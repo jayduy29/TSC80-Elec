@@ -7,7 +7,7 @@
 {"id":"b7","c":"14B4","v":2,"x":885,"y":392,"n":"EDG STARTING BATTERY CHEST 2","s":"632x385x612","a":0,"dc":["(=152++4262+-14B4)"]},
 {"id":"b8","c":"11P1","v":2,"x":1726,"y":495,"n":"GALLEY & PANTRY DISTRIBUTION PANEL","s":"800x800x300","a":0,"dc":["(+11P1)"]},
 {"id":"b9","c":"14C7","v":2,"x":1814,"y":350,"n":"NAUTICAL BATTERY CHARGER NO. 1","s":"261x333x144","a":0,"dc":["(=133++4034+-14C7)"]},
-{"id":"b10","c":"12EP","v":2,"x":1044,"y":349,"n":"EMERGENCY SWITCHBOARD 400 VAC","s":"1800x1400x400","a":0,"dc":["(+12EP0.1)","(+12EP0.2)"]},
+{"id":"b10","c":"12EP0.1","v":2,"x":1044,"y":349,"n":"12EP0.1 EMERGENCY SWITCHBOARD EDG 52KW / MSB TRANSFER LINE / CONSUMERS 3X400V 50HZ","s":"1800x1400x400","a":0,"dc":["(+12EP0.1)"]},
 {"id":"b11","c":"10SC2","v":2,"x":902,"y":636,"n":"SHORE CONNECTION BOX 400A","s":"800x1000x400","a":0,"dc":["(+10SC2)"]},
 {"id":"b12","c":"14E1","v":5,"x":867,"y":373,"n":"ME & DG START BATTERY COMUTATION PANEL","s":"1200x800x300","a":0,"dc":["(+14E1)"]},
 {"id":"b13","c":"13EL1","v":3,"x":929,"y":331,"n":"EMERGENCY LIGHTING DISTRIB. PANEL NO.1 PASSENGER DECK","s":"600x800x300","a":0,"dc":["(+13EL1)"]},
@@ -127,5 +127,6 @@
 {"id":"n1791366632402","c":"304.2U05","v":5,"x":1002,"y":605,"n":"SCR PANEL SB 10610E01","s":"","a":0,"dc":["(=304.2++1060+-304.2U05)"]},
 {"id":"n1791366682133","c":"101.2U02","v":5,"x":926,"y":604,"n":"SCR PANEL DIESEL GENERATOR AFT 10610E04","s":"","a":0,"dc":["(=101.2++1060+-101.2U02)"]},
 {"id":"n1791366709254","c":"101.1U02","v":5,"x":954,"y":607,"n":"SCR PANEL DIESEL GENERATOR FORE 10610E03","s":"","a":0,"dc":["(=101.1++1060+-101.1U02)"]},
-{"id":"n1791546768771","c":"102U02","v":2,"x":957,"y":375,"n":"EMERGENCY GENERATOR","s":"","a":0,"dc":["(=102++4262+-102U02)"]}
+{"id":"n1791546768771","c":"102U02","v":2,"x":957,"y":375,"n":"EMERGENCY GENERATOR","s":"","a":0,"dc":["(=102++4262+-102U02)"]},
+{"id":"n1791546920428","c":"12EP0.2","v":2,"x":1025,"y":403,"n":"12EP0.2 EMERGENCY SWITCHBOARD CONSUMERS 3X230V 50HZ","s":"","a":0,"dc":["(+12EP0.2)"]}
 ]
