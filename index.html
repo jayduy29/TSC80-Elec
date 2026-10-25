@@ -2039,7 +2039,9 @@ function parsePct(v){
 const pctVal=v=>parsePct(v);
 
 const PAL=['#d84315','#1565c0','#2e7d32','#8e24aa','#00838f','#ef6c00'];
-const SPAL=['#f4511e','#4285f4','#34a853','#e65100','#0d47a1','#1b5e20'];
+const SPAL=['#7c3aed','#0d9488','#d97706','#ec4899','#6366f1'];
+
+const isTermination=name=>/đấu|termination|terminat|conn/i.test(name||'');
 
 const CONTR_COLORS={
   'HDC':'#d84315',
@@ -2063,7 +2065,7 @@ function getWorkItemTitle(name){
   const n=(name||'').toLowerCase();
   if(/cắt|cutting|cut/i.test(n))return isEn?'Cable Cutting':'Cắt cáp điện';
   if(/kéo|pulling|pull/i.test(n))return isEn?'Cable Pulling':'Kéo dây cáp điện';
-  if(/đấu|termination|terminat|conn/i.test(n))return isEn?'Termination':'Đấu nối đầu cáp';
+  if(isTermination(n))return isEn?'Termination':'Đấu nối đầu cáp';
   return name;
 }
 
@@ -2124,6 +2126,8 @@ function extractProgData(M){
     const ind=M.ci!==undefined?M.cell(r,M.ci):'';
     const plan=M.cp!==undefined?M.cell(r,M.cp):'';
 
+    if(isTermination(c1)||isTermination(ind)) return;
+
     const m_ctr=ctr(ind);
     if(c0)curContr=c0;
     else if(m_ctr)curContr=m_ctr.c;
@@ -2164,14 +2168,20 @@ function pgroups(M){const out=[];let g=null;M.body.forEach(r=>{const lb=M.cell(r
 
 function chartsHtml(sh,M,wd,cmap){
   const G={},wNames=[];
-  pgroups(M).forEach(g=>{const pend=[];
-    g.rows.forEach(o=>{const x=ctr(o.ind),isQty=/cumulative|qty|quantity|khối lượng|lũy kế/i.test(o.ind);
+  pgroups(M).forEach(g=>{
+    if(isTermination(g.name)) return;
+    const pend=[];
+    g.rows.forEach(o=>{
+      if(isTermination(o.ind)) return;
+      const x=ctr(o.ind),isQty=/cumulative|qty|quantity|khối lượng|lũy kế/i.test(o.ind);
       if(isQty){pend.push({o,c:x?x.c:null});return}
       if(!x)return;
       const q=[...pend].reverse().find(p=>!p.c||p.c===x.c),qr=q?q.o.r:null;
       let plan=qr&&M.cp!==undefined?M.cell(qr,M.cp):(g.plan||'');if(pctVal(plan)!==null)plan=g.plan&&pctVal(g.plan)===null?g.plan:'';
       const pts=[];wd.forEach(w=>{const v=M.cell(o.r,w.c);if(v==='')return;pts.push({wlbl:w.w+(w.y?'/'+String(w.y).slice(2):''),v,pct:pctVal(v),qty:qr?M.cell(qr,w.c):''})});
-      if(!G[x.c])G[x.c]={};G[x.c][g.name]={name:g.name,plan,unit:g.unit,pts};if(!wNames.includes(g.name))wNames.push(g.name)})});
+      if(!G[x.c])G[x.c]={};G[x.c][g.name]={name:g.name,plan,unit:g.unit,pts};if(!wNames.includes(g.name))wNames.push(g.name)
+    })
+  });
   const contractors=Object.keys(G);if(!contractors.length)return '<div class="m" style="padding:10px">'+t('progNoChartData')+'</div>';
   function mkChart(title,color,series){const W=310,H=180,L=38,Bm=36,T=10,R=6,pw=W-L-R,ph=H-T-Bm,mx=100;
     const allW=[...new Set(series.flatMap(s=>s.pts.map(p=>p.wlbl)))].sort((a,b)=>{const f=s=>{const m=s.split('/');return (+m[1]||0)*100+(+m[0])};return f(a)-f(b)});const n=allW.length;
@@ -2227,8 +2237,8 @@ function renderProg(){
 
   if(PS.chart){res.innerHTML=det+chartsHtml(sh,M,wd,cmap);return}
 
-  // Extract structured items & contractors
-  const structuredItems=extractProgData(M);
+  // Extract structured items & contractors (excluding termination/connection)
+  const structuredItems=extractProgData(M).filter(it=>!isTermination(it.name));
 
   if(wcur&&structuredItems.length>0){
     // Render modern executive overview + structured comparison matrix
