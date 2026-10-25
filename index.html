@@ -65,9 +65,16 @@ footer{padding:4px 8px;text-align:center;font-size:11px;color:var(--mut);backgro
 #sm .r{display:flex;gap:6px;margin:8px 0}#sm button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:13px}#sm #sdl{background:var(--acc);color:#fff;border-color:var(--acc)}
 #smsg{font-size:12px;color:var(--mut);margin-bottom:4px}#simgs img{width:100%;display:block;border:1px solid var(--line);margin:8px 0;background:#fff}
 header b{font-size:clamp(12px,3.9vw,15px)}
-#modes{grid-row:2;display:flex;gap:6px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--line)}
-#modes button{flex:1;padding:6px 4px;border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:13px;font-weight:bold}
-#modes button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#modes{grid-row:2;display:flex;gap:8px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--line)}
+#modes button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:bold;cursor:pointer;transition:all .15s}
+#modes button i{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+#modes button.on{border-color:currentColor;box-shadow:0 0 0 1.5px currentColor}
+#modes button[data-m="map"]{color:#d84315}
+#modes button[data-m="sys"]{color:#1565c0}
+#modes button[data-m="prog"]{color:#2e7d32}
+#modes button[data-m="map"].on{background:rgba(216,67,21,0.08)}
+#modes button[data-m="sys"].on{background:rgba(21,101,192,0.08)}
+#modes button[data-m="prog"].on{background:rgba(46,125,50,0.08)}
 #tabs{grid-row:3}#vp{grid-row:4}#pn{grid-row:5}footer{grid-row:6}
 #sysv,#progv{display:none;grid-row:3/6;flex-direction:column;min-height:0;background:var(--bg)}
 body.sys #tabs,body.sys #vp,body.sys #pn,body.prog #tabs,body.prog #vp,body.prog #pn{display:none}body.sys #sysv,body.prog #progv{display:flex}
@@ -260,7 +267,7 @@ tr.row-pulled td{background:transparent}
   <small id="lg">Chấm đỏ = vị trí thiết bị · ô xanh = phòng · bấm để xem dây</small>
   <div id="res"></div>
 </header>
-<div id="modes"><button data-m="map" class="on">Sơ đồ</button><button data-m="sys">Hệ thống</button><button data-m="prog">Tiến độ</button></div>
+<div id="modes"><button data-m="map" class="on"><i style="background:#d84315"></i><span>Sơ đồ</span></button><button data-m="sys"><i style="background:#1565c0"></i><span>Hệ thống</span></button><button data-m="prog"><i style="background:#2e7d32"></i><span>Tiến độ</span></button></div>
 <div id="tabs"></div>
 <div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button></div><div id="pwk"></div><div id="pleg"></div><input id="pq" placeholder="Lọc dòng (gõ từ khóa)…" autocomplete="off"><div id="pstat"></div><div id="pres"></div></div>
 <div id="sysv"><input id="sq" placeholder="Tìm mã hoặc tên hệ thống (vd 903, nav lighting)" autocomplete="off"><div id="ssel"></div><div id="slist"></div><div id="sres"></div></div>
@@ -1883,9 +1890,9 @@ function applyLang(){
 
   const modeBtns = document.querySelectorAll('#modes button');
   if(modeBtns.length>=3){
-    modeBtns[0].textContent = t('modeMap');
-    modeBtns[1].textContent = t('modeSys');
-    modeBtns[2].textContent = t('modeProg');
+    modeBtns[0].innerHTML = '<i style="background:#d84315"></i><span>' + esc(t('modeMap')) + '</span>';
+    modeBtns[1].innerHTML = '<i style="background:#1565c0"></i><span>' + esc(t('modeSys')) + '</span>';
+    modeBtns[2].innerHTML = '<i style="background:#2e7d32"></i><span>' + esc(t('modeProg')) + '</span>';
   }
 
   drawViewTabs();
