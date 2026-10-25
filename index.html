@@ -976,7 +976,7 @@ function pickPin(k){
   let vName = D.views[p.v].name;
   if(curLang==='en'&&(vName==='Mặt cắt dọc'||vName==='Mat cat doc')) vName = t('profileView');
   else if(curLang==='vi') vName = vName.replace(/^Level\s*(\d+)/i, 'Tầng $1');
-  pn.innerHTML=`<h2>${esc(p.c)} <small style="font-weight:normal;color:var(--mut)">· ${t('mainDevice')}</small></h2><div class="m">${esc(p.n)}<br>${p.s?t('dimension')+': '+esc(p.s)+' · ':''}${esc(vName)}${p.a?' · '+t('approxLocation'):''}</div>`+
+  pn.innerHTML=`<h2>${esc(p.c)}</h2><div class="m">${esc(p.n)}<br>${p.s?t('dimension')+': '+esc(p.s)+' · ':''}${esc(vName)}${p.a?' · '+t('approxLocation'):''}</div>`+
    (p.d.length?p.d.map(i=>devRow(i,p.d.length<=2)).join(''):'<div class="m">'+t('noCableInList')+'</div>');
   pn.scrollTop=0}
 pn.addEventListener('click',e=>{
