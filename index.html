@@ -2039,7 +2039,7 @@ function parsePct(v){
 const pctVal=v=>parsePct(v);
 
 const PAL=['#d84315','#1565c0','#2e7d32','#8e24aa','#00838f','#ef6c00'];
-const SPAL=['#7c3aed','#0d9488','#d97706','#ec4899','#6366f1'];
+const SPAL=['#7c3aed','#0d9488','#db2777','#d97706','#6366f1'];
 
 const isTermination=name=>/đấu|termination|terminat|conn/i.test(name||'');
 
@@ -2126,8 +2126,6 @@ function extractProgData(M){
     const ind=M.ci!==undefined?M.cell(r,M.ci):'';
     const plan=M.cp!==undefined?M.cell(r,M.cp):'';
 
-    if(isTermination(c1)||isTermination(ind)) return;
-
     const m_ctr=ctr(ind);
     if(c0)curContr=c0;
     else if(m_ctr)curContr=m_ctr.c;
@@ -2169,10 +2167,8 @@ function pgroups(M){const out=[];let g=null;M.body.forEach(r=>{const lb=M.cell(r
 function chartsHtml(sh,M,wd,cmap){
   const G={},wNames=[];
   pgroups(M).forEach(g=>{
-    if(isTermination(g.name)) return;
     const pend=[];
     g.rows.forEach(o=>{
-      if(isTermination(o.ind)) return;
       const x=ctr(o.ind),isQty=/cumulative|qty|quantity|khối lượng|lũy kế/i.test(o.ind);
       if(isQty){pend.push({o,c:x?x.c:null});return}
       if(!x)return;
@@ -2188,9 +2184,10 @@ function chartsHtml(sh,M,wd,cmap){
     const xi=lb=>allW.indexOf(lb),xf=i=>L+pw*(n<=1?.5:i/(n-1)),yf=v=>T+ph-ph*Math.max(0,Math.min(100,v))/mx;
     let g='';for(let k=0;k<=4;k++){const v=mx*k/4,yy=yf(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#bbb" stroke-width=".5"/><text x="${L-4}" y="${yy+3.5}" font-size="9" text-anchor="end" fill="#666">${Math.round(v)}%</text>`}
     const step=Math.ceil(n/8);for(let i=0;i<n;i+=step)g+=`<text x="${xf(i)}" y="${H-Bm+13}" font-size="9" text-anchor="middle" fill="#666">${esc(allW[i].split('/')[0])}</text>`;
+    const isEn=(curLang==='en');
     const dots=[];series.forEach((s,k)=>{const col=SPAL[k%SPAL.length];let d='',pen=false;
       s.pts.forEach(p=>{if(p.pct===null){pen=false;return}d+=(pen?'L':'M')+xf(xi(p.wlbl)).toFixed(1)+' '+yf(p.pct).toFixed(1);pen=true});if(d)g+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>`;
-      s.pts.forEach(p=>{if(p.pct===null)return;const tip=p.qty?p.qty+' / '+p.v:p.v;dots.push(`<circle cx="${xf(xi(p.wlbl)).toFixed(1)}" cy="${yf(p.pct).toFixed(1)}" r="6" fill="${col}" stroke="#fff" stroke-width="1.5" style="cursor:pointer" data-tt="${esc(tip)}"/>`)})});
+      s.pts.forEach(p=>{if(p.pct===null)return;const tip=(isEn?'Week ':'Tuần ')+p.wlbl+': '+(p.qty?p.qty+' / '+p.v:p.v);dots.push(`<circle cx="${xf(xi(p.wlbl)).toFixed(1)}" cy="${yf(p.pct).toFixed(1)}" r="6" fill="${col}" stroke="#fff" stroke-width="1.5" style="cursor:pointer" data-tt="${esc(tip)}"/>`)})});
     g+=dots.join('');
     const leg=series.map((s,k)=>`<span><i style="background:${SPAL[k%SPAL.length]}"></i>${esc(getWorkItemTitle(s.name))}${s.plan?' ('+esc(s.plan)+(s.unit?' '+esc(getUnitLabel(s.unit)):'')+')':''}</span>`).join('');
     return `<div class="ch"><b style="color:${color}">${esc(title)}</b><svg viewBox="0 0 ${W} ${H}">${g}</svg><div class="lg">${leg}</div></div>`}
@@ -2237,8 +2234,8 @@ function renderProg(){
 
   if(PS.chart){res.innerHTML=det+chartsHtml(sh,M,wd,cmap);return}
 
-  // Extract structured items & contractors (excluding termination/connection)
-  const structuredItems=extractProgData(M).filter(it=>!isTermination(it.name));
+  // Extract structured items & contractors
+  const structuredItems=extractProgData(M);
 
   if(wcur&&structuredItems.length>0){
     // Render modern executive overview + structured comparison matrix
