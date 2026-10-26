@@ -2,6 +2,14 @@
 <html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TSC80 - Sơ đồ bố trí thiết bị điện</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0D5966">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TSC80 Điện">
 <style>
 :root{--bg:#f4f6f9;--fg:#1d2733;--mut:#5b6877;--card:#fff;--line:#d3dae3;--acc:#0D5966;--acct:#0D5966;--hot:#ff7f00;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#12171d;--fg:#e6ebf1;--mut:#9aa7b6;--card:#1b222b;--line:#334050;--acc:#0D5966;--acct:#5cc6d9}}
@@ -257,11 +265,22 @@ tr.row-pulled td{background:transparent}
 
 .lang-btn{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.45);padding:3px 10px;border-radius:14px;font-size:12px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
 .lang-btn:hover{background:rgba(255,255,255,.35)}
+.net-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;user-select:none}
+.net-badge.off{background:#f59e0b;color:#1d2733;border-color:#d97706}
+.pwa-btn{background:#f59e0b;color:#111;border:0;padding:3px 9px;border-radius:14px;font-size:11px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:3px;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .1s}
+.pwa-btn:active{transform:scale(.95)}
 </style></head><body>
 <header>
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <b id="hdr-title">TSC80 - Sơ đồ bố trí thiết bị điện</b>
-    <button id="lang-btn" class="lang-btn" title="Chuyển ngôn ngữ / Switch Language">🇬🇧 ENG</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+    <div style="display:flex;align-items:center;gap:7px;min-width:0">
+      <img src="favicon.png" alt="TSC80" style="width:22px;height:22px;border-radius:5px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.3)">
+      <b id="hdr-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">TSC80 - Sơ đồ bố trí thiết bị điện</b>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+      <span id="net-badge" class="net-badge" title="Trạng thái mạng / Lưu ngoại tuyến">🟢 Online</span>
+      <button id="pwa-install-btn" class="pwa-btn" style="display:none" title="Cài đặt ứng dụng / Dùng ngoại tuyến">📲 Cài App</button>
+      <button id="lang-btn" class="lang-btn" title="Chuyển ngôn ngữ / Switch Language">🇬🇧 ENG</button>
+    </div>
   </div>
   <input id="q" placeholder="Tìm phòng, thiết bị hoặc số dây (vd 1060, 14E1, 903W0017)" autocomplete="off">
   <small id="lg">Chấm đỏ = vị trí thiết bị · ô xanh = phòng · bấm để xem dây</small>
@@ -1919,6 +1938,15 @@ function applyLang(){
   $('#lg').textContent = t('hdrSub');
   $('#q').placeholder = t('searchPh');
   $('#lang-btn').innerHTML = isEn ? '🇻🇳 VIE' : '🇬🇧 ENG';
+  const netB = $('#net-badge');
+  if(netB){
+    const on = navigator.onLine;
+    netB.classList.toggle('off', !on);
+    netB.innerHTML = on ? '🟢 Online' : (isEn ? '📶 Offline' : '📶 Ngoại tuyến');
+    netB.title = on ? (isEn?'Online · Connected':'Trực tuyến · Đang kết nối máy chủ') : (isEn?'Offline · Running from local cache':'Ngoại tuyến · Đang chạy hoàn toàn từ bộ nhớ máy');
+  }
+  const pwaB = $('#pwa-install-btn');
+  if(pwaB) pwaB.innerHTML = isEn ? '📲 Install App' : '📲 Cài App';
 
   const modeBtns = document.querySelectorAll('#modes button');
   if(modeBtns.length>=3){
@@ -2536,7 +2564,70 @@ $('#lock').onclick=()=>{if(editing){editing=false;addMode=false;tb();return}ask(
   dbRef.onSnapshot(s=>{if(editing&&dirty)return;if(s.exists){try{E=JSON.parse(s.data().json);rebuild();refresh()}catch(_){}}},()=>{})}catch(_){}})();
 (async()=>{let arr=null;const c=gh();
   try{if(c&&c.repo&&c.token){const r=await fetch(ghUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:Object.assign({},ghH(c),{'Accept':'application/vnd.github.raw+json'}),cache:'no-store'});if(r.ok)arr=await r.json()}}catch(_){}
-  if(!arr){try{const r=await fetch('pins.json?t='+Date.now(),{cache:'no-store'});if(r.ok)arr=await r.json()}catch(_){}}
-  if(Array.isArray(arr)&&arr.length&&arr[0]&&arr[0].id&&arr[0].c){BASE.length=0;pinsIn(arr).forEach(p=>BASE.push(p));rebuild();if(vi>=0&&!(editing&&dirty))refresh()}})();
+  if(!arr){
+    try{
+      const r=await fetch('pins.json?t='+Date.now(),{cache:'no-store'});
+      if(r.ok){arr=await r.json();try{localStorage.setItem('tsc80_pins_cache',JSON.stringify(arr))}catch(_){}}
+    }catch(_){}
+  }
+  if(!arr){
+    try{const raw=localStorage.getItem('tsc80_pins_cache');if(raw)arr=JSON.parse(raw)}catch(_){}
+  }
+  if(Array.isArray(arr)&&arr.length&&arr[0]&&arr[0].id&&arr[0].c){BASE.length=0;pinsIn(arr).forEach(p=>BASE.push(p));rebuild();if(vi>=0&&!(editing&&dirty))refresh()}
+})();
 show(2);
+
+// ===== PWA Service Worker & Offline Sync =====
+function syncNetStatus(){
+  const b=$('#net-badge');if(!b)return;
+  const on=navigator.onLine;
+  b.classList.toggle('off',!on);
+  const isEn=(curLang==='en');
+  b.innerHTML=on?'🟢 Online':(isEn?'📶 Offline':'📶 Ngoại tuyến');
+  b.title=on?(isEn?'Online · Connected':'Trực tuyến · Đang kết nối máy chủ'):(isEn?'Offline · Running from local cache':'Ngoại tuyến · Đang chạy hoàn toàn từ bộ nhớ máy');
+}
+window.addEventListener('online',()=>{syncNetStatus();flag(curLang==='en'?'Back online!':'Đã kết nối mạng trở lại!')});
+window.addEventListener('offline',()=>{syncNetStatus();flag(curLang==='en'?'Working offline (cached)':'Đang ở chế độ ngoại tuyến (đã lưu máy)')});
+syncNetStatus();
+
+let deferredPrompt=null;
+const pwaBtn=$('#pwa-install-btn');
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  if(pwaBtn)pwaBtn.style.display='inline-flex';
+});
+if(pwaBtn){
+  pwaBtn.onclick=async()=>{
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      const res=await deferredPrompt.userChoice;
+      if(res&&res.outcome==='accepted')pwaBtn.style.display='none';
+      deferredPrompt=null;
+    }else{
+      alert(curLang==='en'
+        ?'To install on iPhone/iPad:\n1. Tap the Share button (⎋) in Safari\n2. Select "Add to Home Screen" (⊞)'
+        :'Để cài đặt lên iPhone / iPad:\n1. Bấm nút Chia sẻ (biểu tượng ⎋ dưới thanh công cụ Safari)\n2. Chọn "Thêm vào MH chính" (Add to Home Screen ⊞)');
+    }
+  };
+}
+window.addEventListener('appinstalled',()=>{
+  if(pwaBtn)pwaBtn.style.display='none';
+  flag(curLang==='en'?'TSC80 installed successfully!':'Đã cài đặt TSC80 vào máy thành công!');
+});
+const isIos=/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+const isStandalone=window.navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;
+if(isIos&&!isStandalone&&pwaBtn){
+  pwaBtn.style.display='inline-flex';
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').then(reg=>{
+      console.log('TSC80 ServiceWorker registered');
+    }).catch(err=>{
+      console.warn('TSC80 SW reg error:',err);
+    });
+  });
+}
 </script></body></html>

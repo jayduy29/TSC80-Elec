@@ -1,0 +1,30 @@
+{
+  "name": "TSC80 - Bố trí thiết bị điện",
+  "short_name": "TSC80 Điện",
+  "description": "Sơ đồ bố trí thiết bị điện tàu TOWT - C459 (TSC80)",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0D5966",
+  "theme_color": "#0D5966",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
