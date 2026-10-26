@@ -1,7 +1,7 @@
 {
-  "name": "TSC80 - Bố trí thiết bị điện",
+  "name": "TSC80 - Hệ thống điện",
   "short_name": "TSC80 Điện",
-  "description": "Sơ đồ bố trí thiết bị điện tàu TOWT - C459 (TSC80)",
+  "description": "Hệ thống điện tàu TOWT - C459 (TSC80)",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
