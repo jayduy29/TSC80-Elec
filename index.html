@@ -105,6 +105,19 @@ body.sys #tabs,body.sys #vp,body.sys #pn,body.prog #tabs,body.prog #vp,body.prog
 .sg-pill{flex:0 0 auto;font-size:11px;font-weight:600;padding:3px 9px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;white-space:nowrap;transition:all .15s}
 .sg-pill:hover{border-color:var(--acc)}
 .sg-pill.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.sg-pill[data-g="A"].on{background:#0284c7!important;border-color:#0284c7!important;color:#fff!important}
+.sg-pill[data-g="B"].on{background:#0d9488!important;border-color:#0d9488!important;color:#fff!important}
+.sg-pill[data-g="C"].on{background:#64748b!important;border-color:#64748b!important;color:#fff!important}
+.sg-pill[data-g="E"].on{background:#dc2626!important;border-color:#dc2626!important;color:#fff!important}
+.sg-pill[data-g="F"].on{background:#059669!important;border-color:#059669!important;color:#fff!important}
+.sg-pill[data-g="G"].on{background:#ea580c!important;border-color:#ea580c!important;color:#fff!important}
+.sg-pill[data-g="H"].on{background:#9333ea!important;border-color:#9333ea!important;color:#fff!important}
+.sg-pill[data-g="I"].on{background:#4f46e5!important;border-color:#4f46e5!important;color:#fff!important}
+.sg-pill[data-g="K"].on{background:#2563eb!important;border-color:#2563eb!important;color:#fff!important}
+.sg-pill[data-g="J"].on{background:#ca8a04!important;border-color:#ca8a04!important;color:#fff!important}
+.sg-pill[data-g="L"].on{background:#d97706!important;border-color:#d97706!important;color:#fff!important}
+.sg-pill[data-g="M"].on{background:#db2777!important;border-color:#db2777!important;color:#fff!important}
+.sg-pill[data-g="N"].on{background:#65a30d!important;border-color:#65a30d!important;color:#fff!important}
 #slist{flex:1;min-height:0;min-width:0;max-height:calc(100vh - 165px);overflow-y:auto;overflow-x:hidden;margin:0 8px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);max-width:calc(100% - 16px)}
 .sys-group-header{padding:6px 10px;font-size:11px;font-weight:bold;letter-spacing:.3px;color:var(--fg);border-bottom:1px solid var(--line);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2;box-shadow:0 1px 2px rgba(0,0,0,.04);min-width:0}
 .sys-group-header:first-child{border-top:0}
@@ -196,8 +209,20 @@ body.sys #tabs,body.sys #vp,body.sys #pn,body.prog #tabs,body.prog #vp,body.prog
 :root[data-theme=dark] .grp-hdr-L{background:#78350f;border-left-color:#fbbf24;color:#fde68a}
 :root[data-theme=dark] .grp-hdr-M{background:#831843;border-left-color:#f472b6;color:#fce7f3}
 :root[data-theme=dark] .grp-hdr-N{background:#365314;border-left-color:#a3e635;color:#ecfccb}
-:root[data-theme=dark] .si:hover{filter:brightness(1.15)}
 :root[data-theme=dark] .si-cables-pill{background:rgba(255,255,255,.12);color:var(--fg)}
+:root[data-theme=dark] .sg-pill[data-g="A"].on, :root:not([data-theme=light]) .sg-pill[data-g="A"].on{background:#0284c7!important;border-color:#38bdf8!important}
+:root[data-theme=dark] .sg-pill[data-g="B"].on, :root:not([data-theme=light]) .sg-pill[data-g="B"].on{background:#0d9488!important;border-color:#2dd4bf!important}
+:root[data-theme=dark] .sg-pill[data-g="C"].on, :root:not([data-theme=light]) .sg-pill[data-g="C"].on{background:#475569!important;border-color:#94a3b8!important}
+:root[data-theme=dark] .sg-pill[data-g="E"].on, :root:not([data-theme=light]) .sg-pill[data-g="E"].on{background:#dc2626!important;border-color:#f87171!important}
+:root[data-theme=dark] .sg-pill[data-g="F"].on, :root:not([data-theme=light]) .sg-pill[data-g="F"].on{background:#059669!important;border-color:#34d399!important}
+:root[data-theme=dark] .sg-pill[data-g="G"].on, :root:not([data-theme=light]) .sg-pill[data-g="G"].on{background:#ea580c!important;border-color:#fb923c!important}
+:root[data-theme=dark] .sg-pill[data-g="H"].on, :root:not([data-theme=light]) .sg-pill[data-g="H"].on{background:#9333ea!important;border-color:#c084fc!important}
+:root[data-theme=dark] .sg-pill[data-g="I"].on, :root:not([data-theme=light]) .sg-pill[data-g="I"].on{background:#4f46e5!important;border-color:#818cf8!important}
+:root[data-theme=dark] .sg-pill[data-g="K"].on, :root:not([data-theme=light]) .sg-pill[data-g="K"].on{background:#2563eb!important;border-color:#60a5fa!important}
+:root[data-theme=dark] .sg-pill[data-g="J"].on, :root:not([data-theme=light]) .sg-pill[data-g="J"].on{background:#ca8a04!important;border-color:#facc15!important}
+:root[data-theme=dark] .sg-pill[data-g="L"].on, :root:not([data-theme=light]) .sg-pill[data-g="L"].on{background:#d97706!important;border-color:#fbbf24!important}
+:root[data-theme=dark] .sg-pill[data-g="M"].on, :root:not([data-theme=light]) .sg-pill[data-g="M"].on{background:#db2777!important;border-color:#f472b6!important}
+:root[data-theme=dark] .sg-pill[data-g="N"].on, :root:not([data-theme=light]) .sg-pill[data-g="N"].on{background:#65a30d!important;border-color:#a3e635!important}
 #ssel{margin:0 8px 6px;padding:8px 10px;border:1px solid var(--acc);border-radius:8px;background:var(--card);font-size:13px;cursor:pointer;display:none}
 #sres{flex:1;min-height:0;overflow:auto;padding:0 8px 8px}
 #sbar{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}#sbar button{padding:6px 10px;border-radius:8px;border:1px solid var(--acc);background:var(--card);color:var(--acct);font-size:12px}#sbar span{font-size:12px;color:var(--mut)}
@@ -395,7 +420,7 @@ tr.row-pulled td{background:transparent}
 <div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button></div><div id="pwk"></div><div id="pleg"></div><input id="pq" placeholder="Lọc dòng (gõ từ khóa)…" autocomplete="off"><div id="pstat"></div><div id="pres"></div></div>
 <div id="sysv"><input id="sq" placeholder="Tìm mã hoặc tên hệ thống (vd 903, nav lighting)" autocomplete="off"><div id="sgrp-bar"></div><div id="ssel"></div><div id="slist"></div><div id="sres"></div></div>
 <div id="vp"><div id="st"><img id="im" alt="Sơ đồ bố trí số phòng"></div><div id="zm"><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></div><div id="tb"></div><div id="hint">Kéo để di chuyển · chụm / cuộn để phóng to</div></div>
-<div id="pn"><div class="m">Chưa chọn phòng. Bấm vào một ô xanh trên sơ đồ.</div></div>
+<div id="pn"><div class="m" id="pn-hint">Chưa chọn phòng. Bấm vào một ô xanh trên sơ đồ.</div></div>
 <footer>COPYRIGHT (C) 2026 BY Jay Duy <span id="lock" title="Chỉnh sửa vị trí">🔒</span></footer>
 <div id="gm"><div class="box"><b>Cài đặt lưu vị trí về GitHub</b><label>Repo (chủ/tên, ví dụ: jayduy/tsc80)</label><input id="gr" autocomplete="off" placeholder="owner/repo"><label>Nhánh</label><input id="gb" autocomplete="off" value="main"><label>Đường dẫn file vị trí trong repo</label><input id="gp" autocomplete="off" value="pins.json"><label>Token (Personal Access Token, chỉ lưu trên máy này)</label><input id="gt" type="password" autocomplete="off" placeholder="github_pat_..."><div id="gmsg"></div><div class="r"><button id="gok">Lưu &amp; kiểm tra</button><button id="gx">Đóng</button></div></div></div>
 <div id="sm"><div class="box"><b id="smt"></b>
@@ -1906,6 +1931,10 @@ sysv.addEventListener('click',e=>{
     sysActiveGroup=(sysActiveGroup===gid||!gid)?null:gid;
     drawSysGroupBar();
     drawSysList($('#sq').value);
+    if(sysActiveGroup){
+      const ap=$(`.sg-pill[data-g="${sysActiveGroup}"]`);
+      if(ap) ap.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+    }
     return;
   }
   const si=e.target.closest('.si[data-sys]');if(si){selectSys(si.dataset.sys);return}
@@ -2182,9 +2211,11 @@ function applyLang(){
   if(sq) {
     sq.placeholder = t('sysSearchPh');
     drawSysGroupBar();
-    drawSysList(sq.value);
+    if(document.body.classList.contains('sys')) {
+      drawSysList(sq.value);
+    }
   }
-  if(curSys) renderSysContent(curSys);
+  if(curSys && document.body.classList.contains('sys')) renderSysContent(curSys);
 
   // Re-render whichever view is currently active in the panel:
   if(fromCable) {
@@ -2194,7 +2225,7 @@ function applyLang(){
   } else if(sel) {
     panel(sel, false);
   } else {
-    $('#pn').innerHTML = '<div class="m">' + t('noRoomSel') + '</div>';
+    $('#pn').innerHTML = '<div class="m" id="pn-hint">' + t('noRoomSel') + '</div>';
   }
 }
 
@@ -2203,7 +2234,10 @@ $('#lang-btn').onclick = ()=>{
   try{localStorage.setItem('tsc80_lang', curLang)}catch(_){}
   applyLang();
 };
-try{ if(localStorage.getItem('tsc80_lang')) { curLang = localStorage.getItem('tsc80_lang'); applyLang(); } }catch(_){}
+try{
+  curLang = localStorage.getItem('tsc80_lang') || 'vi';
+  applyLang();
+}catch(_){}
 
 // ===== tab Tiến độ: đọc trực tiếp Google Drive =====
 const DEF_PID='1Be1vyM5hzqD8n-QPe9_Mmi2FGxXsuAtB';let PID=DEF_PID;try{PID=localStorage.getItem('tsc80_prog_id')||DEF_PID}catch(_){}
