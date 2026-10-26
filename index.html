@@ -148,8 +148,8 @@ td .c-tag{margin:0}
 .prog-tbl th{padding:7px 10px;background:var(--bg);color:var(--mut);font-weight:600;font-size:11px;text-align:left;border-bottom:1px solid var(--line)}
 .prog-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
 .prog-tbl tr:last-child td{border-bottom:0}
-.prog-tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
-.prog-tbl td.r small{color:var(--mut);font-size:10px}
+.prog-tbl td.r{text-align:center;font-variant-numeric:tabular-nums}
+.prog-tbl td.r small{color:var(--mut);font-size:10px;display:block}
 .prog-row-tot{background:rgba(30,58,138,.05);font-weight:bold}
 .prog-row-tot td{border-bottom:1px solid rgba(30,58,138,.15)}
 .cb-tot{display:inline-flex;align-items:center;gap:4px;color:#fff;background:#1e3a8a;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:bold;line-height:16px;letter-spacing:.2px}
@@ -2377,9 +2377,9 @@ function renderProg(){
             <thead>
               <tr>
                 <th style="width:30%">${t('colContrOrTot')}</th>
-                <th style="width:20%;text-align:right">${t('colPlan')}</th>
-                <th style="width:24%;text-align:right">${t('colCumulative')}</th>
-                <th style="width:26%">${t('colProgress')}</th>
+                <th style="width:20%;text-align:center">${t('colPlan')}</th>
+                <th style="width:24%;text-align:center">${t('colCumulative')}</th>
+                <th style="width:26%;text-align:center">${t('colProgress')}</th>
               </tr>
             </thead>
             <tbody>
