@@ -100,8 +100,98 @@ body.sys #tabs,body.sys #vp,body.sys #pn,body.prog #tabs,body.prog #vp,body.prog
 #pres .pb{min-width:40px;height:15px}#pres .pb span{font-size:10px;line-height:15px}
 #pwk{padding:2px 8px;font-size:12px;color:var(--mut)}.wk{display:inline-block;padding:3px 10px;margin:2px 3px 2px 0;border-radius:12px;border:1px solid var(--acc);color:var(--acct);font-size:12px;cursor:pointer}.wk.on{background:var(--acc);color:#fff}
 #sq{margin:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);font-size:15px}
-#slist{flex:none;max-height:38vh;overflow:auto;margin:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
-.si{padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}.si:last-child{border:0}.si.on{background:var(--acc);color:#fff}.si .n{float:right;background:var(--acc);color:#fff;border-radius:10px;padding:0 8px;font-size:12px}.si.on .n{background:#fff;color:var(--acc)}
+#sgrp-bar{display:flex;gap:5px;overflow-x:auto;padding:0 8px 6px;margin-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#sgrp-bar::-webkit-scrollbar{display:none}
+.sg-pill{flex:0 0 auto;font-size:11px;font-weight:600;padding:3px 9px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;white-space:nowrap;transition:all .15s}
+.sg-pill:hover{border-color:var(--acc)}
+.sg-pill.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#slist{flex:1;min-height:0;max-height:calc(100vh - 165px);overflow:auto;margin:0 8px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.sys-group-header{padding:6px 10px;font-size:11px;font-weight:bold;letter-spacing:.3px;color:var(--fg);border-bottom:1px solid var(--line);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sys-group-header:first-child{border-top:0}
+.sgh-count{font-size:10px;font-weight:600;opacity:.8}
+.si{padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px;transition:background .1s}.si:last-child{border-bottom:0}.si:hover{filter:brightness(.97)}.si.on{background:var(--acc)!important;color:#fff!important;border-left-color:#fff!important}.si .n{float:right;background:var(--acc);color:#fff;border-radius:10px;padding:0 8px;font-size:12px}.si.on .n{background:#fff;color:var(--acc)}
+.grp-A{background:#ebf5fa;border-left:4px solid #0284c7}
+.grp-B{background:#e6f7f5;border-left:4px solid #0d9488}
+.grp-C{background:#f1f5f9;border-left:4px solid #64748b}
+.grp-E{background:#fef2f2;border-left:4px solid #dc2626}
+.grp-F{background:#ecfdf5;border-left:4px solid #059669}
+.grp-G{background:#fff7ed;border-left:4px solid #ea580c}
+.grp-H{background:#faf5ff;border-left:4px solid #9333ea}
+.grp-I{background:#eef2ff;border-left:4px solid #4f46e5}
+.grp-K{background:#eff6ff;border-left:4px solid #2563eb}
+.grp-J{background:#fefce8;border-left:4px solid #ca8a04}
+.grp-L{background:#fffbeb;border-left:4px solid #d97706}
+.grp-M{background:#fdf2f8;border-left:4px solid #db2777}
+.grp-N{background:#f7fee7;border-left:4px solid #65a30d}
+.grp-hdr-A{background:#e0f2fe;border-left:4px solid #0284c7;color:#0369a1}
+.grp-hdr-B{background:#ccfbf1;border-left:4px solid #0d9488;color:#0f766e}
+.grp-hdr-C{background:#e2e8f0;border-left:4px solid #64748b;color:#334155}
+.grp-hdr-E{background:#fee2e2;border-left:4px solid #dc2626;color:#b91c1c}
+.grp-hdr-F{background:#d1fae5;border-left:4px solid #059669;color:#047857}
+.grp-hdr-G{background:#ffedd5;border-left:4px solid #ea580c;color:#c2410c}
+.grp-hdr-H{background:#f3e8ff;border-left:4px solid #9333ea;color:#7e22ce}
+.grp-hdr-I{background:#e0e7ff;border-left:4px solid #4f46e5;color:#4338ca}
+.grp-hdr-K{background:#dbeafe;border-left:4px solid #2563eb;color:#1d4ed8}
+.grp-hdr-J{background:#fef08a;border-left:4px solid #ca8a04;color:#a16207}
+.grp-hdr-L{background:#fde68a;border-left:4px solid #d97706;color:#b45309}
+.grp-hdr-M{background:#fce7f3;border-left:4px solid #db2777;color:#be185d}
+.grp-hdr-N{background:#ecfccb;border-left:4px solid #65a30d;color:#4d7c0f}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme=light]) .grp-A{background:#132635;border-left-color:#38bdf8}
+  :root:not([data-theme=light]) .grp-B{background:#112a28;border-left-color:#2dd4bf}
+  :root:not([data-theme=light]) .grp-C{background:#1e2733;border-left-color:#94a3b8}
+  :root:not([data-theme=light]) .grp-E{background:#2b1619;border-left-color:#f87171}
+  :root:not([data-theme=light]) .grp-F{background:#102b20;border-left-color:#34d399}
+  :root:not([data-theme=light]) .grp-G{background:#2d1b11;border-left-color:#fb923c}
+  :root:not([data-theme=light]) .grp-H{background:#251633;border-left-color:#c084fc}
+  :root:not([data-theme=light]) .grp-I{background:#181c38;border-left-color:#818cf8}
+  :root:not([data-theme=light]) .grp-K{background:#14243b;border-left-color:#60a5fa}
+  :root:not([data-theme=light]) .grp-J{background:#2a2510;border-left-color:#facc15}
+  :root:not([data-theme=light]) .grp-L{background:#2b220f;border-left-color:#fbbf24}
+  :root:not([data-theme=light]) .grp-M{background:#2b1424;border-left-color:#f472b6}
+  :root:not([data-theme=light]) .grp-N{background:#1e2810;border-left-color:#a3e635}
+  :root:not([data-theme=light]) .grp-hdr-A{background:#0c4a6e;border-left-color:#38bdf8;color:#e0f2fe}
+  :root:not([data-theme=light]) .grp-hdr-B{background:#134e4a;border-left-color:#2dd4bf;color:#ccfbf1}
+  :root:not([data-theme=light]) .grp-hdr-C{background:#334155;border-left-color:#94a3b8;color:#f1f5f9}
+  :root:not([data-theme=light]) .grp-hdr-E{background:#7f1d1d;border-left-color:#f87171;color:#fee2e2}
+  :root:not([data-theme=light]) .grp-hdr-F{background:#064e3b;border-left-color:#34d399;color:#d1fae5}
+  :root:not([data-theme=light]) .grp-hdr-G{background:#7c2d12;border-left-color:#fb923c;color:#ffedd5}
+  :root:not([data-theme=light]) .grp-hdr-H{background:#581c87;border-left-color:#c084fc;color:#f3e8ff}
+  :root:not([data-theme=light]) .grp-hdr-I{background:#312e81;border-left-color:#818cf8;color:#e0e7ff}
+  :root:not([data-theme=light]) .grp-hdr-K{background:#1e3a8a;border-left-color:#60a5fa;color:#dbeafe}
+  :root:not([data-theme=light]) .grp-hdr-J{background:#713f12;border-left-color:#facc15;color:#fef08a}
+  :root:not([data-theme=light]) .grp-hdr-L{background:#78350f;border-left-color:#fbbf24;color:#fde68a}
+  :root:not([data-theme=light]) .grp-hdr-M{background:#831843;border-left-color:#f472b6;color:#fce7f3}
+  :root:not([data-theme=light]) .grp-hdr-N{background:#365314;border-left-color:#a3e635;color:#ecfccb}
+  :root:not([data-theme=light]) .si:hover{filter:brightness(1.15)}
+}
+:root[data-theme=dark] .grp-A{background:#132635;border-left-color:#38bdf8}
+:root[data-theme=dark] .grp-B{background:#112a28;border-left-color:#2dd4bf}
+:root[data-theme=dark] .grp-C{background:#1e2733;border-left-color:#94a3b8}
+:root[data-theme=dark] .grp-E{background:#2b1619;border-left-color:#f87171}
+:root[data-theme=dark] .grp-F{background:#102b20;border-left-color:#34d399}
+:root[data-theme=dark] .grp-G{background:#2d1b11;border-left-color:#fb923c}
+:root[data-theme=dark] .grp-H{background:#251633;border-left-color:#c084fc}
+:root[data-theme=dark] .grp-I{background:#181c38;border-left-color:#818cf8}
+:root[data-theme=dark] .grp-K{background:#14243b;border-left-color:#60a5fa}
+:root[data-theme=dark] .grp-J{background:#2a2510;border-left-color:#facc15}
+:root[data-theme=dark] .grp-L{background:#2b220f;border-left-color:#fbbf24}
+:root[data-theme=dark] .grp-M{background:#2b1424;border-left-color:#f472b6}
+:root[data-theme=dark] .grp-N{background:#1e2810;border-left-color:#a3e635}
+:root[data-theme=dark] .grp-hdr-A{background:#0c4a6e;border-left-color:#38bdf8;color:#e0f2fe}
+:root[data-theme=dark] .grp-hdr-B{background:#134e4a;border-left-color:#2dd4bf;color:#ccfbf1}
+:root[data-theme=dark] .grp-hdr-C{background:#334155;border-left-color:#94a3b8;color:#f1f5f9}
+:root[data-theme=dark] .grp-hdr-E{background:#7f1d1d;border-left-color:#f87171;color:#fee2e2}
+:root[data-theme=dark] .grp-hdr-F{background:#064e3b;border-left-color:#34d399;color:#d1fae5}
+:root[data-theme=dark] .grp-hdr-G{background:#7c2d12;border-left-color:#fb923c;color:#ffedd5}
+:root[data-theme=dark] .grp-hdr-H{background:#581c87;border-left-color:#c084fc;color:#f3e8ff}
+:root[data-theme=dark] .grp-hdr-I{background:#312e81;border-left-color:#818cf8;color:#e0e7ff}
+:root[data-theme=dark] .grp-hdr-K{background:#1e3a8a;border-left-color:#60a5fa;color:#dbeafe}
+:root[data-theme=dark] .grp-hdr-J{background:#713f12;border-left-color:#facc15;color:#fef08a}
+:root[data-theme=dark] .grp-hdr-L{background:#78350f;border-left-color:#fbbf24;color:#fde68a}
+:root[data-theme=dark] .grp-hdr-M{background:#831843;border-left-color:#f472b6;color:#fce7f3}
+:root[data-theme=dark] .grp-hdr-N{background:#365314;border-left-color:#a3e635;color:#ecfccb}
+:root[data-theme=dark] .si:hover{filter:brightness(1.15)}
 #ssel{margin:0 8px 6px;padding:8px 10px;border:1px solid var(--acc);border-radius:8px;background:var(--card);font-size:13px;cursor:pointer;display:none}
 #sres{flex:1;min-height:0;overflow:auto;padding:0 8px 8px}
 #sbar{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}#sbar button{padding:6px 10px;border-radius:8px;border:1px solid var(--acc);background:var(--card);color:var(--acct);font-size:12px}#sbar span{font-size:12px;color:var(--mut)}
@@ -289,7 +379,7 @@ tr.row-pulled td{background:transparent}
 <div id="modes"><button data-m="map" class="on"><i style="background:#d84315"></i><span>Sơ đồ</span></button><button data-m="sys"><i style="background:#1565c0"></i><span>Hệ thống</span></button><button data-m="prog"><i style="background:#2e7d32"></i><span>Tiến độ</span></button></div>
 <div id="tabs"></div>
 <div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button></div><div id="pwk"></div><div id="pleg"></div><input id="pq" placeholder="Lọc dòng (gõ từ khóa)…" autocomplete="off"><div id="pstat"></div><div id="pres"></div></div>
-<div id="sysv"><input id="sq" placeholder="Tìm mã hoặc tên hệ thống (vd 903, nav lighting)" autocomplete="off"><div id="ssel"></div><div id="slist"></div><div id="sres"></div></div>
+<div id="sysv"><input id="sq" placeholder="Tìm mã hoặc tên hệ thống (vd 903, nav lighting)" autocomplete="off"><div id="sgrp-bar"></div><div id="ssel"></div><div id="slist"></div><div id="sres"></div></div>
 <div id="vp"><div id="st"><img id="im" alt="Sơ đồ bố trí số phòng"></div><div id="zm"><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></div><div id="tb"></div><div id="hint">Kéo để di chuyển · chụm / cuộn để phóng to</div></div>
 <div id="pn"><div class="m">Chưa chọn phòng. Bấm vào một ô xanh trên sơ đồ.</div></div>
 <footer>COPYRIGHT (C) 2026 BY Jay Duy <span id="lock" title="Chỉnh sửa vị trí">🔒</span></footer>
@@ -418,6 +508,7 @@ const I18N = {
     sysCwc: '3. CWC-Megger test',
     ends: 'đầu',
     cables: 'dây',
+    systems: 'hệ thống',
     colTot: 'Tổng dây',
     btnSnapSys: '📷 Chụp ảnh 9:16',
     noFilterMatch: 'Không có dây phù hợp bộ lọc',
@@ -563,6 +654,7 @@ const I18N = {
     sysCwc: '3. CWC-Megger test',
     ends: 'ends',
     cables: 'cables',
+    systems: 'systems',
     colTot: 'Total cables',
     btnSnapSys: '📷 9:16 Image',
     noFilterMatch: 'No cables matching filter',
@@ -1470,13 +1562,45 @@ function getSysStats(c){
   return {tot,pulled:p,pulledPct:pPct,connEnds,connTotal:tot*2,connPct:cPct,cwc,cwcPct,contrStats};
 }
 
+const SYS_GROUPS = [
+  { id: 'A', code: '==A', name: 'POWER SUPPLY & DISTRIBUTION', nameVi: 'Nguồn & Phân phối điện', label: { vi: 'A: Nguồn & PP', en: 'A: Power' }, color: '#0284c7', sys: ['101.1','101.2','102','105','122','123','126','132','133','136','152','155'] },
+  { id: 'B', code: '==B', name: 'PROPULSION', nameVi: 'Hệ thống Đẩy tàu', label: { vi: 'B: Đẩy tàu', en: 'B: Propulsion' }, color: '#0d9488', sys: ['302','304.1','304.2','306','309','311','322'] },
+  { id: 'C', code: '==C', name: 'AUXILIARIES', nameVi: 'Hệ thống Phụ trợ', label: { vi: 'C: Phụ trợ', en: 'C: Auxiliaries' }, color: '#64748b', sys: ['341','351','361','371','373','375','381.1','381.2','381.3','425','431','441','442','446','461','471'] },
+  { id: 'E', code: '==E', name: 'SAFETY', nameVi: 'An toàn & Cứu hỏa', label: { vi: 'E: An toàn', en: 'E: Safety' }, color: '#dc2626', sys: ['201','205','221','222','223','291','401','401.2','415'] },
+  { id: 'F', code: '==F', name: 'HVAC', nameVi: 'Thông gió & Điều hòa (HVAC)', label: { vi: 'F: HVAC', en: 'F: HVAC' }, color: '#059669', sys: ['411','412','413','416'] },
+  { id: 'G', code: '==G', name: 'MOORING', nameVi: 'Hệ thống Chằng buộc (Mooring)', label: { vi: 'G: Mooring', en: 'G: Mooring' }, color: '#ea580c', sys: ['504','506'] },
+  { id: 'H', code: '==H', name: 'DOORS & HATCHES', nameVi: 'Cửa kín nước & Nắp hầm', label: { vi: 'H: Cửa kín', en: 'H: Doors&Hatches' }, color: '#9333ea', sys: ['531','535','536'] },
+  { id: 'I', code: '==I', name: 'AUTOMATION', nameVi: 'Tự động hóa (Automation)', label: { vi: 'I: Tự động hóa', en: 'I: Automation' }, color: '#4f46e5', sys: ['601','617'] },
+  { id: 'K', code: '==K', name: 'NAUTICAL', nameVi: 'Khí tài Hàng hải (Nautical)', label: { vi: 'K: Hàng hải', en: 'K: Nautical' }, color: '#2563eb', sys: ['727','741','742','743','744','746','747','748','751','752','753','756','761','762'] },
+  { id: 'J', code: '==J', name: 'COMMUNICATION', nameVi: 'Thông tin Liên lạc (Communication)', label: { vi: 'J: Liên lạc', en: 'J: Communication' }, color: '#ca8a04', sys: ['708','712','715','721','723','725','728','731'] },
+  { id: 'L', code: '==L', name: 'LIGHTING', nameVi: 'Hệ thống Chiếu sáng (Lighting)', label: { vi: 'L: Chiếu sáng', en: 'L: Lighting' }, color: '#d97706', sys: ['581','901','903','911','921','923'] },
+  { id: 'M', code: '==M', name: 'ICT / ENTERTAINMENT', nameVi: 'Mạng & Giải trí (ICT/Media)', label: { vi: 'M: Mạng/Media', en: 'M: ICT/Media' }, color: '#db2777', sys: ['631','634','771'] },
+  { id: 'N', code: '==N', name: 'LIFTING', nameVi: 'Thiết bị Nâng hạ (Lifting)', label: { vi: 'N: Nâng hạ', en: 'N: Lifting' }, color: '#65a30d', sys: ['512'] }
+];
+const SYS_TO_GRP={};
+SYS_GROUPS.forEach(g=>g.sys.forEach(c=>{SYS_TO_GRP[c]=g}));
+let sysActiveGroup=null;
+
+function drawSysGroupBar(){
+  const bar=$('#sgrp-bar');
+  if(!bar) return;
+  const isEn=(curLang==='en');
+  let html=`<button class="sg-pill${!sysActiveGroup?' on':''}" data-g="">${isEn?'All':'Tất cả'} (${sysList.length})</button>`;
+  SYS_GROUPS.forEach(g=>{
+    const lbl=(g.label&&g.label[curLang])||(g.label&&g.label.vi)||g.name;
+    const cnt=g.sys.filter(c=>sysCab[c]).length;
+    html+=`<button class="sg-pill${sysActiveGroup===g.id?' on':''}" data-g="${g.id}">${esc(lbl)} (${cnt})</button>`;
+  });
+  bar.innerHTML=html;
+}
+
 function setMode(m){
   document.body.classList.toggle('sys',m==='sys');
   document.body.classList.toggle('prog',m==='prog');
   document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   $('#res').style.display='none';
   if(m==='map')apply();
-  if(m==='sys'){ if($('#sq'))$('#sq').placeholder=t('sysSearchPh'); if(!curSys)drawSysList(''); }
+  if(m==='sys'){ if($('#sq'))$('#sq').placeholder=t('sysSearchPh'); drawSysGroupBar(); if(!curSys)drawSysList(''); }
   if(m==='prog')enterProg();
 }
 function enterSys(){setMode('sys')}
@@ -1484,24 +1608,78 @@ function exitSys(){if(document.body.classList.contains('sys')||document.body.cla
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
 
 function drawSysList(k){
-  k=(k||'').toLowerCase();
-  const l=sysList.filter(s=>!k||(s.c+' '+s.n).toLowerCase().includes(k));
-  $('#slist').innerHTML=l.map(s=>{
-    const st=getSysStats(s.c);
-    const pTag=`<span class="sys-mini-pill" title="${t('colPull')}: ${st.pulled}/${st.tot} (${st.pulledPct}%)">${t('pillPull')} ${st.pulledPct}%</span>`;
-    const cTag=`<span class="sys-mini-pill" title="${t('colConn')}: ${st.connEnds}/${st.connTotal} ${t('ends')} (${st.connPct}%)">${t('pillConn')} ${st.connPct}%</span>`;
-    return `<div class="si${s.c===curSys?' on':''}" data-sys="${esc(s.c)}">
-      <span class="n">${s.k} ${t('cables')}</span>
-      <div style="float:right;display:flex;gap:4px;margin-right:6px">
-        ${pTag}${cTag}
-      </div>
-      <b>${esc(s.c)}</b> · ${esc(s.n||t('unnamed'))}
+  k=(k||'').trim().toLowerCase();
+  const isEn=(curLang==='en');
+  const bar=$('#sgrp-bar');if(bar)bar.style.display='flex';
+
+  const groupsToRender=sysActiveGroup?SYS_GROUPS.filter(g=>g.id===sysActiveGroup):SYS_GROUPS;
+  let totalRendered=0;
+  let html='';
+
+  groupsToRender.forEach(g=>{
+    const matchingSys=g.sys
+      .map(code=>sysList.find(s=>s.c===code))
+      .filter(s=>s&&(!k||(s.c+' '+s.n).toLowerCase().includes(k)));
+
+    if(!matchingSys.length) return;
+    totalRendered+=matchingSys.length;
+
+    const gTitle=isEn?`${g.code} ${g.name}`:`${g.code} ${g.nameVi||g.name}`;
+    html+=`<div class="sys-group-header grp-hdr-${g.id}">
+      <span><b>${g.id}.</b> ${esc(gTitle)}</span>
+      <span class="sgh-count">${matchingSys.length} ${t('systems')}</span>
     </div>`;
-  }).join('')||`<div class="si">${t('sysNotFound')}</div>`;
+
+    matchingSys.forEach(s=>{
+      const st=getSysStats(s.c);
+      const pTag=`<span class="sys-mini-pill" title="${t('colPull')}: ${st.pulled}/${st.tot} (${st.pulledPct}%)">${t('pillPull')} ${st.pulledPct}%</span>`;
+      const cTag=`<span class="sys-mini-pill" title="${t('colConn')}: ${st.connEnds}/${st.connTotal} ${t('ends')} (${st.connPct}%)">${t('pillConn')} ${st.connPct}%</span>`;
+      html+=`<div class="si grp-${g.id}${s.c===curSys?' on':''}" data-sys="${esc(s.c)}">
+        <span class="n">${s.k} ${t('cables')}</span>
+        <div style="float:right;display:flex;gap:4px;margin-right:6px">
+          ${pTag}${cTag}
+        </div>
+        <b>${esc(s.c)}</b> · ${esc(s.n||t('unnamed'))}
+      </div>`;
+    });
+  });
+
+  const uncatSys=sysList.filter(s=>!SYS_TO_GRP[s.c]&&(!k||(s.c+' '+s.n).toLowerCase().includes(k)));
+  if(uncatSys.length>0&&!sysActiveGroup){
+    totalRendered+=uncatSys.length;
+    html+=`<div class="sys-group-header">
+      <span>${isEn?'OTHER SYSTEMS':'HỆ THỐNG KHÁC'}</span>
+      <span class="sgh-count">${uncatSys.length} ${t('systems')}</span>
+    </div>`;
+    uncatSys.forEach(s=>{
+      const st=getSysStats(s.c);
+      const pTag=`<span class="sys-mini-pill" title="${t('colPull')}: ${st.pulled}/${st.tot} (${st.pulledPct}%)">${t('pillPull')} ${st.pulledPct}%</span>`;
+      const cTag=`<span class="sys-mini-pill" title="${t('colConn')}: ${st.connEnds}/${st.connTotal} ${t('ends')} (${st.connPct}%)">${t('pillConn')} ${st.connPct}%</span>`;
+      html+=`<div class="si${s.c===curSys?' on':''}" data-sys="${esc(s.c)}">
+        <span class="n">${s.k} ${t('cables')}</span>
+        <div style="float:right;display:flex;gap:4px;margin-right:6px">
+          ${pTag}${cTag}
+        </div>
+        <b>${esc(s.c)}</b> · ${esc(s.n||t('unnamed'))}
+      </div>`;
+    });
+  }
+
+  if(totalRendered===0){
+    html=`<div class="si" style="text-align:center;padding:16px;color:var(--mut)">${t('sysNotFound')}</div>`;
+  }
+
+  $('#slist').innerHTML=html;
   $('#slist').style.display='block';
   $('#ssel').style.display='none';
 }
-$('#sq').oninput=e=>{drawSysList(e.target.value)};
+$('#sq').oninput=e=>{
+  if(e.target.value.trim()&&sysActiveGroup){
+    sysActiveGroup=null;
+    drawSysGroupBar();
+  }
+  drawSysList(e.target.value);
+};
 
 function endH(i){
   const r=devRoom[i]||'';
@@ -1511,6 +1689,7 @@ function endH(i){
 function renderSysContent(c){
   const ids=sysCab[c]||[], s=sysList.find(x=>x.c===c)||{n:''};
   const st=getSysStats(c);
+  const sbar=$('#sgrp-bar');if(sbar)sbar.style.display='none';
   $('#slist').style.display='none';
   $('#ssel').style.display='block';
   $('#ssel').innerHTML=`<b>${esc(c)}</b> · ${esc(s.n)} · ${ids.length} ${t('cables')} <span style="float:right">▾ ${t('changeSys')}</span>`;
@@ -1703,6 +1882,14 @@ function addBackSys(c){
 }
 
 sysv.addEventListener('click',e=>{
+  const sg=e.target.closest('.sg-pill');
+  if(sg){
+    const gid=sg.dataset.g;
+    sysActiveGroup=(sysActiveGroup===gid||!gid)?null:gid;
+    drawSysGroupBar();
+    drawSysList($('#sq').value);
+    return;
+  }
   const si=e.target.closest('.si[data-sys]');if(si){selectSys(si.dataset.sys);return}
   if(e.target.closest('#ssel')){curSys=null;drawSysList($('#sq').value);return}
 
@@ -1976,6 +2163,7 @@ function applyLang(){
   const sq = $('#sq');
   if(sq) {
     sq.placeholder = t('sysSearchPh');
+    drawSysGroupBar();
     drawSysList(sq.value);
   }
   if(curSys) renderSysContent(curSys);
