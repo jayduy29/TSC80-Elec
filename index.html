@@ -651,6 +651,33 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function apply(){st.style.transform=`translate(${T.x}px,${T.y}px) scale(${T.s})`;st.style.setProperty('--inv',Math.max(1/T.s,.7));st.classList.toggle('lab',T.s>=.35)}
 function fit(){const v=D.views[vi],s=Math.min(vp.clientWidth/v.w,vp.clientHeight/v.h);T={s:s,x:(vp.clientWidth-v.w*s)/2,y:(vp.clientHeight-v.h*s)/2};apply()}
 function zoomAt(cx,cy,k){const s=Math.max(.02,Math.min(8,T.s*k)),r=s/T.s;T.x=cx-(cx-T.x)*r;T.y=cy-(cy-T.y)*r;T.s=s;apply()}
+let zoomAnimId=null;
+function smoothZoomAt(cx,cy,k,dur=200){
+  if(zoomAnimId){cancelAnimationFrame(zoomAnimId);zoomAnimId=null}
+  const s0=T.s,x0=T.x,y0=T.y;
+  const s1=Math.max(.02,Math.min(8,T.s*k));
+  if(Math.abs(s1-s0)<0.0001)return;
+  const r=s1/s0;
+  const x1=cx-(cx-x0)*r,y1=cy-(cy-y0)*r;
+  const t0=performance.now();
+  function f(now){
+    const p=Math.min(1,(now-t0)/dur);
+    const ease=1-Math.pow(1-p,3);
+    T.s=s0+(s1-s0)*ease;T.x=x0+(x1-x0)*ease;T.y=y0+(y1-y0)*ease;
+    apply();
+    if(p<1)zoomAnimId=requestAnimationFrame(f);
+    else zoomAnimId=null;
+  }
+  zoomAnimId=requestAnimationFrame(f);
+}
+let lastDblTime=0;
+function dblZoom(clientX,clientY){
+  const now=Date.now();
+  if(now-lastDblTime<350)return;
+  lastDblTime=now;
+  const r=vp.getBoundingClientRect();
+  smoothZoomAt(clientX-r.left,clientY-r.top,1.45);
+}
 function show(i){
   vi=i;const v=D.views[i];im.src=v.img;im.width=v.w;im.height=v.h;st.style.width=v.w+'px';st.style.height=v.h+'px';
   st.querySelectorAll('.hs,.pin').forEach(e=>e.remove());
@@ -1039,7 +1066,7 @@ drawViewTabs();
 // pan / zoom
 const P=new Map();let mv=0,drag=null;
 const pt=e=>{const r=vp.getBoundingClientRect();return [(e.clientX-r.left-T.x)/T.s,(e.clientY-r.top-T.y)/T.s]};
-vp.addEventListener('pointerdown',e=>{if(e.target.closest('#tb,#zm'))return;mv=0;
+vp.addEventListener('pointerdown',e=>{if(zoomAnimId){cancelAnimationFrame(zoomAnimId);zoomAnimId=null}if(e.target.closest('#tb,#zm'))return;mv=0;
   const pp=editing&&P.size===0&&e.target.closest('.pin');
   if(pp){drag={k:+pp.dataset.p,el:pp};selP=drag.k;st.querySelectorAll('.pin').forEach(x=>x.classList.toggle('on',x===pp))}
   P.set(e.pointerId,[e.clientX,e.clientY])});
@@ -1048,14 +1075,19 @@ vp.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.ge
   if(P.size===1){T.x+=n[0]-o[0];T.y+=n[1]-o[1];mv+=Math.abs(n[0]-o[0])+Math.abs(n[1]-o[1]);apply()}
   else if(P.size===2){const q=[...P].find(([k])=>k!==e.pointerId)[1],d0=Math.hypot(o[0]-q[0],o[1]-q[1]),d1=Math.hypot(n[0]-q[0],n[1]-q[1]);mv+=99;if(d0>0)zoomAt((n[0]+q[0])/2-r.left,(n[1]+q[1])/2-r.top,d1/d0)}
   P.set(e.pointerId,n)});
+let lastTapTime=0,lastTapPos=[0,0];
 const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);
   if(drag){const d=drag;drag=null;if(mv>=4){const p=D.pins[d.k];setF(p.id,{x:p.x,y:p.y});flag('Đã dời '+p.c+' (chưa lưu)')}else pickPin(d.k);return}
   if(mv<8&&e.type==='pointerup'){const h=document.elementFromPoint(e.clientX,e.clientY);if(h&&h.closest('#tb,#zm'))return;
+    const now=Date.now(),dt=now-lastTapTime,dist=Math.hypot(e.clientX-lastTapPos[0],e.clientY-lastTapPos[1]);
+    lastTapTime=now;lastTapPos=[e.clientX,e.clientY];
+    if(dt>40&&dt<350&&dist<40){dblZoom(e.clientX,e.clientY);return}
     fromCable=null;const pp=h&&h.closest('.pin');if(pp){pickPin(+pp.dataset.p);return}
     if(editing&&addMode){addAt(...pt(e));return}
     const x=h&&h.closest('.hs');if(x)pick(x.dataset.n)}};
 vp.addEventListener('pointerup',up);vp.addEventListener('pointercancel',up);
-$('#zin').onclick=()=>zoomAt(vp.clientWidth/2,vp.clientHeight/2,1.5);$('#zout').onclick=()=>zoomAt(vp.clientWidth/2,vp.clientHeight/2,1/1.5);
+vp.addEventListener('dblclick',e=>{if(e.target.closest('#tb,#zm'))return;e.preventDefault();dblZoom(e.clientX,e.clientY)});
+$('#zin').onclick=()=>smoothZoomAt(vp.clientWidth/2,vp.clientHeight/2,1.5);$('#zout').onclick=()=>smoothZoomAt(vp.clientWidth/2,vp.clientHeight/2,1/1.5);
 vp.addEventListener('wheel',e=>{e.preventDefault();const r=vp.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.15:1/1.15)},{passive:false});
 addEventListener('resize',()=>{if(vi>=0)fit()});
 // search
