@@ -2612,6 +2612,149 @@ function drawCanvasWrappedText(g, text, x, y, maxWidth, lineHeight){
   return curY;
 }
 
+function drawCanvasFormattedText(g, rawText, x, y, maxWidth, lineHeight, baseFont){
+  const styles = {
+    normal: { color: '#1e293b', font: '15.5px ' + baseFont, bg: null },
+    good:   { color: '#15803d', font: 'bold 15.5px ' + baseFont, bg: '#dcfce7', border: '#86efac' },
+    warn:   { color: '#b45309', font: 'bold 15.5px ' + baseFont, bg: '#fef3c7', border: '#fde68a' },
+    crit:   { color: '#b91c1c', font: 'bold 15.5px ' + baseFont, bg: '#fee2e2', border: '#fca5a5' },
+    focus:  { color: '#0369a1', font: 'bold 15.5px ' + baseFont, bg: '#e0f2fe', border: '#bae6fd' }
+  };
+
+  const regex = /\[(GOOD|WARN|CRIT|FOCUS):([^\]]+)\]/gi;
+  let tokens = [];
+  let lastIndex = 0;
+  let match;
+  while((match = regex.exec(rawText)) !== null){
+    if(match.index > lastIndex){
+      tokens.push({ type: 'normal', text: rawText.substring(lastIndex, match.index) });
+    }
+    tokens.push({ type: match[1].toLowerCase(), text: match[2] });
+    lastIndex = regex.lastIndex;
+  }
+  if(lastIndex < rawText.length){
+    tokens.push({ type: 'normal', text: rawText.substring(lastIndex) });
+  }
+
+  let wordUnits = [];
+  tokens.forEach(tok => {
+    const parts = tok.text.split(/(\s+)/);
+    parts.forEach(p => {
+      if(!p) return;
+      wordUnits.push({
+        text: p,
+        isSpace: /^\s+$/.test(p),
+        type: tok.type,
+        style: styles[tok.type] || styles.normal
+      });
+    });
+  });
+
+  let lines = [];
+  let curLine = [];
+  let curLineWidth = 0;
+
+  wordUnits.forEach(unit => {
+    g.font = unit.style.font;
+    unit.width = g.measureText(unit.text).width;
+
+    if(unit.isSpace){
+      if(curLine.length > 0){
+        curLine.push(unit);
+        curLineWidth += unit.width;
+      }
+      return;
+    }
+
+    if(curLineWidth + unit.width > maxWidth && curLine.length > 0){
+      while(curLine.length && curLine[curLine.length - 1].isSpace){
+        curLineWidth -= curLine.pop().width;
+      }
+      lines.push(curLine);
+      curLine = [unit];
+      curLineWidth = unit.width;
+    } else {
+      curLine.push(unit);
+      curLineWidth += unit.width;
+    }
+  });
+
+  if(curLine.length > 0){
+    while(curLine.length && curLine[curLine.length - 1].isSpace){
+      curLine.pop();
+    }
+    lines.push(curLine);
+  }
+
+  g.textBaseline = 'top';
+  g.textAlign = 'left';
+  let curY = y;
+  lines.forEach(lineItems => {
+    let groups = [];
+    let curGroup = null;
+    let xOffset = x;
+
+    lineItems.forEach(u => {
+      const uX = xOffset;
+      xOffset += u.width;
+      if (u.isSpace) {
+        if (curGroup && curGroup.type !== 'normal') {
+          curGroup.items.push({ u, x: uX });
+        }
+        return;
+      }
+      if (curGroup && curGroup.type === u.type) {
+        curGroup.items.push({ u, x: uX });
+      } else {
+        if (curGroup) groups.push(curGroup);
+        curGroup = { type: u.type, style: u.style, items: [{ u, x: uX }] };
+      }
+    });
+    if (curGroup) groups.push(curGroup);
+
+    groups.forEach(grp => {
+      if (!grp.style.bg || grp.type === 'normal') return;
+      const nonSpaces = grp.items.filter(it => !it.u.isSpace);
+      if (!nonSpaces.length) return;
+      const first = nonSpaces[0];
+      const last = nonSpaces[nonSpaces.length - 1];
+      const startX = first.x - 4;
+      const endX = last.x + last.u.width + 4;
+      const boxW = endX - startX;
+      const boxH = lineHeight - 4;
+      const boxY = curY - 2;
+
+      g.fillStyle = grp.style.bg;
+      g.beginPath();
+      if (g.roundRect) {
+        g.roundRect(startX, boxY, boxW, boxH, 4);
+      } else {
+        g.rect(startX, boxY, boxW, boxH);
+      }
+      g.fill();
+      if (grp.style.border) {
+        g.strokeStyle = grp.style.border;
+        g.lineWidth = 1;
+        g.stroke();
+      }
+    });
+
+    let textX = x;
+    lineItems.forEach(u => {
+      if (!u.isSpace) {
+        g.font = u.style.font;
+        g.fillStyle = u.style.color;
+        g.fillText(u.text, textX, curY);
+      }
+      textX += u.width;
+    });
+
+    curY += lineHeight;
+  });
+
+  return curY;
+}
+
 async function snapProg(){
   const sh = PS.sheets[PS.cur];
   if(!sh){
@@ -2812,28 +2955,34 @@ async function snapProg(){
     { wk: 'W50', pullTot: 95.0, pullDelta: 2.0, termTot: 80.0, termDelta: 8.0, note: 'Mốc đợt 1 (Sẵn sàng Test & Comm)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true }
   ];
 
-  // Table 3 Directives with distinct contractor colors
+  // Table 3 Directives with distinct contractor colors & star ratings
   const comments = [
     {
       name: 'HDC',
       color: '#d84315',
-      desc: isEn ?
-        'Cable pulling showed remarkable breakthrough (+14.3%, reaching 82.3% far exceeding plan). Termination accelerated to 13.1% (+238 ends). Request W45 to maintain workforce and finalize Axis A switchboard termination to reach 26% target.' :
-        'Kéo dây bứt phá rất xuất sắc (+14.3%, đạt 82.3% vượt xa kế hoạch). Đấu nối tăng tốc đạt 13.1% (+238 đầu). Yêu cầu tuần W45 giữ vững quân số, tập trung dứt điểm đấu nối phòng điện trục A để hướng tới mốc 26%.'
+      starsStr: '★★★★☆',
+      scoreText: '4.0 / 5',
+      descRaw: isEn ?
+        'Cable pulling showed [GOOD:remarkable breakthrough (+14.3%, reaching 82.3% far exceeding plan)]. Termination accelerated to [GOOD:13.1% (+238 ends)]. Request W45 to [FOCUS:maintain workforce] and finalize [FOCUS:Axis A switchboard termination] to reach 26% target.' :
+        'Kéo dây bứt phá [GOOD:rất xuất sắc (+14.3%, đạt 82.3% vượt xa kế hoạch)]. Đấu nối tăng tốc đạt [GOOD:13.1% (+238 đầu)]. Yêu cầu tuần W45 [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm đấu nối phòng điện trục A] để hướng tới mốc 26%.'
     },
     {
       name: 'NAUTICS',
       color: '#1565c0',
-      desc: isEn ?
-        'Cable pulling showed signs of slowing (+2.7%, reaching 72.2%). Termination remains behind (+91 ends, reaching only 10.3% vs 15% plan). Request immediate addition of 3-4 skilled electricians from early W45 to catch up.' :
-        'Tiến độ kéo dây có dấu hiệu chậm lại (+2.7%, đạt 72.2%). Đấu nối còn chậm (+91 đầu, chỉ đạt 10.3% vs 15% yêu cầu). Yêu cầu bổ sung ngay 3-4 thợ đấu nối tay nghề cao từ đầu tuần W45 để bắt kịp lộ trình.'
+      starsStr: '★★★☆☆',
+      scoreText: '3.0 / 5',
+      descRaw: isEn ?
+        'Cable pulling showed [WARN:signs of slowing (+2.7%, reaching 72.2%)]. Termination [WARN:remains behind (+91 ends, reaching only 10.3% vs 15% plan)]. Request [CRIT:immediate addition of 3-4 skilled electricians] from early W45 to [FOCUS:catch up].' :
+        'Tiến độ kéo dây [WARN:có dấu hiệu chậm lại (+2.7%, đạt 72.2%)]. Đấu nối [WARN:còn chậm (+91 đầu, chỉ đạt 10.3% vs 15% yêu cầu)]. Yêu cầu [CRIT:bổ sung ngay 3-4 thợ đấu nối tay nghề cao] ngay từ đầu tuần W45 để [FOCUS:bắt kịp lộ trình].'
     },
     {
       name: 'ST',
       color: '#2e7d32',
-      desc: isEn ?
-        'Cable pulling accelerated impressively (+11.1%, reaching 66.6% exceeding plan). However, TERMINATION HAS NOT STARTED (0/554 ends). Request urgent deployment of dedicated termination team from early W45, avoiding workload accumulation.' :
-        'Kéo dây tăng tốc ấn tượng (+11.1%, đạt 66.6% vượt kế hoạch). Tuy nhiên ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu). Yêu cầu khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45, không để dồn ứ việc về cuối.'
+      starsStr: '★★☆☆☆',
+      scoreText: '2.0 / 5',
+      descRaw: isEn ?
+        'Cable pulling accelerated impressively [GOOD:(+11.1%, reaching 66.6% exceeding plan)]. However, [CRIT:TERMINATION HAS NOT STARTED (0/554 ends)]. Request [CRIT:urgent deployment of dedicated termination team from early W45], strictly [FOCUS:avoiding workload accumulation at the end].' :
+        'Kéo dây tăng tốc ấn tượng [GOOD:(+11.1%, đạt 66.6% vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].'
     }
   ];
 
@@ -3088,16 +3237,25 @@ async function snapProg(){
     ('BẢNG 3: NHẬN XÉT & CHỈ ĐẠO ĐIỀU HÀNH TUẦN TỚI (' + nextWkLabel + ')'));
   y += 36;
 
-  // Table 3 Data Rows (with distinct PM contractor colors)
-  const t3RowH = 96;
+  // Table 3 Data Rows (with distinct PM contractor colors & star ratings)
+  const t3RowH = 112;
   comments.forEach(cm => {
-    // Contractor name cell in PM brand color
+    // Contractor name cell in PM brand color with star rating
     g.fillStyle = cm.color;
     g.fillRect(X_PAD, y, 180, t3RowH);
     g.strokeStyle = '#d3dae3';
     g.lineWidth = 1;
     g.strokeRect(X_PAD, y, 180, t3RowH);
-    drawCellText(X_PAD, y, 180, t3RowH, cm.name, 'bold', '#ffffff', 'center', 'bold 20px ' + F);
+
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.font = 'bold 22px ' + F;
+    g.fillStyle = '#ffffff';
+    g.fillText(cm.name, X_PAD + 90, y + 38);
+
+    g.font = '22px ' + F;
+    g.fillStyle = '#ffd700';
+    g.fillText(cm.starsStr, X_PAD + 90, y + 74);
 
     // Comment cell
     g.fillStyle = '#ffffff';
@@ -3105,11 +3263,7 @@ async function snapProg(){
     g.strokeStyle = '#d3dae3';
     g.strokeRect(X_PAD + 180, y, 940, t3RowH);
 
-    g.fillStyle = '#1d2733';
-    g.font = '15.5px ' + F;
-    g.textAlign = 'left';
-    g.textBaseline = 'top';
-    drawCanvasWrappedText(g, cm.desc, X_PAD + 180 + 16, y + 16, 940 - 32, 24);
+    drawCanvasFormattedText(g, cm.descRaw, X_PAD + 180 + 16, y + 18, 940 - 32, 26, F);
 
     y += t3RowH;
   });
@@ -3152,9 +3306,18 @@ async function snapProg(){
 
   let commentsRowsHtml = '';
   comments.forEach(c => {
+    const descHtml = c.descRaw
+      .replace(/\[GOOD:(.*?)\]/g, '<span class="hl-good">$1</span>')
+      .replace(/\[WARN:(.*?)\]/g, '<span class="hl-warn">$1</span>')
+      .replace(/\[CRIT:(.*?)\]/g, '<span class="hl-crit">$1</span>')
+      .replace(/\[FOCUS:(.*?)\]/g, '<span class="hl-focus">$1</span>');
+
     commentsRowsHtml += '<tr>' +
-      '<td class="nt-name ' + esc(c.name) + '">' + esc(c.name) + '</td>' +
-      '<td class="nt-desc">' + esc(c.desc) + '</td>' +
+      '<td class="nt-name ' + esc(c.name) + '">' +
+        '<div class="nt-title">' + esc(c.name) + '</div>' +
+        '<div class="nt-stars" title="Đánh giá ' + esc(c.scoreText) + ' sao">' + esc(c.starsStr) + '</div>' +
+      '</td>' +
+      '<td class="nt-desc">' + descHtml + '</td>' +
       '</tr>';
   });
 
@@ -3184,12 +3347,18 @@ async function snapProg(){
   .curr-week { background-color: #fff3e0; font-weight: bold; }
   .tag-pass { color: #15803d; font-weight: bold; }
   .tag-fail { color: #b91c1c; font-weight: bold; }
-  .comments-table td { padding: 10px 14px; }
-  .nt-name { width: 18%; font-weight: bold; font-size: 15px; color: #ffffff; vertical-align: middle; }
+  .comments-table td { padding: 12px 16px; vertical-align: middle; }
+  .nt-name { width: 18%; text-align: center; vertical-align: middle; padding: 12px 8px; }
   .nt-name.HDC { background-color: #d84315; }
   .nt-name.NAUTICS { background-color: #1565c0; }
   .nt-name.ST { background-color: #2e7d32; }
-  .nt-desc { text-align: left; font-size: 13px; line-height: 1.5; }
+  .nt-title { font-size: 21px; font-weight: 800; color: #ffffff; line-height: 1.2; margin-bottom: 5px; letter-spacing: 0.5px; }
+  .nt-stars { color: #ffd700; font-size: 19px; letter-spacing: 2px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+  .nt-desc { text-align: left; font-size: 15px; line-height: 1.6; color: #1e293b; }
+  .hl-good { background: #dcfce7; color: #15803d; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #86efac; display: inline-block; }
+  .hl-warn { background: #fef3c7; color: #b45309; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a; display: inline-block; }
+  .hl-crit { background: #fee2e2; color: #b91c1c; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #fca5a5; display: inline-block; }
+  .hl-focus { background: #e0f2fe; color: #0369a1; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #bae6fd; display: inline-block; }
   .th-hdc { background-color: #d84315; color: #ffffff; font-weight: bold; }
   .th-nautics { background-color: #1565c0; color: #ffffff; font-weight: bold; }
   .th-st { background-color: #2e7d32; color: #ffffff; font-weight: bold; }
