@@ -232,8 +232,13 @@ body.sys #tabs,body.sys #vp,body.sys #pn,body.prog #tabs,body.prog #vp,body.prog
 #pres tr.grp td{background:var(--acc);color:#fff;text-align:left;font-weight:bold;font-size:12px}#pres tr.grp small{color:#d4eef2;font-weight:normal;font-size:10px;margin-left:6px}
 #pres td.v{text-align:center}#pres td.lb br{margin:0}#pres td.lb small{font-size:10px;color:var(--mut)}
 .ch{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:8px;margin:0 0 10px}.ch>b{display:block;color:var(--acct);margin-bottom:4px;font-size:13px}.ch svg{width:100%;height:auto;display:block;overflow:visible}.ch .lg{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin-top:4px}.ch .lg span{display:inline-flex;align-items:center;gap:4px}.ch .lg i{width:10px;height:10px;border-radius:50%;display:inline-block}
-#svgtt{position:fixed;background:rgba(20,24,30,.95);color:#fff;font-size:12px;font-weight:600;padding:6px 11px;border-radius:8px;z-index:9999;white-space:nowrap;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);line-height:1.3;max-width:calc(100vw - 16px)}
 #pbar button.on{background:var(--acc)!important;color:#fff!important}
+#pbar #pexp{background:var(--acc);color:#fff;font-weight:bold;border-color:var(--acc);cursor:pointer}
+#pbar #pexp:hover{filter:brightness(1.1)}
+.kpi-delta{font-size:10px;font-weight:700;margin-left:4px;padding:1px 5px;border-radius:6px;vertical-align:middle;display:inline-block;line-height:1.2}
+.kpi-delta.up{background:rgba(22,163,74,.15);color:#16a34a}
+.kpi-delta.same{background:rgba(100,116,139,.15);color:#64748b}
+.kpi-delta.down{background:rgba(220,38,38,.15);color:#dc2626}
 #gm{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:130;display:none;align-items:center;justify-content:center;padding:10px}
 #gm .box{background:var(--card);color:var(--fg);padding:14px;border-radius:12px;width:min(400px,100%);max-height:92vh;overflow:auto}
 #gm label{display:block;font-size:12px;color:var(--mut);margin:8px 0 2px}#gm input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font-size:14px}
@@ -417,7 +422,7 @@ tr.row-pulled td{background:transparent}
 </header>
 <div id="modes"><button data-m="map" class="on"><i style="background:#d84315"></i><span>Sơ đồ</span></button><button data-m="sys"><i style="background:#1565c0"></i><span>Hệ thống</span></button><button data-m="prog"><i style="background:#2e7d32"></i><span>Tiến độ</span></button></div>
 <div id="tabs"></div>
-<div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button></div><div id="pwk"></div><div id="pleg"></div><input id="pq" placeholder="Lọc dòng (gõ từ khóa)…" autocomplete="off"><div id="pstat"></div><div id="pres"></div></div>
+<div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button><button id="pexp">📊 Xuất báo cáo</button></div><div id="pwk"></div><div id="pleg"></div><input id="pq" placeholder="Lọc dòng (gõ từ khóa)…" autocomplete="off"><div id="pstat"></div><div id="pres"></div></div>
 <div id="sysv"><input id="sq" placeholder="Tìm mã hoặc tên hệ thống (vd 903, nav lighting)" autocomplete="off"><div id="sgrp-bar"></div><div id="ssel"></div><div id="slist"></div><div id="sres"></div></div>
 <div id="vp"><div id="st"><img id="im" alt="Sơ đồ bố trí số phòng"></div><div id="zm"><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></div><div id="tb"></div><div id="hint">Kéo để di chuyển · chụm / cuộn để phóng to</div></div>
 <div id="pn"><div class="m" id="pn-hint">Chưa chọn phòng. Bấm vào một ô xanh trên sơ đồ.</div></div>
@@ -614,7 +619,17 @@ const I18N = {
     itemPulling: 'Kéo dây cáp điện',
     itemTermination: 'Đấu nối đầu cáp',
     allContractors: 'Tất cả',
-    detailsByItem: 'CHI TIẾT THEO HẠNG MỤC'
+    detailsByItem: 'CHI TIẾT THEO HẠNG MỤC',
+    btnExportProg: '📊 Xuất báo cáo',
+    progReportCompared: 'So sánh với Tuần trước: {w}',
+    vsPrevWk: 'so với {w}',
+    vsPrev: 'so với tuần trước',
+    progReportTitle: 'BÁO CÁO TIẾN ĐỘ THI CÔNG TUẦN {w}',
+    progReportSub: 'Dự án Đóng tàu TSC80 - Hệ thống Điện (C459)',
+    progWeeklyGain: 'Tăng trong tuần (Δ)',
+    progPrevWeek: 'Tuần trước ({w})',
+    progCurWeek: 'Tuần này ({w})',
+    progNoPrevWeek: 'Tuần đầu tiên'
   },
   en: {
     hdrTitle: 'TSC80 - Electrical System',
@@ -760,7 +775,17 @@ const I18N = {
     itemPulling: 'Cable Pulling',
     itemTermination: 'Termination',
     allContractors: 'All',
-    detailsByItem: 'DETAILS BY WORK ITEM'
+    detailsByItem: 'DETAILS BY WORK ITEM',
+    btnExportProg: '📊 Export Report',
+    progReportCompared: 'Compared with previous week: {w}',
+    vsPrevWk: 'vs {w}',
+    vsPrev: 'vs prev week',
+    progReportTitle: 'WEEKLY PROGRESS REPORT - WEEK {w}',
+    progReportSub: 'TSC80 Shipbuilding Project - Electrical System (C459)',
+    progWeeklyGain: 'Weekly Gain (Δ)',
+    progPrevWeek: 'Previous ({w})',
+    progCurWeek: 'This Week ({w})',
+    progNoPrevWeek: 'Initial Week'
   }
 };
 const t = k => (I18N[curLang] && I18N[curLang][k]) || I18N.vi[k] || k;
@@ -2200,6 +2225,7 @@ function applyLang(){
   const pq = $('#pq'); if(pq) pq.placeholder = t('progFilterPh');
   const pfr = $('#pfr');
   if(pfr) pfr.textContent = PS.frame===0?t('btnRaw'):(PS.frame===1?t('btnRawDrive'):t('btnRawSheets'));
+  const pexp = $('#pexp'); if(pexp) pexp.textContent = t('btnExportProg');
 
   // If Progress tab is active, re-render it now!
   if(document.body.classList.contains('prog')) {
@@ -2415,8 +2441,13 @@ function pmodel(sh){
   const textish=c=>{const v=body.map(r=>cell(r,c)).filter(x=>x!=='');return v.length&&v.filter(x=>!isNum(x)).length>=v.length*0.5};
   const find=re=>other.find(c=>re.test(head[c]||''));
   const ci=find(/indicator|chỉ tiêu/i),cu=find(/unit|đvt|đơn vị/i),cp=find(/plan|kế hoạch/i);
-  let lab=other.find(c=>!stt(c)&&c!==ci&&c!==cu&&c!==cp&&textish(c));if(lab===undefined)lab=other.find(c=>!stt(c));if(lab===undefined)lab=other[0];
-  return {head,body,cell,weeks,other,lab,ci,cu,cp,rest:other.filter(c=>c!==lab&&!stt(c))};
+  const cc=find(/contractor|nhà\s*thầu|đơn\s*vị/i);
+  const cw=find(/work\s*item|hạng\s*mục|nội\s*dung|công\s*việc/i);
+  let lab=cw!==undefined?cw:other.find(c=>!stt(c)&&c!==ci&&c!==cu&&c!==cp&&c!==cc&&textish(c));
+  if(lab===undefined)lab=other.find(c=>!stt(c)&&c!==cc);
+  if(lab===undefined)lab=other.find(c=>!stt(c));
+  if(lab===undefined)lab=other[0];
+  return {head,body,cell,weeks,other,lab,ci,cu,cp,cc,cw,rest:other.filter(c=>c!==lab&&!stt(c))};
 }
 
 function ctr(ind){const m=/^\s*([^-–]{1,24}?)\s*[-–]\s*(.+)$/.exec(ind||'');return m?{c:m[1].trim(),t:m[2].trim()}:null}
@@ -2427,7 +2458,7 @@ function extractProgData(M){
   let curContr=null;
 
   M.body.forEach(r=>{
-    const c0=(r[0]||'').trim();
+    const c0=M.cc!==undefined?M.cell(r,M.cc):(r[0]||'').trim();
     const c1=M.lab!==undefined?M.cell(r,M.lab):'';
     const unit=M.cu!==undefined?M.cell(r,M.cu):'';
     const ind=M.ci!==undefined?M.cell(r,M.ci):'';
@@ -2559,6 +2590,506 @@ document.addEventListener('scroll',()=>{
   if(old)old.remove();
 },{passive:true,capture:true});
 
+async function snapProg(){
+  const sh = PS.sheets[PS.cur];
+  if(!sh){
+    alert(t('progNoData'));
+    return;
+  }
+  const M = pmodel(sh);
+  const wd = M.weeks.filter(w=>M.body.some(r=>!zeroLike(M.cell(r,w.c))));
+  if(!wd.length){
+    alert(t('progNoData'));
+    return;
+  }
+  const wcur = wd.find(w=>w.c===PS.wk) || wd[wd.length - 1];
+  const curIdx = wd.findIndex(w=>w.c===(wcur?wcur.c:-1));
+  const wprev = curIdx > 0 ? wd[curIdx - 1] : null;
+
+  const wkLabel = w => w ? (w.y ? (w.w + '/' + String(w.y).slice(2)) : (w.w >= 10 ? 'W' + w.w : 'W0' + w.w)) : '';
+  const curWkStr = wkLabel(wcur);
+  const prevWkStr = wprev ? wkLabel(wprev) : '';
+  const isEn = (curLang === 'en');
+
+  const structuredItems = extractProgData(M);
+  if(!structuredItems.length){
+    alert(t('progNoData'));
+    return;
+  }
+
+  const cv = document.createElement('canvas');
+  const W = 1200, H = 1697;
+  cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  const M_PAD = 40;
+  const F = 'Arial, Helvetica, sans-serif';
+
+  g.textBaseline = 'top';
+  g.textAlign = 'left';
+
+  // 1. Canvas Background
+  g.fillStyle = '#f1f5f9';
+  g.fillRect(0, 0, W, H);
+
+  // Main Card
+  g.fillStyle = '#ffffff';
+  drawCanvasRoundRect(g, M_PAD, M_PAD, W - 2*M_PAD, H - 2*M_PAD, 16);
+  g.fill();
+  g.strokeStyle = '#cbd5e1';
+  g.lineWidth = 1.5;
+  g.stroke();
+
+  // 2. Header Banner
+  const bannerH = 135;
+  g.save();
+  drawCanvasRoundRect(g, M_PAD, M_PAD, W - 2*M_PAD, bannerH, 16);
+  g.clip();
+  const grad = g.createLinearGradient(M_PAD, M_PAD, W - M_PAD, M_PAD + bannerH);
+  grad.addColorStop(0, '#0a424c');
+  grad.addColorStop(1, '#0D5966');
+  g.fillStyle = grad;
+  g.fillRect(M_PAD, M_PAD, W - 2*M_PAD, bannerH);
+  g.restore();
+
+  // Banner Text Content
+  g.fillStyle = '#38bdf8';
+  g.font = 'bold 14px ' + F;
+  g.fillText(isEn ? 'TSC80 SHIPBUILDING PROJECT   ·   ELECTRICAL SYSTEM (C459)' : 'DỰ ÁN ĐÓNG TÀU TSC80   ·   HỆ THỐNG ĐIỆN (C459)', M_PAD + 25, M_PAD + 26);
+
+  g.fillStyle = '#ffffff';
+  g.font = 'bold 30px ' + F;
+  const reportMainTitle = isEn ? ('WEEKLY PROGRESS REPORT — WEEK ' + curWkStr) : ('BÁO CÁO TIẾN ĐỘ THI CÔNG — TUẦN ' + curWkStr);
+  g.fillText(reportMainTitle, M_PAD + 25, M_PAD + 54);
+
+  g.fillStyle = '#e0f2fe';
+  g.font = '16px ' + F;
+  const compSubtitle = wprev ?
+    (isEn ? ('✦ Comparison vs Previous Week: ' + prevWkStr) : ('✦ So sánh đối chiếu trực tiếp với Tuần trước: ' + prevWkStr)) :
+    (isEn ? '✦ Initial Project Milestone Report' : '✦ Báo cáo mốc khởi đầu dự án');
+  g.fillText(compSubtitle, M_PAD + 25, M_PAD + 96);
+
+  // Banner Week Badge on the right
+  const badgeW = 150, badgeH = 75;
+  const bx = W - M_PAD - badgeW - 25, by = M_PAD + 20;
+  g.fillStyle = 'rgba(255,255,255,0.15)';
+  drawCanvasRoundRect(g, bx, by, badgeW, badgeH, 10);
+  g.fill();
+  g.strokeStyle = 'rgba(255,255,255,0.3)';
+  g.lineWidth = 1;
+  g.stroke();
+
+  g.textAlign = 'center';
+  g.fillStyle = '#bae6fd';
+  g.font = 'bold 12px ' + F;
+  g.fillText(isEn ? 'CURRENT WEEK' : 'TUẦN BÁO CÁO', bx + badgeW / 2, by + 16);
+
+  g.fillStyle = '#ffffff';
+  g.font = 'bold 26px ' + F;
+  g.fillText(curWkStr, bx + badgeW / 2, by + 40);
+
+  g.textAlign = 'right';
+  g.fillStyle = '#cbd5e1';
+  g.font = '12px ' + F;
+  const timeStr = (isEn ? 'Exported: ' : 'Xuất lúc: ') + new Date().toLocaleString(isEn ? 'en-US' : 'vi-VN');
+  g.fillText(timeStr, W - M_PAD - 25, M_PAD + bannerH - 18);
+  g.textAlign = 'left';
+
+  // 3. Section I: Executive Progress Overview
+  let y = M_PAD + bannerH + 26;
+  const innerX = M_PAD + 20;
+  const innerW = W - 2 * innerX; // 1080px
+
+  g.fillStyle = '#0f172a';
+  g.font = 'bold 18px ' + F;
+  g.fillText(isEn ? 'I. EXECUTIVE PROGRESS OVERVIEW' : 'I. TỔNG QUAN TIẾN ĐỘ THI CÔNG TOÀN DỰ ÁN', innerX, y);
+  y += 28;
+
+  const kpiCount = Math.min(structuredItems.length, 3);
+  const kpiSpacing = 16;
+  const kpiW = (innerW - (kpiCount - 1) * kpiSpacing) / kpiCount;
+  const kpiH = 155;
+  const contrs = ['HDC', 'NAUTICS', 'ST'];
+
+  structuredItems.slice(0, 3).forEach((it, idx) => {
+    const kx = innerX + idx * (kpiW + kpiSpacing);
+    const itTitle = getWorkItemTitle(it.name);
+    const itUnit = getUnitLabel(it.unit);
+    const totEntry = it.contractors.find(c => c.isTotal);
+    const totPlan = totEntry ? totEntry.plan : null;
+    const totQty = totEntry && totEntry.qtyRow && wcur ? parseNum(M.cell(totEntry.qtyRow, wcur.c)) : null;
+    const totPct = totEntry && totEntry.pctRow && wcur ? parsePct(M.cell(totEntry.pctRow, wcur.c)) : null;
+    const prevTotQty = totEntry && totEntry.qtyRow && wprev ? parseNum(M.cell(totEntry.qtyRow, wprev.c)) : null;
+    const prevTotPct = totEntry && totEntry.pctRow && wprev ? parsePct(M.cell(totEntry.pctRow, wprev.c)) : null;
+
+    const deltaQty = (totQty !== null && prevTotQty !== null) ? (totQty - prevTotQty) : null;
+    const deltaPct = (totPct !== null && prevTotPct !== null) ? (totPct - prevTotPct) : null;
+
+    // Card background
+    g.fillStyle = '#f8fafc';
+    drawCanvasRoundRect(g, kx, y, kpiW, kpiH, 12);
+    g.fill();
+    g.strokeStyle = '#e2e8f0';
+    g.lineWidth = 1.2;
+    g.stroke();
+
+    // Top item title
+    g.fillStyle = '#1e293b';
+    g.font = 'bold 15px ' + F;
+    g.fillText((idx + 1) + '. ' + itTitle, kx + 14, y + 14);
+
+    // Large Progress %
+    g.fillStyle = '#0D5966';
+    g.font = 'bold 28px ' + F;
+    g.fillText(fmtPctVal(totPct), kx + 14, y + 42);
+
+    // Delta badge next to progress %
+    if(deltaPct !== null){
+      const sign = deltaPct >= 0 ? '+' : '';
+      const arrow = deltaPct > 0.0001 ? '▲' : (deltaPct < -0.0001 ? '▼' : '—');
+      const dTxt = arrow + ' ' + sign + deltaPct.toFixed(1) + '% vs ' + prevWkStr;
+      const dWidth = 140;
+      const dBg = deltaPct > 0.0001 ? '#dcfce7' : (deltaPct < -0.0001 ? '#fee2e2' : '#f1f5f9');
+      const dFg = deltaPct > 0.0001 ? '#15803d' : (deltaPct < -0.0001 ? '#b91c1c' : '#475569');
+      drawCanvasBadge(g, dTxt, kx + kpiW - dWidth - 14, y + 44, dWidth, 26, dBg, dFg);
+      g.textBaseline = 'top';
+      g.textAlign = 'left';
+    }
+
+    // Cumulative Quantity & Plan
+    g.fillStyle = '#475569';
+    g.font = '13px ' + F;
+    let qtyLine = fmtVal(totQty) + ' / ' + fmtVal(totPlan) + ' ' + itUnit;
+    if(deltaQty !== null){
+      const dSign = deltaQty >= 0 ? '+' : '';
+      qtyLine += '  (' + dSign + fmtVal(deltaQty) + ' ' + itUnit + ')';
+    }
+    g.fillText(qtyLine, kx + 14, y + 80);
+
+    // Progress bar
+    const barW = kpiW - 28, barH = 8;
+    const fillW = Math.max(0, Math.min(barW, barW * (totPct || 0) / 100));
+    g.fillStyle = '#e2e8f0';
+    drawCanvasRoundRect(g, kx + 14, y + 102, barW, barH, 4);
+    g.fill();
+    if(fillW > 0){
+      g.fillStyle = '#1e3a8a';
+      drawCanvasRoundRect(g, kx + 14, y + 102, fillW, barH, 4);
+      g.fill();
+    }
+
+    // Contractor mini chips
+    let chipX = kx + 14;
+    contrs.forEach(cName => {
+      const cData = it.contractors.find(c => c.name.toUpperCase().includes(cName));
+      const cPct = cData && cData.pctRow && wcur ? parsePct(M.cell(cData.pctRow, wcur.c)) : null;
+      const col = getContrColor(cName);
+      g.fillStyle = col;
+      g.beginPath();
+      g.arc(chipX + 4, y + 130, 4, 0, Math.PI * 2);
+      g.fill();
+
+      g.fillStyle = '#334155';
+      g.font = 'bold 12px ' + F;
+      const tText = cName + ': ' + fmtPctVal(cPct);
+      g.fillText(tText, chipX + 12, y + 123);
+      chipX += g.measureText(tText).width + 16;
+    });
+  });
+
+  // 4. Section II: Detailed Comparison Matrix Table
+  y += kpiH + 30;
+  g.fillStyle = '#0f172a';
+  g.font = 'bold 18px ' + F;
+  g.fillText(isEn ? 'II. DETAILED PROGRESS & PREVIOUS WEEK COMPARISON MATRIX' : 'II. BẢNG ĐỐI CHIẾU TIẾN ĐỘ CHI TIẾT THEO HẠNG MỤC & NHÀ THẦU', innerX, y);
+  y += 24;
+
+  // Table Columns width: 280, 130, 150, 150, 160, 210 = 1080px
+  const CW = [280, 130, 150, 150, 160, 210];
+  const TH = 40;
+
+  // Table Header
+  g.fillStyle = '#0D5966';
+  drawCanvasRoundRect(g, innerX, y, innerW, TH, 8);
+  g.fill();
+
+  const headers = [
+    isEn ? 'Work Item / Contractor' : 'Hạng mục / Đơn vị thi công',
+    isEn ? 'Plan' : 'Kế hoạch',
+    isEn ? ('Prev Week (' + (prevWkStr || '—') + ')') : ('Tuần trước (' + (prevWkStr || '—') + ')'),
+    isEn ? ('This Week (' + curWkStr + ')') : ('Tuần này (' + curWkStr + ')'),
+    isEn ? 'Weekly Gain (Δ)' : 'Tăng trong tuần (Δ)',
+    isEn ? 'Cumulative Progress (%)' : 'Tiến độ lũy kế (%)'
+  ];
+
+  g.fillStyle = '#ffffff';
+  g.font = 'bold 14px ' + F;
+  let hx = innerX;
+  headers.forEach((h, k) => {
+    if(k === 0){
+      g.textAlign = 'left';
+      g.fillText(h, hx + 12, y + 12);
+    } else if(k === 5){
+      g.textAlign = 'center';
+      g.fillText(h, hx + CW[k] / 2, y + 12);
+    } else {
+      g.textAlign = 'right';
+      g.fillText(h, hx + CW[k] - 12, y + 12);
+    }
+    hx += CW[k];
+  });
+  g.textAlign = 'left';
+  y += TH + 4;
+
+  // Render Table Rows
+  structuredItems.forEach((it, idx) => {
+    const itTitle = getWorkItemTitle(it.name);
+    const itUnit = getUnitLabel(it.unit);
+    const totEntry = it.contractors.find(c => c.isTotal);
+    const totPlan = totEntry ? totEntry.plan : null;
+
+    // Group Header Row
+    const ghH = 32;
+    g.fillStyle = '#e2e8f0';
+    g.fillRect(innerX, y, innerW, ghH);
+    g.fillStyle = '#0f172a';
+    g.font = 'bold 14px ' + F;
+    g.fillText((idx + 1) + '. ' + itTitle.toUpperCase() + '  (' + (isEn ? 'Plan: ' : 'Kế hoạch: ') + fmtVal(totPlan) + ' ' + itUnit + '  ·  ' + (isEn ? 'Unit: ' : 'ĐVT: ') + itUnit + ')', innerX + 12, y + 8);
+    y += ghH;
+
+    const rowH = 34;
+
+    // Total Project Row
+    if(totEntry){
+      const qtyVal = totEntry.qtyRow && wcur ? parseNum(M.cell(totEntry.qtyRow, wcur.c)) : null;
+      const pctVal = totEntry.pctRow && wcur ? parsePct(M.cell(totEntry.pctRow, wcur.c)) : null;
+      const prevQtyVal = totEntry.qtyRow && wprev ? parseNum(M.cell(totEntry.qtyRow, wprev.c)) : null;
+      const prevPctVal = totEntry.pctRow && wprev ? parsePct(M.cell(totEntry.pctRow, wprev.c)) : null;
+
+      const deltaQty = (qtyVal !== null && prevQtyVal !== null) ? (qtyVal - prevQtyVal) : null;
+      const deltaPct = (pctVal !== null && prevPctVal !== null) ? (pctVal - prevPctVal) : null;
+
+      g.fillStyle = 'rgba(30, 58, 138, 0.08)';
+      g.fillRect(innerX, y, innerW, rowH);
+
+      g.strokeStyle = '#e2e8f0';
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(innerX, y + rowH);
+      g.lineTo(innerX + innerW, y + rowH);
+      g.stroke();
+
+      let rx = innerX;
+      // Col 0
+      drawCanvasBadge(g, isEn ? 'TOTAL PROJECT' : 'TỔNG DỰ ÁN', rx + 12, y + 5, 120, 24, '#1e3a8a', '#ffffff');
+      g.textBaseline = 'top';
+      rx += CW[0];
+
+      // Col 1 (Plan)
+      g.textAlign = 'right';
+      g.font = 'bold 13px ' + F;
+      g.fillStyle = '#334155';
+      g.fillText(totPlan !== null ? (fmtVal(totPlan) + ' ' + itUnit) : '—', rx + CW[1] - 12, y + 9);
+      rx += CW[1];
+
+      // Col 2 (Prev Qty)
+      g.font = '13px ' + F;
+      g.fillStyle = '#64748b';
+      g.fillText(prevQtyVal !== null ? (fmtVal(prevQtyVal) + ' ' + itUnit) : '—', rx + CW[2] - 12, y + 9);
+      rx += CW[2];
+
+      // Col 3 (Cur Qty)
+      g.font = 'bold 13px ' + F;
+      g.fillStyle = '#1e3a8a';
+      g.fillText(qtyVal !== null ? (fmtVal(qtyVal) + ' ' + itUnit) : '—', rx + CW[3] - 12, y + 9);
+      rx += CW[3];
+
+      // Col 4 (Weekly Gain Δ)
+      if(deltaQty !== null){
+        const sign = deltaQty >= 0 ? '+' : '';
+        const arrow = deltaQty > 0 ? '▲' : (deltaQty < 0 ? '▼' : '—');
+        const dColor = deltaQty > 0 ? '#15803d' : (deltaQty < 0 ? '#b91c1c' : '#64748b');
+        g.font = 'bold 12px ' + F;
+        g.fillStyle = dColor;
+        g.fillText(arrow + ' ' + sign + fmtVal(deltaQty) + ' (' + sign + (deltaPct !== null ? deltaPct.toFixed(1) : '0') + '%)', rx + CW[4] - 12, y + 9);
+      } else {
+        g.font = '12px ' + F;
+        g.fillStyle = '#94a3b8';
+        g.fillText('—', rx + CW[4] - 12, y + 9);
+      }
+      rx += CW[4];
+
+      // Col 5 (Progress Bar & %)
+      g.textAlign = 'left';
+      const pbWidth = 100, pbHeight = 12;
+      const pbX = rx + 14, pbY = y + 11;
+      const pbFill = Math.max(0, Math.min(pbWidth, pbWidth * (pctVal || 0) / 100));
+      g.fillStyle = '#e2e8f0';
+      drawCanvasRoundRect(g, pbX, pbY, pbWidth, pbHeight, 6);
+      g.fill();
+      if(pbFill > 0){
+        g.fillStyle = '#1e3a8a';
+        drawCanvasRoundRect(g, pbX, pbY, pbFill, pbHeight, 6);
+        g.fill();
+      }
+      g.font = 'bold 13px ' + F;
+      g.fillStyle = '#1e3a8a';
+      g.fillText(fmtPctVal(pctVal), rx + 14 + pbWidth + 10, y + 9);
+
+      y += rowH;
+    }
+
+    // Contractor Rows
+    contrs.forEach((cName, ck) => {
+      const cData = it.contractors.find(c => c.name.toUpperCase().includes(cName));
+      if(!cData) return;
+
+      const cPlan = cData.plan;
+      const cQty = cData.qtyRow && wcur ? parseNum(M.cell(cData.qtyRow, wcur.c)) : null;
+      const cPct = cData.pctRow && wcur ? parsePct(M.cell(cData.pctRow, wcur.c)) : null;
+      const prevCQty = cData.qtyRow && wprev ? parseNum(M.cell(cData.qtyRow, wprev.c)) : null;
+      const prevCPct = cData.pctRow && wprev ? parsePct(M.cell(cData.pctRow, wprev.c)) : null;
+
+      const cDeltaQty = (cQty !== null && prevCQty !== null) ? (cQty - prevCQty) : null;
+      const cDeltaPct = (cPct !== null && prevCPct !== null) ? (cPct - prevCPct) : null;
+      const cCol = getContrColor(cName);
+
+      g.fillStyle = ck % 2 === 0 ? '#ffffff' : '#f8fafc';
+      g.fillRect(innerX, y, innerW, rowH);
+
+      g.strokeStyle = '#e2e8f0';
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(innerX, y + rowH);
+      g.lineTo(innerX + innerW, y + rowH);
+      g.stroke();
+
+      let rx = innerX;
+      // Col 0
+      drawCanvasBadge(g, cName, rx + 12, y + 5, 75, 24, cCol, '#ffffff');
+      g.textBaseline = 'top';
+      rx += CW[0];
+
+      // Col 1 (Plan)
+      g.textAlign = 'right';
+      g.font = '13px ' + F;
+      g.fillStyle = '#334155';
+      g.fillText(cPlan !== null ? (fmtVal(cPlan) + ' ' + itUnit) : '—', rx + CW[1] - 12, y + 9);
+      rx += CW[1];
+
+      // Col 2 (Prev Qty)
+      g.font = '13px ' + F;
+      g.fillStyle = '#64748b';
+      g.fillText(prevCQty !== null ? (fmtVal(prevCQty) + ' ' + itUnit) : '—', rx + CW[2] - 12, y + 9);
+      rx += CW[2];
+
+      // Col 3 (Cur Qty)
+      g.font = '13px ' + F;
+      g.fillStyle = '#0f172a';
+      g.fillText(cQty !== null ? (fmtVal(cQty) + ' ' + itUnit) : '—', rx + CW[3] - 12, y + 9);
+      rx += CW[3];
+
+      // Col 4 (Weekly Gain Δ)
+      if(cDeltaQty !== null){
+        const sign = cDeltaQty >= 0 ? '+' : '';
+        const arrow = cDeltaQty > 0 ? '▲' : (cDeltaQty < 0 ? '▼' : '—');
+        const dColor = cDeltaQty > 0 ? '#15803d' : (cDeltaQty < 0 ? '#b91c1c' : '#64748b');
+        g.font = 'bold 12px ' + F;
+        g.fillStyle = dColor;
+        g.fillText(arrow + ' ' + sign + fmtVal(cDeltaQty) + ' (' + sign + (cDeltaPct !== null ? cDeltaPct.toFixed(1) : '0') + '%)', rx + CW[4] - 12, y + 9);
+      } else {
+        g.font = '12px ' + F;
+        g.fillStyle = '#94a3b8';
+        g.fillText('—', rx + CW[4] - 12, y + 9);
+      }
+      rx += CW[4];
+
+      // Col 5 (Progress Bar & %)
+      g.textAlign = 'left';
+      const pbWidth = 100, pbHeight = 12;
+      const pbX = rx + 14, pbY = y + 11;
+      const cPbFill = Math.max(0, Math.min(pbWidth, pbWidth * (cPct || 0) / 100));
+      g.fillStyle = '#e2e8f0';
+      drawCanvasRoundRect(g, pbX, pbY, pbWidth, pbHeight, 6);
+      g.fill();
+      if(cPbFill > 0){
+        g.fillStyle = cCol;
+        drawCanvasRoundRect(g, pbX, pbY, cPbFill, pbHeight, 6);
+        g.fill();
+      }
+      g.font = 'bold 13px ' + F;
+      g.fillStyle = '#0f172a';
+      g.fillText(fmtPctVal(cPct), rx + 14 + pbWidth + 10, y + 9);
+
+      y += rowH;
+    });
+
+    y += 8; // Spacing between work items
+  });
+
+  // 5. Notes & Remarks Card
+  const noteH = 92;
+  g.fillStyle = '#f8fafc';
+  drawCanvasRoundRect(g, innerX, y, innerW, noteH, 10);
+  g.fill();
+  g.strokeStyle = '#cbd5e1';
+  g.lineWidth = 1;
+  g.stroke();
+
+  g.fillStyle = '#0f172a';
+  g.font = 'bold 14px ' + F;
+  g.fillText(isEn ? '📌 Progress Notes & Analysis Remarks:' : '📌 Ghi chú đánh giá tiến độ thi công:', innerX + 16, y + 14);
+
+  g.fillStyle = '#334155';
+  g.font = '13px ' + F;
+  const note1 = isEn ?
+    ('• Week ' + curWkStr + ' shows weekly delta comparison against ' + (prevWkStr || 'initial project start') + '. Data is synced from Google Sheets.') :
+    ('• Báo cáo tiến độ tuần ' + curWkStr + ' đối chiếu trực tiếp với ' + (prevWkStr || 'mốc bắt đầu dự án') + ', thể hiện khối lượng lũy kế và tăng trưởng trong tuần của HDC, NAUTICS, ST.');
+  const note2 = isEn ?
+    '• Work items tracked: 1. Cable Cutting (m) · 2. Cable Pulling (m) · 3. Cable Termination (pts). Cumulative values calculated to date.' :
+    '• Các chỉ tiêu theo dõi: 1. Cắt cáp điện (m) · 2. Kéo dây cáp điện (m) · 3. Đấu nối đầu cáp (đầu cốt). Số liệu lũy kế tính đến tuần báo cáo.';
+  g.fillText(note1, innerX + 16, y + 40);
+  g.fillText(note2, innerX + 16, y + 64);
+
+  // 6. Page Footer
+  const footerY = H - M_PAD - 35;
+  g.strokeStyle = '#e2e8f0';
+  g.lineWidth = 1;
+  g.beginPath();
+  g.moveTo(innerX, footerY);
+  g.lineTo(innerX + innerW, footerY);
+  g.stroke();
+
+  g.fillStyle = '#64748b';
+  g.font = '13px ' + F;
+  g.textAlign = 'left';
+  g.fillText(isEn ? 'TSC80 Shipbuilding Project   ·   Weekly Progress System' : 'Dự án Đóng tàu TSC80   ·   Hệ thống Báo cáo Tiến độ', innerX, footerY + 14);
+
+  g.textAlign = 'center';
+  g.fillText(isEn ? ('Report ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')) : ('Báo cáo đối chiếu ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')), W / 2, footerY + 14);
+
+  g.textAlign = 'right';
+  g.fillText('Bản quyền © 2026 Jay Duy   ·   Trang 1/1', innerX + innerW, footerY + 14);
+  g.textAlign = 'left';
+
+  // 7. Convert canvas to Blob & File for modal
+  const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/png'));
+  const fileName = 'BaoCaoTienDo_Tuan_' + curWkStr.replace(/[^A-Za-z0-9]+/g,'_') + (wprev ? ('_vs_' + prevWkStr.replace(/[^A-Za-z0-9]+/g,'_')) : '') + '.png';
+  const file = new File([blob], fileName, { type: 'image/png' });
+
+  snapFiles = [file];
+  const url = URL.createObjectURL(blob);
+  $('#smt').textContent = isEn ?
+    ('Weekly Progress Report — ' + curWkStr + (wprev ? ' (vs ' + prevWkStr + ')' : ' (Initial)')) :
+    ('Ảnh Báo Cáo Tiến Độ Tuần ' + curWkStr + (wprev ? ' (so với ' + prevWkStr + ')' : ' (Tuần đầu)'));
+  $('#simgs').innerHTML = '<img src="' + url + '" alt="Báo cáo tiến độ tuần ' + curWkStr + '">';
+  $('#smsg').textContent = isEn ?
+    'Click "Download" or press and hold image to save.' :
+    'Bấm "Tải về" hoặc nhấn giữ vào ảnh để lưu về máy / gửi Zalo.';
+  $('#sm-tabs').style.display = 'none';
+  $('#sm').style.display = 'block';
+  $('#sm').scrollTop = 0;
+}
+
 function renderProg(){
   const isEn=(curLang==='en');
   const sel=$('#psheet');sel.style.display=PS.sheets.length>1?'':'none';sel.innerHTML=PS.sheets.map((s,i)=>`<option value="${i}"${i===PS.cur?' selected':''}>${esc(s.name)}</option>`).join('');
@@ -2606,6 +3137,10 @@ function renderProg(){
 
   // Extract structured items & contractors
   const structuredItems=extractProgData(M);
+  const curIdx=wd.findIndex(w=>w.c===(wcur?wcur.c:-1));
+  const wprev=curIdx>0?wd[curIdx-1]:null;
+  const curWkStr=wkLabel(wcur);
+  const prevWkStr=wprev?wkLabel(wprev):'';
 
   if(wcur&&structuredItems.length>0){
     // Render modern executive overview + structured comparison matrix
@@ -2622,6 +3157,11 @@ function renderProg(){
       const totPlan=totEntry?totEntry.plan:null;
       const totQty=totEntry&&totEntry.qtyRow&&wcur?parseNum(M.cell(totEntry.qtyRow,wcur.c)):null;
       const totPct=totEntry&&totEntry.pctRow&&wcur?parsePct(M.cell(totEntry.pctRow,wcur.c)):null;
+      const prevTotQty=totEntry&&totEntry.qtyRow&&wprev?parseNum(M.cell(totEntry.qtyRow,wprev.c)):null;
+      const prevTotPct=totEntry&&totEntry.pctRow&&wprev?parsePct(M.cell(totEntry.pctRow,wprev.c)):null;
+
+      const totDeltaQty=(totQty!==null&&prevTotQty!==null)?(totQty-prevTotQty):null;
+      const totDeltaPct=(totPct!==null&&prevTotPct!==null)?(totPct-prevTotPct):null;
 
       // Check keyword filter
       if(k){
@@ -2636,17 +3176,38 @@ function renderProg(){
         if(PS.contrFilter&&PS.contrFilter!=='ALL'&&PS.contrFilter!=='TOTAL'&&PS.contrFilter!==cName)return '';
         const cData=it.contractors.find(c=>c.name.toUpperCase().includes(cName));
         const cPct=cData&&cData.pctRow&&wcur?parsePct(M.cell(cData.pctRow,wcur.c)):null;
+        const prevCPct=cData&&cData.pctRow&&wprev?parsePct(M.cell(cData.pctRow,wprev.c)):null;
+        const cDelta=(cPct!==null&&prevCPct!==null)?(cPct-prevCPct):null;
+        let cDeltaHtml='';
+        if(cDelta!==null){
+          const cCls=cDelta>0.0001?'up':(cDelta<-0.0001?'down':'same');
+          const cArrow=cDelta>0.0001?'▲':(cDelta<-0.0001?'▼':'—');
+          cDeltaHtml=` <small class="kpi-delta ${cCls}" style="padding:0 3px">${cArrow} ${(cDelta>0?'+':'')+cDelta.toFixed(1)}%</small>`;
+        }
         const col=getContrColor(cName);
-        return `<span class="c-chip" style="color:${col};border-color:${col}"><i style="background:${col}"></i>${cName}: ${fmtPctVal(cPct)}</span>`;
+        return `<span class="c-chip" style="color:${col};border-color:${col}"><i style="background:${col}"></i>${cName}: ${fmtPctVal(cPct)}${cDeltaHtml}</span>`;
       }).filter(Boolean).join('');
+
+      let totDeltaPctHtml='';
+      if(totDeltaPct!==null){
+        const sign=totDeltaPct>=0?'+':'';
+        const dCls=totDeltaPct>0.0001?'up':(totDeltaPct<-0.0001?'down':'same');
+        const arrow=totDeltaPct>0.0001?'▲':(totDeltaPct<-0.0001?'▼':'—');
+        totDeltaPctHtml=`<span class="kpi-delta ${dCls}" title="${t('vsPrevWk').replace('{w}',prevWkStr)}">${arrow} ${sign}${totDeltaPct.toFixed(1)}%</span>`;
+      }
+      let totDeltaQtyHtml='';
+      if(totDeltaQty!==null){
+        const sign=totDeltaQty>=0?'+':'';
+        totDeltaQtyHtml=` <span style="font-size:11px;font-weight:600;color:${totDeltaQty>=0?'#16a34a':'#dc2626'}">(${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)} ${t('vsPrev')})</span>`;
+      }
 
       overviewKpis+=`
         <div class="prog-kpi-card">
           <div class="prog-kpi-top">
             <span class="prog-kpi-name">${idx+1}. ${esc(itTitle)}</span>
-            <span class="prog-kpi-pct">${fmtPctVal(totPct)}</span>
+            <span class="prog-kpi-pct">${fmtPctVal(totPct)} ${totDeltaPctHtml}</span>
           </div>
-          <div class="prog-kpi-sub">${fmtVal(totQty)} / ${fmtVal(totPlan)} ${esc(itUnit)}</div>
+          <div class="prog-kpi-sub">${fmtVal(totQty)} / ${fmtVal(totPlan)} ${esc(itUnit)}${totDeltaQtyHtml}</div>
           <div class="pb"><i style="width:${Math.max(0,Math.min(100,totPct||0))}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div>
           <div class="prog-kpi-chips">${cChips}</div>
         </div>`;
@@ -2657,12 +3218,27 @@ function renderProg(){
       // 1. Total Project Row (shown when all contractors or when TOTAL is selected)
       if((!PS.contrFilter||PS.contrFilter==='TOTAL')&&totEntry){
         const pbW=Math.max(0,Math.min(100,totPct||0));
+        let deltaTotQtyHtml='';
+        if(totDeltaQty!==null){
+          const sign=totDeltaQty>=0?'+':'';
+          const dCls=totDeltaQty>0?'up':(totDeltaQty<0?'down':'same');
+          deltaTotQtyHtml=`<div style="font-size:10px;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)}</span></div>`;
+        }
+        let deltaTotPctHtml='';
+        if(totDeltaPct!==null){
+          const sign=totDeltaPct>=0?'+':'';
+          const dCls=totDeltaPct>0.0001?'up':(totDeltaPct<-0.0001?'down':'same');
+          deltaTotPctHtml=`<div style="text-align:center;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${totDeltaPct.toFixed(1)}% ${t('vsPrev')}</span></div>`;
+        }
         rowsHtml+=`
           <tr class="prog-row-tot">
             <td><span class="cb-tot">${t('totalProject')}</span></td>
             <td class="r">${fmtVal(totPlan)} <small>${esc(itUnit)}</small></td>
-            <td class="r"><b>${fmtVal(totQty)}</b> <small>${esc(itUnit)}</small></td>
-            <td><div class="pb"><i style="width:${pbW}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div></td>
+            <td class="r"><b>${fmtVal(totQty)}</b> <small>${esc(itUnit)}</small>${deltaTotQtyHtml}</td>
+            <td>
+              <div class="pb"><i style="width:${pbW}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div>
+              ${deltaTotPctHtml}
+            </td>
           </tr>`;
       }
 
@@ -2673,15 +3249,36 @@ function renderProg(){
         const cPlan=cData?cData.plan:null;
         const cQty=cData&&cData.qtyRow&&wcur?parseNum(M.cell(cData.qtyRow,wcur.c)):null;
         const cPct=cData&&cData.pctRow&&wcur?parsePct(M.cell(cData.pctRow,wcur.c)):null;
+        const prevCQty=cData&&cData.qtyRow&&wprev?parseNum(M.cell(cData.qtyRow,wprev.c)):null;
+        const prevCPct=cData&&cData.pctRow&&wprev?parsePct(M.cell(cData.pctRow,wprev.c)):null;
+
+        const cDeltaQty=(cQty!==null&&prevCQty!==null)?(cQty-prevCQty):null;
+        const cDeltaPct=(cPct!==null&&prevCPct!==null)?(cPct-prevCPct):null;
         const col=getContrColor(cName);
         const pbW=Math.max(0,Math.min(100,cPct||0));
+
+        let cDeltaQtyHtml='';
+        if(cDeltaQty!==null){
+          const sign=cDeltaQty>=0?'+':'';
+          const dCls=cDeltaQty>0?'up':(cDeltaQty<0?'down':'same');
+          cDeltaQtyHtml=`<div style="font-size:10px;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${fmtVal(cDeltaQty)} ${esc(itUnit)}</span></div>`;
+        }
+        let cDeltaPctHtml='';
+        if(cDeltaPct!==null){
+          const sign=cDeltaPct>=0?'+':'';
+          const dCls=cDeltaPct>0.0001?'up':(cDeltaPct<-0.0001?'down':'same');
+          cDeltaPctHtml=`<div style="text-align:center;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${cDeltaPct.toFixed(1)}%</span></div>`;
+        }
 
         rowsHtml+=`
           <tr>
             <td><span class="c-tag-pill" style="background:${col}">${cName}</span></td>
             <td class="r">${fmtVal(cPlan)} <small>${esc(itUnit)}</small></td>
-            <td class="r"><b>${fmtVal(cQty)}</b> <small>${esc(itUnit)}</small></td>
-            <td><div class="pb"><i style="width:${pbW}%;background:${col}"></i><span>${fmtPctVal(cPct)}</span></div></td>
+            <td class="r"><b>${fmtVal(cQty)}</b> <small>${esc(itUnit)}</small>${cDeltaQtyHtml}</td>
+            <td>
+              <div class="pb"><i style="width:${pbW}%;background:${col}"></i><span>${fmtPctVal(cPct)}</span></div>
+              ${cDeltaPctHtml}
+            </td>
           </tr>`;
       });
 
@@ -2698,10 +3295,10 @@ function renderProg(){
           <table class="prog-tbl">
             <thead>
               <tr>
-                <th style="width:30%">${t('colContrOrTot')}</th>
-                <th style="width:20%;text-align:center">${t('colPlan')}</th>
-                <th style="width:24%;text-align:center">${t('colCumulative')}</th>
-                <th style="width:26%;text-align:center">${t('colProgress')}</th>
+                <th style="width:28%">${t('colContrOrTot')}</th>
+                <th style="width:16%;text-align:center">${t('colPlan')}</th>
+                <th style="width:28%;text-align:center">${wprev ? (t('progPrevWeek').replace('{w}', esc(prevWkStr)) + ' ➜ ' + t('progCurWeek').replace('{w}', esc(curWkStr))) : t('colCumulative')}</th>
+                <th style="width:28%;text-align:center">${t('colProgress')}</th>
               </tr>
             </thead>
             <tbody>
@@ -2716,12 +3313,11 @@ function renderProg(){
       return;
     }
 
-    const curWkStr=wkLabel(wcur);
     const overviewSection=`
       <div class="prog-overview">
         <div class="prog-overview-hdr">
           <b>${t('progOverviewTitle').replace('{w}',curWkStr)}</b>
-          <span>${t('progOverviewSub')}</span>
+          <span>${wprev ? t('progReportCompared').replace('{w}', prevWkStr) : t('progOverviewSub')}</span>
         </div>
         <div class="prog-kpi-grid">
           ${overviewKpis}
@@ -2774,6 +3370,7 @@ $('#pleg').onclick=e=>{
   }
 };
 $('#pch').onclick=()=>{PS.chart=!PS.chart;if(PS.chart)PS.frame=0;renderProg()};
+const pexpBtn=$('#pexp');if(pexpBtn)pexpBtn.onclick=()=>snapProg();
 // ===== chế độ chỉnh sửa =====
 const md=$('#md'),mi=$('#mi');
 function ask(title,def,cb,type){$('#mt').textContent=title;mi.style.display='';mi.type=type||'text';mi.value=def||'';md.style.display='flex';setTimeout(()=>mi.focus(),50);$('#mo').onclick=()=>{md.style.display='none';cb(mi.value.trim())};$('#mc').onclick=()=>{md.style.display='none'}}
