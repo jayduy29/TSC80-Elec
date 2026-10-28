@@ -255,49 +255,38 @@ td .c-tag{margin:0}
 .tw table{table-layout:fixed;border-collapse:collapse;width:100%}
 
 /* === Progress tab modern layout & KPI cards === */
-.prog-overview{margin:0 0 14px;background:var(--card);border:1.5px solid var(--acc);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(13,89,102,.08)}
-.prog-overview-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(135deg,#0a424c,#0D5966);color:#fff;border-bottom:2px solid #5cc6d9;flex-wrap:wrap;gap:6px}
-.prog-overview-hdr b{font-size:16px;color:#fff;font-weight:800;letter-spacing:.5px}
-.prog-overview-hdr span{font-size:13px;color:#e0f2fe;font-weight:500}
-.prog-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;padding:14px}
-.prog-kpi-card{background:var(--bg);border:1.5px solid var(--line);border-top:4px solid var(--acc);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.prog-overview{margin:0 0 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.prog-overview-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:4px}
+.prog-overview-hdr b{font-size:13px;color:var(--acct);letter-spacing:.3px}
+.prog-overview-hdr span{font-size:11px;color:var(--mut)}
+.prog-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.prog-kpi-card{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:5px}
 .prog-kpi-top{display:flex;justify-content:space-between;align-items:center}
-.prog-kpi-name{font-size:15px;font-weight:bold;color:var(--fg)}
-.prog-kpi-pct{font-size:18px;font-weight:800;color:var(--acc)}
-.prog-kpi-sub{font-size:12.5px;color:var(--mut);font-weight:500}
-.kpi-delta{font-size:12px;font-weight:700;padding:2px 6px;border-radius:6px;display:inline-block}
-.kpi-delta.up{background:#dcfce7;color:#15803d}
-.kpi-delta.down{background:#fee2e2;color:#b91c1c}
-.kpi-delta.same{background:#f1f5f9;color:#64748b}
-.prog-kpi-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.c-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:bold;padding:3px 9px;border-radius:12px;border:1.5px solid;background:var(--card)}
-.c-chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.c-chip.HDC{color:#d84315;border-color:#d84315;background:rgba(216,67,21,0.06)}
-.c-chip.NAUTICS{color:#1565c0;border-color:#1565c0;background:rgba(21,101,192,0.06)}
-.c-chip.ST{color:#2e7d32;border-color:#2e7d32;background:rgba(46,125,50,0.06)}
+.prog-kpi-name{font-size:12px;font-weight:bold;color:var(--fg)}
+.prog-kpi-pct{font-size:14px;font-weight:800;color:var(--acct)}
+.prog-kpi-sub{font-size:11px;color:var(--mut)}
+.prog-kpi-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.c-chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;border:1px solid var(--line);background:var(--card)}
+.c-chip i{width:7px;height:7px;border-radius:50%;display:inline-block}
 
-.prog-sec-hdr{font-size:15px;font-weight:bold;color:var(--acc);margin:14px 4px 8px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
-.prog-card{margin:0 0 16px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.04)}
-.prog-card-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(135deg,rgba(13,89,102,.08),rgba(13,89,102,.03));border-bottom:1.5px solid var(--line);flex-wrap:wrap;gap:8px}
-.prog-card-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.prog-card-num{display:inline-flex;width:24px;height:24px;background:var(--acc);color:#fff;border-radius:50%;font-size:13px;font-weight:bold;align-items:center;justify-content:center}
-.prog-card-title b{font-size:15.5px;color:var(--fg)}
-.prog-card-meta{font-size:12.5px;color:var(--mut)}
-.prog-card-badge{font-size:15px;font-weight:800;color:var(--acc);background:rgba(13,89,102,.12);padding:3px 12px;border-radius:14px;border:1px solid rgba(13,89,102,.2)}
+.prog-sec-hdr{font-size:12px;font-weight:bold;color:var(--mut);margin:8px 2px 6px;letter-spacing:.5px}
+.prog-card{margin:0 0 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.prog-card-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg);border-bottom:1px solid var(--line);flex-wrap:wrap;gap:6px}
+.prog-card-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.prog-card-num{display:inline-flex;width:20px;height:20px;background:var(--acc);color:#fff;border-radius:50%;font-size:11px;font-weight:bold;align-items:center;justify-content:center}
+.prog-card-title b{font-size:13px;color:var(--fg)}
+.prog-card-meta{font-size:11px;color:var(--mut)}
+.prog-card-badge{font-size:13px;font-weight:800;color:var(--acct);background:rgba(13,89,102,.12);padding:2px 9px;border-radius:12px}
 
-.prog-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
-.prog-tbl th{padding:9px 12px;background:rgba(13,89,102,.06);color:var(--acc);font-weight:700;font-size:13px;text-align:left;border-bottom:1.5px solid var(--line)}
-.prog-tbl td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.prog-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.prog-tbl th{padding:7px 10px;background:var(--bg);color:var(--mut);font-weight:600;font-size:11px;text-align:left;border-bottom:1px solid var(--line)}
+.prog-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
 .prog-tbl tr:last-child td{border-bottom:0}
-.prog-tbl td.r{text-align:center;font-variant-numeric:tabular-nums;font-size:13.5px}
-.prog-tbl td.r b{font-size:14px}
-.prog-tbl td.r small{color:var(--mut);font-size:11px;display:block}
-.prog-row-tot{background:rgba(13,89,102,.06);font-weight:bold}
-.prog-row-tot td{border-bottom:1.5px solid rgba(13,89,102,.2)}
-.cb-tot{display:inline-flex;align-items:center;gap:5px;color:#fff;background:var(--acc);border-radius:6px;padding:3px 10px;font-size:12.5px;font-weight:bold;line-height:18px;letter-spacing:.3px}
-.c-tag-pill{display:inline-flex;align-items:center;gap:4px;color:#fff;border-radius:6px;padding:3px 10px;font-size:12.5px;font-weight:bold;line-height:18px}
-.pb{position:relative;height:20px;background:var(--line);border-radius:10px;overflow:hidden;min-width:90px;text-align:center}
-.pb span{position:relative;font-size:12px;font-weight:bold;line-height:20px;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.7)}
+.prog-tbl td.r{text-align:center;font-variant-numeric:tabular-nums}
+.prog-tbl td.r small{color:var(--mut);font-size:10px;display:block}
+.prog-row-tot{background:rgba(30,58,138,.05);font-weight:bold}
+.prog-row-tot td{border-bottom:1px solid rgba(30,58,138,.15)}
+.cb-tot{display:inline-flex;align-items:center;gap:4px;color:#fff;background:#1e3a8a;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:bold;line-height:16px;letter-spacing:.2px}
 
 #pleg .tag-btn{flex:0 0 auto;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:11px;font-weight:bold;cursor:pointer;transition:all .15s}
 #pleg .tag-btn.on{border-color:currentColor;box-shadow:0 0 0 1px currentColor}
@@ -624,15 +613,15 @@ const I18N = {
     totalOverall: 'Tổng thể',
     unitLbl: 'ĐV: ',
     planLbl: 'KH: ',
-    progOverviewTitle: 'TỔNG QUAN TIẾN ĐỘ TUẦN {w} (KÉO DÂY & ĐẤU NỐI)',
+    progOverviewTitle: 'TỔNG QUAN TIẾN ĐỘ TUẦN {w}',
     progOverviewSub: 'Dữ liệu lũy kế đến tuần được chọn',
     itemCutting: 'Cắt cáp điện',
     itemPulling: 'Kéo dây cáp điện',
     itemTermination: 'Đấu nối đầu cáp',
     allContractors: 'Tất cả',
-    detailsByItem: 'CHI TIẾT THEO HẠNG MỤC (KÉO DÂY & ĐẤU NỐI)',
+    detailsByItem: 'CHI TIẾT THEO HẠNG MỤC',
     btnExportProg: '📊 Xuất báo cáo',
-    progReportCompared: 'So sánh 2 tiêu chí trọng điểm với Tuần trước: {w}',
+    progReportCompared: 'So sánh với Tuần trước: {w}',
     vsPrevWk: 'so với {w}',
     vsPrev: 'so với tuần trước',
     progReportTitle: 'BÁO CÁO TIẾN ĐỘ THI CÔNG TUẦN {w}',
@@ -780,15 +769,15 @@ const I18N = {
     totalOverall: 'Overall',
     unitLbl: 'Unit: ',
     planLbl: 'Plan: ',
-    progOverviewTitle: 'WEEKLY PROGRESS OVERVIEW - WEEK {w} (PULLING & TERMINATION)',
+    progOverviewTitle: 'WEEKLY PROGRESS OVERVIEW - WEEK {w}',
     progOverviewSub: 'Cumulative progress through selected week',
     itemCutting: 'Cable Cutting',
     itemPulling: 'Cable Pulling',
     itemTermination: 'Termination',
     allContractors: 'All',
-    detailsByItem: 'DETAILS BY WORK ITEM (PULLING & TERMINATION)',
+    detailsByItem: 'DETAILS BY WORK ITEM',
     btnExportProg: '📊 Export Report',
-    progReportCompared: 'Key 2-criteria comparison with previous week: {w}',
+    progReportCompared: 'Compared with previous week: {w}',
     vsPrevWk: 'vs {w}',
     vsPrev: 'vs prev week',
     progReportTitle: 'WEEKLY PROGRESS REPORT - WEEK {w}',
@@ -3429,7 +3418,7 @@ function renderProg(){
   // Quick contractor filter pills in legend: ALL, TOTAL, HDC, NAUTICS, ST
   const filterOptions=[
     {key:'ALL',label:t('allContractors'),col:''},
-    {key:'TOTAL',label:isEn?'TOTAL PROJECT':'TỔNG DỰ ÁN',col:'#0D5966'},
+    {key:'TOTAL',label:isEn?'TOTAL PROJECT':'TỔNG DỰ ÁN',col:'#1e3a8a'},
     {key:'HDC',label:'HDC',col:getContrColor('HDC')},
     {key:'NAUTICS',label:'NAUTICS',col:getContrColor('NAUTICS')},
     {key:'ST',label:'ST',col:getContrColor('ST')}
@@ -3446,15 +3435,12 @@ function renderProg(){
   const wkLabel=w=>w.y?(w.w+'/'+String(w.y).slice(2)):(w.w>=10?'W'+w.w:'W0'+w.w);
   wk.innerHTML=wd.length?t('weekLabel')+wd.map(w=>`<span class="wk${wcur&&w.c===wcur.c?' on':''}" data-c="${w.c}">${wkLabel(w)}</span>`).join(''):'';
 
-  const cmap={'HDC':'#d84315','NAUTICS':'#1565c0','ST':'#2e7d32','TOTAL PROJECT':'#0D5966','TỔNG DỰ ÁN':'#0D5966'};
+  const cmap={'HDC':'#d84315','NAUTICS':'#1565c0','ST':'#2e7d32','TOTAL PROJECT':'#1e3a8a','TỔNG DỰ ÁN':'#1e3a8a'};
 
   if(PS.chart){res.innerHTML=det+chartsHtml(sh,M,wd,cmap);return}
 
   // Extract structured items & contractors
-  const allStructuredItems=extractProgData(M);
-  // User requirement: chỉ so sánh trên 2 tiêu chí kéo dây và đấu nối
-  const compItems=allStructuredItems.filter(it=>/kéo|pulling|pull/i.test(it.name)||isTermination(it.name));
-  const structuredItems=compItems.length>0?compItems:allStructuredItems;
+  const structuredItems=extractProgData(M);
   const curIdx=wd.findIndex(w=>w.c===(wcur?wcur.c:-1));
   const wprev=curIdx>0?wd[curIdx-1]:null;
   const curWkStr=wkLabel(wcur);
@@ -3503,7 +3489,7 @@ function renderProg(){
           cDeltaHtml=` <small class="kpi-delta ${cCls}" style="padding:0 3px">${cArrow} ${(cDelta>0?'+':'')+cDelta.toFixed(1)}%</small>`;
         }
         const col=getContrColor(cName);
-        return `<span class="c-chip ${cName}" style="color:${col};border-color:${col}"><i style="background:${col}"></i>${cName}: ${fmtPctVal(cPct)}${cDeltaHtml}</span>`;
+        return `<span class="c-chip" style="color:${col};border-color:${col}"><i style="background:${col}"></i>${cName}: ${fmtPctVal(cPct)}${cDeltaHtml}</span>`;
       }).filter(Boolean).join('');
 
       let totDeltaPctHtml='';
@@ -3516,7 +3502,7 @@ function renderProg(){
       let totDeltaQtyHtml='';
       if(totDeltaQty!==null){
         const sign=totDeltaQty>=0?'+':'';
-        totDeltaQtyHtml=` <span style="font-size:12px;font-weight:600;color:${totDeltaQty>=0?'#16a34a':'#dc2626'}">(${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)} ${t('vsPrev')})</span>`;
+        totDeltaQtyHtml=` <span style="font-size:11px;font-weight:600;color:${totDeltaQty>=0?'#16a34a':'#dc2626'}">(${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)} ${t('vsPrev')})</span>`;
       }
 
       overviewKpis+=`
@@ -3526,7 +3512,7 @@ function renderProg(){
             <span class="prog-kpi-pct">${fmtPctVal(totPct)} ${totDeltaPctHtml}</span>
           </div>
           <div class="prog-kpi-sub">${fmtVal(totQty)} / ${fmtVal(totPlan)} ${esc(itUnit)}${totDeltaQtyHtml}</div>
-          <div class="pb"><i style="width:${Math.max(0,Math.min(100,totPct||0))}%;background:var(--acc,#0D5966)"></i><span>${fmtPctVal(totPct)}</span></div>
+          <div class="pb"><i style="width:${Math.max(0,Math.min(100,totPct||0))}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div>
           <div class="prog-kpi-chips">${cChips}</div>
         </div>`;
 
@@ -3540,7 +3526,7 @@ function renderProg(){
         if(totDeltaQty!==null){
           const sign=totDeltaQty>=0?'+':'';
           const dCls=totDeltaQty>0?'up':(totDeltaQty<0?'down':'same');
-          deltaTotQtyHtml=`<div style="font-size:11px;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)}</span></div>`;
+          deltaTotQtyHtml=`<div style="font-size:10px;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)}</span></div>`;
         }
         let deltaTotPctHtml='';
         if(totDeltaPct!==null){
@@ -3554,7 +3540,7 @@ function renderProg(){
             <td class="r">${fmtVal(totPlan)} <small>${esc(itUnit)}</small></td>
             <td class="r"><b>${fmtVal(totQty)}</b> <small>${esc(itUnit)}</small>${deltaTotQtyHtml}</td>
             <td>
-              <div class="pb"><i style="width:${pbW}%;background:var(--acc,#0D5966)"></i><span>${fmtPctVal(totPct)}</span></div>
+              <div class="pb"><i style="width:${pbW}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div>
               ${deltaTotPctHtml}
             </td>
           </tr>`;
