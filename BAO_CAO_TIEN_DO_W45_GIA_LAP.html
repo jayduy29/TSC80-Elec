@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Báo Cáo Tiến Độ Tuần W45 (GIẢ LẬP ĐỐI CHIẾU 3 NHÀ THẦU)</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+  * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+  body {
+    margin: 0;
+    padding: 24px;
+    color: #1d2733;
+    background-color: #f1f5f9;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .report-container {
+    max-width: 920px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 24px 28px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .sim-banner {
+    background: #e0f2fe;
+    border: 1.5px dashed #0284c7;
+    color: #0369a1;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header-block {
+    text-align: center;
+    margin-bottom: 16px;
+    border-bottom: 3px solid #0D5966;
+    padding-bottom: 10px;
+  }
+  .header-block h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0D5966;
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .header-block p {
+    font-size: 13px;
+    color: #555;
+    margin: 0;
+    font-style: italic;
+  }
+  .section-title {
+    background: linear-gradient(135deg, #0a424c, #0D5966);
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 14px;
+    margin-bottom: 0;
+    border-radius: 4px 4px 0 0;
+    letter-spacing: 0.3px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14px;
+  }
+  th, td {
+    border: 1px solid #d3dae3;
+    padding: 7px 8px;
+    text-align: center;
+    font-size: 13px;
+  }
+  th {
+    background-color: #e6f2f4;
+    color: #0D5966;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .col-label {
+    text-align: left;
+    width: 34%;
+    font-weight: 600;
+  }
+  .group-header {
+    background-color: #d4e8eb;
+    color: #0a424c;
+    font-weight: 700;
+    font-size: 13.5px;
+    text-align: left;
+    padding-left: 12px;
+  }
+  .plan-col {
+    background-color: #fffbe6;
+    color: #78350f;
+    font-weight: bold;
+  }
+  .total-col {
+    background-color: #f0f7f8;
+    color: #0D5966;
+    font-weight: bold;
+  }
+  .curr-week {
+    background-color: #fff3e0;
+    font-weight: bold;
+  }
+  .tag-pass {
+    color: #15803d;
+    font-weight: bold;
+  }
+  .tag-fail {
+    color: #b91c1c;
+    font-weight: bold;
+  }
+  .comments-table td {
+    padding: 12px 16px;
+    vertical-align: middle;
+  }
+  .nt-name {
+    width: 18%;
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px 8px;
+  }
+  .nt-name.HDC {
+    background-color: #d84315;
+  }
+  .nt-name.NAUTICS {
+    background-color: #1565c0;
+  }
+  .nt-name.ST {
+    background-color: #2e7d32;
+  }
+  .nt-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+  }
+  .nt-stars {
+    color: #ffd700;
+    font-size: 19px;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  }
+  .nt-desc {
+    text-align: left;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1e293b;
+  }
+  /* Highlight Badges */
+  .hl-good {
+    background: #dcfce7;
+    color: #15803d;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #86efac;
+    display: inline-block;
+  }
+  .hl-warn {
+    background: #fef3c7;
+    color: #b45309;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #fde68a;
+    display: inline-block;
+  }
+  .hl-crit {
+    background: #fee2e2;
+    color: #b91c1c;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #fca5a5;
+    display: inline-block;
+  }
+  .hl-focus {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #bae6fd;
+    display: inline-block;
+  }
+  .th-hdc {
+    background-color: #d84315;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-nautics {
+    background-color: #1565c0;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-st {
+    background-color: #2e7d32;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-tot {
+    background-color: #0D5966;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-plan {
+    background-color: #fffbe6;
+    color: #78350f;
+    font-weight: bold;
+  }
+  .col-hdc {
+    background-color: #fff8f6;
+  }
+  .col-nautics {
+    background-color: #f4f8ff;
+  }
+  .col-st {
+    background-color: #f4faf5;
+  }
+  @media print {
+    body { padding: 0; background: #fff; }
+    .no-print, .sim-banner { display: none; }
+    .report-container { box-shadow: none; padding: 0; }
+  }
+  .btn-print {
+    padding: 8px 16px;
+    background: #0D5966;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 15px;
+  }
+</style>
+</head>
+<body>
+
+<div class="report-container">
+  <div class="no-print sim-banner">
+    <span>🔬 <b>KỊCH BẢN GIẢ LẬP TUẦN TỚI (W45)</b>: Kiểm chứng hệ thống tự động đánh giá sao, nhận xét và giao chỉ đạo W46</span>
+    <button class="btn-print" onclick="window.print()" style="margin:0;">🖨 In Báo Cáo / Xuất PDF (A4)</button>
+  </div>
+
+  <div class="header-block">
+    <h1>BÁO CÁO TIẾN ĐỘ TUẦN: ĐỐI CHIẾU 3 NHÀ THẦU (W44 vs W45)</h1>
+    <p>Dự án: C459 | Hạng mục: Cáp điện (Kéo dây & Đấu nối) | Mốc mục tiêu W50: Kéo dây 95% – Đấu nối 80%</p>
+  </div>
+
+  <div class="section-title">BẢNG 1: SO SÁNH TIẾN ĐỘ KÉO DÂY & ĐẤU NỐI GIỮA 2 TUẦN CỦA 3 NHÀ THẦU</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:34%; text-align: left; padding-left: 10px;">Hạng mục / Thông số theo dõi</th>
+        <th style="width:13%;" class="th-plan">Kế hoạch W45</th>
+        <th style="width:13%;" class="th-hdc">HDC</th>
+        <th style="width:13%;" class="th-nautics">NAUTICS</th>
+        <th style="width:13%;" class="th-st">ST</th>
+        <th style="width:14%;" class="th-tot">TOÀN DỰ ÁN</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="6" class="group-header">I. TIẾN ĐỘ KÉO DÂY</td></tr>
+      <tr>
+        <td class="col-label">• Tuần trước (W44)</td>
+        <td class="plan-col">71.0%</td>
+        <td class="col-hdc">82.3%</td>
+        <td class="col-nautics">72.2%</td>
+        <td class="col-st">66.6%</td>
+        <td class="total-col">76.2%</td>
+      </tr>
+      <tr>
+        <td class="col-label">• Tuần này (W45)</td>
+        <td class="plan-col">80.0%</td>
+        <td class="col-hdc">85.8%</td>
+        <td class="col-nautics">76.8%</td>
+        <td class="col-st">72.1%</td>
+        <td class="total-col">80.3%</td>
+      </tr>
+      <tr style="font-weight: bold;">
+        <td class="col-label">• Tăng trong tuần (Δ = W45 - W44)</td>
+        <td class="plan-col">+3.8%</td>
+        <td class="col-hdc">+3.5%</td>
+        <td class="col-nautics">+4.6%</td>
+        <td class="col-st">+5.5%</td>
+        <td class="total-col">+4.1%</td>
+      </tr>
+      <tr>
+        <td class="col-label">• Đánh giá (vs Kế hoạch +3.8%)</td>
+        <td class="plan-col">Chuẩn</td>
+        <td class="col-hdc"><span class="tag-pass">🟢 Vượt (+3.5%)</span></td>
+        <td class="col-nautics"><span class="tag-pass">🟢 Vượt (+0.8%)</span></td>
+        <td class="col-st"><span class="tag-pass">🟢 Vượt (+1.7%)</span></td>
+        <td class="total-col"><span class="tag-pass">🟢 Vượt (+0.3%)</span></td>
+      </tr>
+      <tr>
+        <td class="col-label">• Khối lượng thực hiện tuần (mét)</td>
+        <td class="plan-col">2,479 m</td>
+        <td class="col-hdc">1,057 m</td>
+        <td class="col-nautics">1,201 m</td>
+        <td class="col-st">474 m</td>
+        <td class="total-col">2,732 m</td>
+      </tr>
+
+      <tr><td colspan="6" class="group-header">II. TIẾN ĐỘ ĐẤU NỐI</td></tr>
+      <tr>
+        <td class="col-label">• Tuần trước (W44)</td>
+        <td class="plan-col">15.0%</td>
+        <td class="col-hdc">13.1%</td>
+        <td class="col-nautics">10.3%</td>
+        <td class="col-st">0.0%</td>
+        <td class="total-col">10.7%</td>
+      </tr>
+      <tr>
+        <td class="col-label">• Tuần này (W45)</td>
+        <td class="plan-col">26.0%</td>
+        <td class="col-hdc">28.2%</td>
+        <td class="col-nautics">24.1%</td>
+        <td class="col-st">14.4%</td>
+        <td class="total-col">25.4%</td>
+      </tr>
+      <tr style="font-weight: bold;">
+        <td class="col-label">• Tăng trong tuần (Δ = W45 - W44)</td>
+        <td class="plan-col">+15.3%</td>
+        <td class="col-hdc">+15.1%</td>
+        <td class="col-nautics">+13.8%</td>
+        <td class="col-st">+14.4%</td>
+        <td class="total-col">+14.7%</td>
+      </tr>
+      <tr>
+        <td class="col-label">• Đánh giá (vs Kế hoạch +15.3%)</td>
+        <td class="plan-col">Chuẩn</td>
+        <td class="col-hdc"><span class="tag-pass">🟢 Vượt (+2.2%)</span></td>
+        <td class="col-nautics"><span class="tag-fail">🔴 Chậm nhẹ (-1.5%)</span></td>
+        <td class="col-st"><span class="tag-fail">🔴 Chậm nhẹ (-0.9%)</span></td>
+        <td class="total-col"><span class="tag-fail">🔴 Chậm nhẹ (-0.6%)</span></td>
+      </tr>
+      <tr>
+        <td class="col-label">• Khối lượng thực hiện tuần (đầu cáp)</td>
+        <td class="plan-col">804 đầu</td>
+        <td class="col-hdc">452 đầu</td>
+        <td class="col-nautics">235 đầu</td>
+        <td class="col-st">80 đầu</td>
+        <td class="total-col">767 đầu</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">BẢNG 2: LỘ TRÌNH MỤC TIÊU CAM KẾT CHO CẢ 3 NHÀ THẦU (W43 ➔ W50)</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:12%;">Tuần</th>
+        <th style="width:16%;">KÉO DÂY Lũy kế</th>
+        <th style="width:14%;">Tăng tuần (Δ)</th>
+        <th style="width:16%;">ĐẤU NỐI Lũy kế</th>
+        <th style="width:14%;">Tăng tuần (Δ)</th>
+        <th style="width:28%; text-align: left; padding-left: 10px;">Trọng tâm kiểm soát / Ghi chú</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>W43</td>
+        <td>67.0%</td>
+        <td>—</td>
+        <td>4.4%</td>
+        <td>—</td>
+        <td style="text-align:left;">Đã qua (Mốc xuất phát đấu nối)</td>
+      </tr>
+      <tr>
+        <td>W44</td>
+        <td>76.2%</td>
+        <td>+9.2%</td>
+        <td>10.7%</td>
+        <td>+6.3%</td>
+        <td style="text-align:left;">Đã qua (Kéo dây vượt, đấu nối bắt đầu chạy)</td>
+      </tr>
+      <tr class="curr-week">
+        <td>W45</td>
+        <td>80.0%</td>
+        <td>+3.8%</td>
+        <td>26.0%</td>
+        <td>+15.3%</td>
+        <td style="text-align:left;">Tuần báo cáo (Tập trung toàn lực đấu nối)</td>
+      </tr>
+      <tr>
+        <td>W46</td>
+        <td>84.0%</td>
+        <td>+4.0%</td>
+        <td>38.0%</td>
+        <td>+12.0%</td>
+        <td style="text-align:left;">Duy trì ổn định nhân lực đấu nối</td>
+      </tr>
+      <tr>
+        <td>W47</td>
+        <td>88.0%</td>
+        <td>+4.0%</td>
+        <td>50.0%</td>
+        <td>+12.0%</td>
+        <td style="text-align:left;">Đấu nối tiệm cận 50%</td>
+      </tr>
+      <tr>
+        <td>W48</td>
+        <td>91.0%</td>
+        <td>+3.0%</td>
+        <td>62.0%</td>
+        <td>+12.0%</td>
+        <td style="text-align:left;">Nghiệm thu phân đoạn 1</td>
+      </tr>
+      <tr>
+        <td>W49</td>
+        <td>93.0%</td>
+        <td>+2.0%</td>
+        <td>72.0%</td>
+        <td>+10.0%</td>
+        <td style="text-align:left;">Giai đoạn nước rút rải cáp & đấu nối</td>
+      </tr>
+      <tr style="font-weight:bold; background-color:#e8f5e9; color:#1b5e20;">
+        <td>W50</td>
+        <td>95.0%</td>
+        <td>+2.0%</td>
+        <td>80.0%</td>
+        <td>+8.0%</td>
+        <td style="text-align:left;">Mốc đợt 1 (Sẵn sàng Test & Comm)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">BẢNG 3: NHẬN XÉT & CHỈ ĐẠO ĐIỀU HÀNH TUẦN TỚI (W46)</div>
+  <table class="comments-table">
+    <tbody>
+      <tr>
+        <td class="nt-name HDC">
+          <div class="nt-title">HDC</div>
+          <div class="nt-stars" title="Đánh giá 5.0/5 sao">★★★★★</div>
+        </td>
+        <td class="nt-desc">
+          Kéo dây tiếp tục ổn định <span class="hl-good">(+3.5%, đạt 85.8% vượt xa kế hoạch)</span>. Đấu nối bứt phá rất xuất sắc <span class="hl-good">(+452 đầu cốt, đạt 28.2% vượt mốc 26% yêu cầu)</span>. Yêu cầu tuần W46 <span class="hl-focus">tiếp tục giữ vững quân số</span>, tập trung <span class="hl-focus">dứt điểm đấu nối tủ điện chính và phòng điều khiển</span> để hướng tới mốc 40%.
+        </td>
+      </tr>
+      <tr>
+        <td class="nt-name NAUTICS">
+          <div class="nt-title">NAUTICS</div>
+          <div class="nt-stars" title="Đánh giá 4.0/5 sao">★★★★☆</div>
+        </td>
+        <td class="nt-desc">
+          Kéo dây tăng tốc trở lại <span class="hl-good">(+4.6%, đạt 76.8% vượt kế hoạch tuần)</span>. Đấu nối tiến bộ vượt bậc nhờ bổ sung thợ <span class="hl-good">(+235 đầu cốt, đạt 24.1%)</span>, cơ bản bám sát lộ trình. Yêu cầu tuần W46 <span class="hl-focus">duy trì ổn định 2 tổ đấu nối chuyên trách</span> nhằm <span class="hl-focus">bứt phá đạt mốc 38% trong tuần W46</span>.
+        </td>
+      </tr>
+      <tr>
+        <td class="nt-name ST">
+          <div class="nt-title">ST</div>
+          <div class="nt-stars" title="Đánh giá 3.0/5 sao">★★★☆☆</div>
+        </td>
+        <td class="nt-desc">
+          Kéo dây duy trì nhịp độ cao <span class="hl-good">(+5.5%, đạt 72.1% vượt kế hoạch)</span>. Đấu nối đã chính thức khởi động và tăng tốc <span class="hl-good">(+80 đầu cốt, đạt 14.4%)</span>, thoát khỏi tình trạng cảnh báo đỏ. Yêu cầu tuần W46 <span class="hl-crit">đẩy mạnh năng suất lên 100-120 đầu cốt/tuần</span>, quyết tâm <span class="hl-focus">tiệm cận mốc 30% để không bị tụt lại</span>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
