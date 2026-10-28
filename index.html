@@ -2943,20 +2943,134 @@ async function snapProg(){
   };
 
   // Roadmap commitment targets (W43 to W50)
-  const isCurWk44 = (curWkStr === 'W44' || curWkStr === '44/26');
+  // Roadmap commitment targets (W43 to W50)
   const roadmap = [
-    { wk: 'W43', pullTot: 67.0, pullDelta: null, termTot: 4.4, termDelta: null, note: 'Đã qua (Mốc xuất phát đấu nối)', noteEn: 'Passed (Termination baseline)', isCurrent: curWkStr === 'W43' },
-    { wk: 'W44', pullTot: 76.2, pullDelta: 9.2, termTot: 10.7, termDelta: 6.3, note: 'Tuần báo cáo (Kéo dây vượt, đấu nối chậm)', noteEn: 'Report week (Pulling ahead, termination behind)', isCurrent: isCurWk44 },
-    { wk: 'W45', pullTot: 80.0, pullDelta: 3.8, termTot: 26.0, termDelta: 15.3, note: 'Mốc tuần tới (Tập trung toàn lực đấu nối)', noteEn: 'Next milestone (Full focus on termination)', isCurrent: curWkStr === 'W45' },
-    { wk: 'W46', pullTot: 84.0, pullDelta: 4.0, termTot: 38.0, termDelta: 12.0, note: 'Duy trì ổn định nhân lực đấu nối', noteEn: 'Maintain stable termination workforce', isCurrent: curWkStr === 'W46' },
-    { wk: 'W47', pullTot: 88.0, pullDelta: 4.0, termTot: 50.0, termDelta: 12.0, note: 'Đấu nối tiệm cận 50%', noteEn: 'Termination approaching 50%', isCurrent: curWkStr === 'W47' },
-    { wk: 'W48', pullTot: 91.0, pullDelta: 3.0, termTot: 62.0, termDelta: 12.0, note: 'Nghiệm thu phân đoạn 1', noteEn: 'Stage 1 acceptance', isCurrent: curWkStr === 'W48' },
-    { wk: 'W49', pullTot: 93.0, pullDelta: 2.0, termTot: 72.0, termDelta: 10.0, note: 'Giai đoạn nước rút rải cáp & đấu nối', noteEn: 'Sprint phase for cable laying & termination', isCurrent: curWkStr === 'W49' },
-    { wk: 'W50', pullTot: 95.0, pullDelta: 2.0, termTot: 80.0, termDelta: 8.0, note: 'Mốc đợt 1 (Sẵn sàng Test & Comm)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true }
+    { wk: 'W43', pullTot: 67.0, pullDelta: null, termTot: 4.4, termDelta: null, note: 'Đã qua (Mốc xuất phát đấu nối)', noteEn: 'Passed (Termination baseline)', isCurrent: (wcur && wcur.w === 43) || curWkStr === 'W43' },
+    { wk: 'W44', pullTot: 76.2, pullDelta: 9.2, termTot: 10.7, termDelta: 6.3, note: 'Tuần báo cáo (Kéo dây vượt, đấu nối chậm)', noteEn: 'Report week (Pulling ahead, termination behind)', isCurrent: (wcur && wcur.w === 44) || curWkStr === 'W44' },
+    { wk: 'W45', pullTot: 80.0, pullDelta: 3.8, termTot: 26.0, termDelta: 15.3, note: 'Mốc tuần tới (Tập trung toàn lực đấu nối)', noteEn: 'Next milestone (Full focus on termination)', isCurrent: (wcur && wcur.w === 45) || curWkStr === 'W45' },
+    { wk: 'W46', pullTot: 84.0, pullDelta: 4.0, termTot: 38.0, termDelta: 12.0, note: 'Duy trì ổn định nhân lực đấu nối', noteEn: 'Maintain stable termination workforce', isCurrent: (wcur && wcur.w === 46) || curWkStr === 'W46' },
+    { wk: 'W47', pullTot: 88.0, pullDelta: 4.0, termTot: 50.0, termDelta: 12.0, note: 'Đấu nối tiệm cận 50%', noteEn: 'Termination approaching 50%', isCurrent: (wcur && wcur.w === 47) || curWkStr === 'W47' },
+    { wk: 'W48', pullTot: 91.0, pullDelta: 3.0, termTot: 62.0, termDelta: 12.0, note: 'Nghiệm thu phân đoạn 1', noteEn: 'Stage 1 acceptance', isCurrent: (wcur && wcur.w === 48) || curWkStr === 'W48' },
+    { wk: 'W49', pullTot: 93.0, pullDelta: 2.0, termTot: 72.0, termDelta: 10.0, note: 'Giai đoạn nước rút rải cáp & đấu nối', noteEn: 'Sprint phase for cable laying & termination', isCurrent: (wcur && wcur.w === 49) || curWkStr === 'W49' },
+    { wk: 'W50', pullTot: 95.0, pullDelta: 2.0, termTot: 80.0, termDelta: 8.0, note: 'Mốc đợt 1 (Sẵn sàng Test & Comm)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true, isCurrent: (wcur && wcur.w === 50) || curWkStr === 'W50' }
   ];
 
-  // Table 3 Directives with distinct contractor colors & star ratings
-  const comments = [
+  // Dynamic next week label
+  let nextWkLabel = isEn ? 'Next Week' : 'Tuần tới';
+  if(wcur && wcur.w){
+    const nextW = wcur.w + 1;
+    nextWkLabel = wcur.y ? (nextW + '/' + String(wcur.y).slice(2)) : (nextW >= 10 ? 'W' + nextW : 'W0' + nextW);
+  }
+
+  // Dynamic Contractor Evaluation Generator for Any Week
+  function buildContractorEvaluation(cName, color, pull, term, pullPlanD, termPlanD){
+    const pullDelta = pull.deltaPct || 0;
+    const pullCur = pull.curPct || 0;
+    const pullDiff = pullDelta - (pullPlanD || 0);
+
+    const termDelta = term.deltaPct || 0;
+    const termCur = term.curPct || 0;
+    const termDiff = termDelta - (termPlanD || 0);
+    const termQty = term.deltaQty !== null ? term.deltaQty : 0;
+    const termPlanTotal = term.plan || 0;
+
+    // Star calculation (1 - 5 stars)
+    let score = 3.0;
+    if(pullDiff >= 5.0) score += 1.0;
+    else if(pullDiff >= 1.0) score += 0.5;
+    else if(pullDiff < -2.0) score -= 0.5;
+
+    if(termCur === 0 && termPlanTotal > 0){
+      score -= 1.5;
+    } else if(termDiff >= 3.0){
+      score += 1.0;
+    } else if(termDiff >= 0){
+      score += 0.5;
+    } else if(termDiff < -4.0){
+      score -= 0.5;
+    }
+    const finalScore = Math.max(1, Math.min(5, Math.round(score)));
+    let starsStr = '';
+    for(let i = 1; i <= 5; i++){
+      starsStr += (i <= finalScore) ? '★' : '☆';
+    }
+
+    // Pulling analysis sentence
+    let pullSentence = '';
+    if(pullDiff >= 5.0){
+      pullSentence = isEn ?
+        `Cable pulling [GOOD:breakthrough progress (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}% far exceeding plan)].` :
+        `Kéo dây bứt phá [GOOD:rất xuất sắc (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}% vượt xa kế hoạch)].`;
+    } else if(pullDiff >= 0){
+      pullSentence = isEn ?
+        `Cable pulling [GOOD:accelerated well (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}% exceeding plan)].` :
+        `Kéo dây [GOOD:tăng tốc ấn tượng (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}% vượt kế hoạch)].`;
+    } else if(pullDiff >= -2.0){
+      pullSentence = isEn ?
+        `Cable pulling [WARN:showed signs of slowing (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}%)].` :
+        `Tiến độ kéo dây [WARN:có dấu hiệu chậm lại (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}%)].`;
+    } else {
+      pullSentence = isEn ?
+        `Cable pulling [CRIT:significantly behind plan (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}%)].` :
+        `Tiến độ kéo dây [CRIT:chậm so với kế hoạch (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}%)].`;
+    }
+
+    // Termination analysis sentence
+    let termSentence = '';
+    if(termCur === 0 && termPlanTotal > 0){
+      termSentence = isEn ?
+        `However, [CRIT:TERMINATION HAS NOT STARTED (0/${termPlanTotal} ends)].` :
+        `Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/${termPlanTotal} đầu)].`;
+    } else if(termDiff >= 3.0){
+      termSentence = isEn ?
+        `Termination [GOOD:accelerated strongly (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
+        `Đấu nối [GOOD:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu)].`;
+    } else if(termDiff >= -2.0 && termDiff < 0){
+      termSentence = isEn ?
+        `Termination [WARN:slight lag (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
+        `Đấu nối [WARN:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu), còn chậm nhẹ].`;
+    } else if(termDiff < -2.0){
+      termSentence = isEn ?
+        `Termination [WARN:remains behind (+${termQty} ends, reached ${termCur.toFixed(1)}% vs target)].` :
+        `Đấu nối [WARN:còn chậm (+${termQty} đầu, chỉ đạt ${termCur.toFixed(1)}% vs yêu cầu)].`;
+    } else {
+      termSentence = isEn ?
+        `Termination [GOOD:met plan (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
+        `Đấu nối [GOOD:đáp ứng kế hoạch (+${termQty} đầu, đạt ${termCur.toFixed(1)}%)].`;
+    }
+
+    // Directives sentence for next week
+    let directiveSentence = '';
+    if(termCur === 0 && termPlanTotal > 0){
+      directiveSentence = isEn ?
+        `Request [CRIT:urgent deployment of dedicated termination team in ${nextWkLabel}], strictly [FOCUS:avoiding workload accumulation].` :
+        `Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần ${nextWkLabel}], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`;
+    } else if(termDiff < -2.0){
+      directiveSentence = isEn ?
+        `Request [CRIT:immediate addition of skilled electricians in ${nextWkLabel}] to [FOCUS:catch up with schedule].` :
+        `Yêu cầu [CRIT:bổ sung ngay 3-4 thợ đấu nối tay nghề cao ngay từ đầu tuần ${nextWkLabel}] để [FOCUS:bắt kịp lộ trình].`;
+    } else if(pullDiff >= 2.0 && termDiff >= -2.0){
+      directiveSentence = isEn ?
+        `Request ${nextWkLabel} to [FOCUS:maintain workforce] and [FOCUS:finalize switchboard termination] to reach target milestones.` :
+        `Yêu cầu tuần ${nextWkLabel} [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm các phân đoạn trọng điểm] để hướng tới mốc mục tiêu.`;
+    } else {
+      directiveSentence = isEn ?
+        `Maintain execution momentum and ensure safety and quality in ${nextWkLabel}.` :
+        `Duy trì nhịp độ thi công và kiểm soát an toàn chất lượng trong tuần ${nextWkLabel}.`;
+    }
+
+    return {
+      name: cName,
+      color,
+      starsStr,
+      scoreText: finalScore.toFixed(1) + ' / 5',
+      descRaw: pullSentence + ' ' + termSentence + ' ' + directiveSentence
+    };
+  }
+
+  // Pre-configured expert directives for W44, or dynamic auto-generated for other weeks
+  const isW44 = (curWkStr === 'W44' || curWkStr === '44/26');
+  const comments = isW44 ? [
     {
       name: 'HDC',
       color: '#d84315',
@@ -2984,6 +3098,10 @@ async function snapProg(){
         'Cable pulling accelerated impressively [GOOD:(+11.1%, reaching 66.6% exceeding plan)]. However, [CRIT:TERMINATION HAS NOT STARTED (0/554 ends)]. Request [CRIT:urgent deployment of dedicated termination team from early W45], strictly [FOCUS:avoiding workload accumulation at the end].' :
         'Kéo dây tăng tốc ấn tượng [GOOD:(+11.1%, đạt 66.6% vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].'
     }
+  ] : [
+    buildContractorEvaluation('HDC', '#d84315', hdcPull, hdcTerm, pullPlanDelta, termPlanDelta),
+    buildContractorEvaluation('NAUTICS', '#1565c0', nauPull, nauTerm, pullPlanDelta, termPlanDelta),
+    buildContractorEvaluation('ST', '#2e7d32', stPull, stTerm, pullPlanDelta, termPlanDelta)
   ];
 
   // Render on A4 Canvas (1200 x 1697) with larger fonts & PM contractor colors
@@ -3231,7 +3349,6 @@ async function snapProg(){
   y += 24;
 
   // --- BẢNG 3 ---
-  const nextWkLabel = (curWkStr === 'W44' || curWkStr === '44/26') ? 'W45' : (isEn ? 'Next Week' : 'Tuần tới');
   drawSectionTitle(y, isEn ?
     ('TABLE 3: DIRECTIVES & RECOMMENDATIONS FOR ' + nextWkLabel) :
     ('BẢNG 3: NHẬN XÉT & CHỈ ĐẠO ĐIỀU HÀNH TUẦN TỚI (' + nextWkLabel + ')'));
