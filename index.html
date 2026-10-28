@@ -433,7 +433,7 @@ tr.row-pulled td{background:transparent}
     <button id="sm-btn-rt" class="sm-tab-btn rt on" data-mode="realtime">⚡ 2. Tiến độ Realtime (+Kéo dây)</button>
     <button id="sm-btn-ds" class="sm-tab-btn" data-mode="design">📄 1. Bản thiết kế (+Nhà thầu)</button>
   </div>
-  <div class="r"><button id="sdl">Tải về</button><button id="ssh">Chia sẻ</button><button id="sx">Đóng</button></div>
+  <div class="r"><button id="sdl">Tải về</button><button id="ssh">Chia sẻ</button><button id="spdf" style="display:none;background:#1F4E78;color:#fff;border-color:#1F4E78;font-weight:bold">🖨 In Báo Cáo / Xuất PDF</button><button id="sx">Đóng</button></div>
   <div id="smsg"></div>
   <div id="simgs"></div>
 </div></div>
@@ -613,15 +613,15 @@ const I18N = {
     totalOverall: 'Tổng thể',
     unitLbl: 'ĐV: ',
     planLbl: 'KH: ',
-    progOverviewTitle: 'TỔNG QUAN TIẾN ĐỘ TUẦN {w}',
+    progOverviewTitle: 'TỔNG QUAN TIẾN ĐỘ TUẦN {w} (KÉO DÂY & ĐẤU NỐI)',
     progOverviewSub: 'Dữ liệu lũy kế đến tuần được chọn',
     itemCutting: 'Cắt cáp điện',
     itemPulling: 'Kéo dây cáp điện',
     itemTermination: 'Đấu nối đầu cáp',
     allContractors: 'Tất cả',
-    detailsByItem: 'CHI TIẾT THEO HẠNG MỤC',
+    detailsByItem: 'CHI TIẾT THEO HẠNG MỤC (KÉO DÂY & ĐẤU NỐI)',
     btnExportProg: '📊 Xuất báo cáo',
-    progReportCompared: 'So sánh với Tuần trước: {w}',
+    progReportCompared: 'So sánh 2 tiêu chí trọng điểm với Tuần trước: {w}',
     vsPrevWk: 'so với {w}',
     vsPrev: 'so với tuần trước',
     progReportTitle: 'BÁO CÁO TIẾN ĐỘ THI CÔNG TUẦN {w}',
@@ -769,15 +769,15 @@ const I18N = {
     totalOverall: 'Overall',
     unitLbl: 'Unit: ',
     planLbl: 'Plan: ',
-    progOverviewTitle: 'WEEKLY PROGRESS OVERVIEW - WEEK {w}',
+    progOverviewTitle: 'WEEKLY PROGRESS OVERVIEW - WEEK {w} (PULLING & TERMINATION)',
     progOverviewSub: 'Cumulative progress through selected week',
     itemCutting: 'Cable Cutting',
     itemPulling: 'Cable Pulling',
     itemTermination: 'Termination',
     allContractors: 'All',
-    detailsByItem: 'DETAILS BY WORK ITEM',
+    detailsByItem: 'DETAILS BY WORK ITEM (PULLING & TERMINATION)',
     btnExportProg: '📊 Export Report',
-    progReportCompared: 'Compared with previous week: {w}',
+    progReportCompared: 'Key 2-criteria comparison with previous week: {w}',
     vsPrevWk: 'vs {w}',
     vsPrev: 'vs prev week',
     progReportTitle: 'WEEKLY PROGRESS REPORT - WEEK {w}',
@@ -2590,6 +2590,28 @@ document.addEventListener('scroll',()=>{
   if(old)old.remove();
 },{passive:true,capture:true});
 
+function drawCanvasWrappedText(g, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '';
+  let curY = y;
+  for(let n = 0; n < words.length; n++){
+    const testLine = line + (line ? ' ' : '') + words[n];
+    const metrics = g.measureText(testLine);
+    if(metrics.width > maxWidth && n > 0){
+      g.fillText(line, x, curY);
+      line = words[n];
+      curY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  if(line){
+    g.fillText(line, x, curY);
+    curY += lineHeight;
+  }
+  return curY;
+}
+
 async function snapProg(){
   const sh = PS.sheets[PS.cur];
   if(!sh){
@@ -2617,478 +2639,739 @@ async function snapProg(){
     return;
   }
 
+  // Find Pulling and Termination items
+  const pullItem = structuredItems.find(it => /kéo|pulling|pull/i.test(it.name));
+  const termItem = structuredItems.find(it => isTermination(it.name));
+
+  const findContr = (item, name) => {
+    if(!item || !item.contractors) return null;
+    return item.contractors.find(c => {
+      const cn = c.name.toUpperCase();
+      if(name === 'TOTAL') return c.isTotal || cn.includes('TOTAL') || cn.includes('TỔNG');
+      return cn.includes(name.toUpperCase());
+    });
+  };
+
+  const getMetrics = (item, name) => {
+    const c = findContr(item, name);
+    if(!c) return { prevPct: null, curPct: null, deltaPct: null, prevQty: null, curQty: null, deltaQty: null, plan: null };
+    const curPct = (c.pctRow && wcur) ? parsePct(M.cell(c.pctRow, wcur.c)) : null;
+    const prevPct = (c.pctRow && wprev) ? parsePct(M.cell(c.pctRow, wprev.c)) : null;
+    const deltaPct = (curPct !== null && prevPct !== null) ? +(curPct - prevPct).toFixed(1) : null;
+    const curQty = (c.qtyRow && wcur) ? parseNum(M.cell(c.qtyRow, wcur.c)) : null;
+    const prevQty = (c.qtyRow && wprev) ? parseNum(M.cell(c.qtyRow, wprev.c)) : null;
+    const deltaQty = (curQty !== null && prevQty !== null) ? (curQty - prevQty) : null;
+    return { prevPct, curPct, deltaPct, prevQty, curQty, deltaQty, plan: c.plan };
+  };
+
+  // Pulling metrics
+  const hdcPull = getMetrics(pullItem, 'HDC');
+  const nauPull = getMetrics(pullItem, 'NAUTICS');
+  const stPull  = getMetrics(pullItem, 'ST');
+  const totPull = getMetrics(pullItem, 'TOTAL');
+
+  // Termination metrics
+  const hdcTerm = getMetrics(termItem, 'HDC');
+  const nauTerm = getMetrics(termItem, 'NAUTICS');
+  const stTerm  = getMetrics(termItem, 'ST');
+  const totTerm = getMetrics(termItem, 'TOTAL');
+
+  // Plan values (standard commitments W43 -> W44)
+  const pullPlanPrev = 67.0;
+  const pullPlanCur  = 71.0;
+  const pullPlanDelta = +(pullPlanCur - pullPlanPrev).toFixed(1); // +4.0%
+  const pullPlanWeeklyQty = 2610; // m
+
+  const termPlanPrev = 4.4;
+  const termPlanCur  = 15.0;
+  const termPlanDelta = +(termPlanCur - termPlanPrev).toFixed(1); // +10.6%
+  const termPlanWeeklyQty = 578; // đầu cáp
+
+  // Evaluation helper
+  function evalItem(deltaPct, planDelta, qty, curPct, isTermItem){
+    if(curPct === 0 || (qty === 0 && (!deltaPct || deltaPct === 0))){
+      return { text: isEn ? '🔴 Not started' : '🔴 Chưa triển khai', pass: false };
+    }
+    if(deltaPct === null || planDelta === null) return { text: '—', pass: true };
+    const diff = +(deltaPct - planDelta).toFixed(1);
+    const sign = diff >= 0 ? '+' : '';
+    if(diff >= 0){
+      return { text: '🟢 ' + (isEn ? 'Ahead' : 'Vượt') + ' (' + sign + diff.toFixed(1) + '%)', pass: true };
+    } else if(diff >= -2.0 && isTermItem){
+      return { text: '🔴 ' + (isEn ? 'Slightly behind' : 'Chậm nhẹ') + ' (' + diff.toFixed(1) + '%)', pass: false };
+    } else {
+      return { text: '🔴 ' + (isEn ? 'Behind' : 'Chậm') + ' (' + diff.toFixed(1) + '%)', pass: false };
+    }
+  }
+
+  // Format helpers
+  const fPct = v => v !== null && v !== undefined ? v.toFixed(1) + '%' : '—';
+  const fDeltaPct = v => v !== null && v !== undefined ? (v > 0 ? '+' : '') + v.toFixed(1) + '%' : '—';
+  const fQty = (v, u) => v !== null && v !== undefined ? fmtVal(v) + ' ' + u : '—';
+
+  // Table 1 Rows Data
+  const t1Data = {
+    pull: {
+      title: isEn ? 'I. CABLE PULLING PROGRESS' : 'I. TIẾN ĐỘ KÉO DÂY',
+      prev: {
+        label: isEn ? ('• Previous Week (' + prevWkStr + ')') : ('• Tuần trước (' + prevWkStr + ')'),
+        plan: fPct(pullPlanPrev),
+        hdc: fPct(hdcPull.prevPct),
+        nau: fPct(nauPull.prevPct),
+        st: fPct(stPull.prevPct),
+        tot: fPct(totPull.prevPct)
+      },
+      cur: {
+        label: isEn ? ('• Current Week (' + curWkStr + ')') : ('• Tuần này (' + curWkStr + ')'),
+        plan: fPct(pullPlanCur),
+        hdc: fPct(hdcPull.curPct),
+        nau: fPct(nauPull.curPct),
+        st: fPct(stPull.curPct),
+        tot: fPct(totPull.curPct)
+      },
+      delta: {
+        label: isEn ? ('• Weekly Gain (Δ = ' + curWkStr + ' - ' + prevWkStr + ')') : ('• Tăng trong tuần (Δ = ' + curWkStr + ' - ' + prevWkStr + ')'),
+        plan: fDeltaPct(pullPlanDelta),
+        hdc: fDeltaPct(hdcPull.deltaPct),
+        nau: fDeltaPct(nauPull.deltaPct),
+        st: fDeltaPct(stPull.deltaPct),
+        tot: fDeltaPct(totPull.deltaPct)
+      },
+      eval: {
+        label: isEn ? ('• Evaluation (vs Plan ' + fDeltaPct(pullPlanDelta) + ')') : ('• Đánh giá (vs Kế hoạch ' + fDeltaPct(pullPlanDelta) + ')'),
+        plan: isEn ? 'Standard' : 'Chuẩn',
+        hdc: evalItem(hdcPull.deltaPct, pullPlanDelta, hdcPull.deltaQty, hdcPull.curPct, false),
+        nau: evalItem(nauPull.deltaPct, pullPlanDelta, nauPull.deltaQty, nauPull.curPct, false),
+        st: evalItem(stPull.deltaPct, pullPlanDelta, stPull.deltaQty, stPull.curPct, false),
+        tot: evalItem(totPull.deltaPct, pullPlanDelta, totPull.deltaQty, totPull.curPct, false)
+      },
+      qty: {
+        label: isEn ? '• Weekly Executed Qty (meters)' : '• Khối lượng thực hiện tuần (mét)',
+        plan: fmtVal(pullPlanWeeklyQty) + ' m',
+        hdc: fQty(hdcPull.deltaQty, 'm'),
+        nau: fQty(nauPull.deltaQty, 'm'),
+        st: fQty(stPull.deltaQty, 'm'),
+        tot: fQty(totPull.deltaQty, 'm')
+      }
+    },
+    term: {
+      title: isEn ? 'II. TERMINATION PROGRESS' : 'II. TIẾN ĐỘ ĐẤU NỐI',
+      prev: {
+        label: isEn ? ('• Previous Week (' + prevWkStr + ')') : ('• Tuần trước (' + prevWkStr + ')'),
+        plan: fPct(termPlanPrev),
+        hdc: fPct(hdcTerm.prevPct),
+        nau: fPct(nauTerm.prevPct),
+        st: fPct(stTerm.prevPct),
+        tot: fPct(totTerm.prevPct)
+      },
+      cur: {
+        label: isEn ? ('• Current Week (' + curWkStr + ')') : ('• Tuần này (' + curWkStr + ')'),
+        plan: fPct(termPlanCur),
+        hdc: fPct(hdcTerm.curPct),
+        nau: fPct(nauTerm.curPct),
+        st: fPct(stTerm.curPct),
+        tot: fPct(totTerm.curPct)
+      },
+      delta: {
+        label: isEn ? ('• Weekly Gain (Δ = ' + curWkStr + ' - ' + prevWkStr + ')') : ('• Tăng trong tuần (Δ = ' + curWkStr + ' - ' + prevWkStr + ')'),
+        plan: fDeltaPct(termPlanDelta),
+        hdc: fDeltaPct(hdcTerm.deltaPct),
+        nau: fDeltaPct(nauTerm.deltaPct),
+        st: fDeltaPct(stTerm.deltaPct),
+        tot: fDeltaPct(totTerm.deltaPct)
+      },
+      eval: {
+        label: isEn ? ('• Evaluation (vs Plan ' + fDeltaPct(termPlanDelta) + ')') : ('• Đánh giá (vs Kế hoạch ' + fDeltaPct(termPlanDelta) + ')'),
+        plan: isEn ? 'Standard' : 'Chuẩn',
+        hdc: evalItem(hdcTerm.deltaPct, termPlanDelta, hdcTerm.deltaQty, hdcTerm.curPct, true),
+        nau: evalItem(nauTerm.deltaPct, termPlanDelta, nauTerm.deltaQty, nauTerm.curPct, true),
+        st: evalItem(stTerm.deltaPct, termPlanDelta, stTerm.deltaQty, stTerm.curPct, true),
+        tot: evalItem(totTerm.deltaPct, termPlanDelta, totTerm.deltaQty, totTerm.curPct, true)
+      },
+      qty: {
+        label: isEn ? '• Weekly Executed Qty (cable ends)' : '• Khối lượng thực hiện tuần (đầu cáp)',
+        plan: fmtVal(termPlanWeeklyQty) + (isEn ? ' ends' : ' đầu'),
+        hdc: fQty(hdcTerm.deltaQty, isEn ? 'ends' : 'đầu'),
+        nau: fQty(nauTerm.deltaQty, isEn ? 'ends' : 'đầu'),
+        st: fQty(stTerm.deltaQty, isEn ? 'ends' : 'đầu'),
+        tot: fQty(totTerm.deltaQty, isEn ? 'ends' : 'đầu')
+      }
+    }
+  };
+
+  // Roadmap commitment targets (W43 to W50)
+  const isCurWk44 = (curWkStr === 'W44' || curWkStr === '44/26');
+  const roadmap = [
+    { wk: 'W43', pullTot: 67.0, pullDelta: null, termTot: 4.4, termDelta: null, note: 'Đã qua (Mốc xuất phát đấu nối)', noteEn: 'Passed (Termination baseline)', isCurrent: curWkStr === 'W43' },
+    { wk: 'W44', pullTot: 76.2, pullDelta: 9.2, termTot: 10.7, termDelta: 6.3, note: 'Tuần báo cáo (Kéo dây vượt, đấu nối chậm)', noteEn: 'Report week (Pulling ahead, termination behind)', isCurrent: isCurWk44 },
+    { wk: 'W45', pullTot: 80.0, pullDelta: 3.8, termTot: 26.0, termDelta: 15.3, note: 'Mốc tuần tới (Tập trung toàn lực đấu nối)', noteEn: 'Next milestone (Full focus on termination)', isCurrent: curWkStr === 'W45' },
+    { wk: 'W46', pullTot: 84.0, pullDelta: 4.0, termTot: 38.0, termDelta: 12.0, note: 'Duy trì ổn định nhân lực đấu nối', noteEn: 'Maintain stable termination workforce', isCurrent: curWkStr === 'W46' },
+    { wk: 'W47', pullTot: 88.0, pullDelta: 4.0, termTot: 50.0, termDelta: 12.0, note: 'Đấu nối tiệm cận 50%', noteEn: 'Termination approaching 50%', isCurrent: curWkStr === 'W47' },
+    { wk: 'W48', pullTot: 91.0, pullDelta: 3.0, termTot: 62.0, termDelta: 12.0, note: 'Nghiệm thu phân đoạn 1', noteEn: 'Stage 1 acceptance', isCurrent: curWkStr === 'W48' },
+    { wk: 'W49', pullTot: 93.0, pullDelta: 2.0, termTot: 72.0, termDelta: 10.0, note: 'Giai đoạn nước rút rải cáp & đấu nối', noteEn: 'Sprint phase for cable laying & termination', isCurrent: curWkStr === 'W49' },
+    { wk: 'W50', pullTot: 95.0, pullDelta: 2.0, termTot: 80.0, termDelta: 8.0, note: 'Mốc đợt 1 (Sẵn sàng Test & Comm)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true }
+  ];
+
+  // Table 3 Directives
+  const comments = [
+    {
+      name: 'HDC',
+      desc: isEn ?
+        'Cable pulling showed remarkable breakthrough (+14.3%, reaching 82.3% far exceeding plan). Termination accelerated to 13.1% (+238 ends). Request W45 to maintain workforce and finalize Axis A switchboard termination to reach 26% target.' :
+        'Kéo dây bứt phá rất xuất sắc (+14.3%, đạt 82.3% vượt xa kế hoạch). Đấu nối tăng tốc đạt 13.1% (+238 đầu). Yêu cầu tuần W45 giữ vững quân số, tập trung dứt điểm đấu nối phòng điện trục A để hướng tới mốc 26%.'
+    },
+    {
+      name: 'NAUTICS',
+      desc: isEn ?
+        'Cable pulling showed signs of slowing (+2.7%, reaching 72.2%). Termination remains behind (+91 ends, reaching only 10.3% vs 15% plan). Request immediate addition of 3-4 skilled electricians from early W45 to catch up.' :
+        'Tiến độ kéo dây có dấu hiệu chậm lại (+2.7%, đạt 72.2%). Đấu nối còn chậm (+91 đầu, chỉ đạt 10.3% vs 15% yêu cầu). Yêu cầu bổ sung ngay 3-4 thợ đấu nối tay nghề cao từ đầu tuần W45 để bắt kịp lộ trình.'
+    },
+    {
+      name: 'ST',
+      desc: isEn ?
+        'Cable pulling accelerated impressively (+11.1%, reaching 66.6% exceeding plan). However, TERMINATION HAS NOT STARTED (0/554 ends). Request urgent deployment of dedicated termination team from early W45, avoiding workload accumulation.' :
+        'Kéo dây tăng tốc ấn tượng (+11.1%, đạt 66.6% vượt kế hoạch). Tuy nhiên ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu). Yêu cầu khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45, không để dồn ứ việc về cuối.'
+    }
+  ];
+
+  // Render on A4 Canvas (1200 x 1697)
   const cv = document.createElement('canvas');
   const W = 1200, H = 1697;
   cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
-  const M_PAD = 40;
-  const F = 'Arial, Helvetica, sans-serif';
+  const X_PAD = 40;
+  const innerW = W - 2 * X_PAD; // 1120
+  const F = 'Segoe UI, Arial, Helvetica, sans-serif';
 
-  g.textBaseline = 'top';
-  g.textAlign = 'left';
-
-  // 1. Canvas Background
-  g.fillStyle = '#f1f5f9';
+  // White Background
+  g.fillStyle = '#ffffff';
   g.fillRect(0, 0, W, H);
 
-  // Main Card
-  g.fillStyle = '#ffffff';
-  drawCanvasRoundRect(g, M_PAD, M_PAD, W - 2*M_PAD, H - 2*M_PAD, 16);
-  g.fill();
-  g.strokeStyle = '#cbd5e1';
-  g.lineWidth = 1.5;
-  g.stroke();
+  let y = 36;
 
-  // 2. Header Banner
-  const bannerH = 135;
-  g.save();
-  drawCanvasRoundRect(g, M_PAD, M_PAD, W - 2*M_PAD, bannerH, 16);
-  g.clip();
-  const grad = g.createLinearGradient(M_PAD, M_PAD, W - M_PAD, M_PAD + bannerH);
-  grad.addColorStop(0, '#0a424c');
-  grad.addColorStop(1, '#0D5966');
-  g.fillStyle = grad;
-  g.fillRect(M_PAD, M_PAD, W - 2*M_PAD, bannerH);
-  g.restore();
-
-  // Banner Text Content
-  g.fillStyle = '#38bdf8';
-  g.font = 'bold 14px ' + F;
-  g.fillText(isEn ? 'TSC80 SHIPBUILDING PROJECT   ·   ELECTRICAL SYSTEM (C459)' : 'DỰ ÁN ĐÓNG TÀU TSC80   ·   HỆ THỐNG ĐIỆN (C459)', M_PAD + 25, M_PAD + 26);
-
-  g.fillStyle = '#ffffff';
-  g.font = 'bold 30px ' + F;
-  const reportMainTitle = isEn ? ('WEEKLY PROGRESS REPORT — WEEK ' + curWkStr) : ('BÁO CÁO TIẾN ĐỘ THI CÔNG — TUẦN ' + curWkStr);
-  g.fillText(reportMainTitle, M_PAD + 25, M_PAD + 54);
-
-  g.fillStyle = '#e0f2fe';
-  g.font = '16px ' + F;
-  const compSubtitle = wprev ?
-    (isEn ? ('✦ Comparison vs Previous Week: ' + prevWkStr) : ('✦ So sánh đối chiếu trực tiếp với Tuần trước: ' + prevWkStr)) :
-    (isEn ? '✦ Initial Project Milestone Report' : '✦ Báo cáo mốc khởi đầu dự án');
-  g.fillText(compSubtitle, M_PAD + 25, M_PAD + 96);
-
-  // Banner Week Badge on the right
-  const badgeW = 150, badgeH = 75;
-  const bx = W - M_PAD - badgeW - 25, by = M_PAD + 20;
-  g.fillStyle = 'rgba(255,255,255,0.15)';
-  drawCanvasRoundRect(g, bx, by, badgeW, badgeH, 10);
-  g.fill();
-  g.strokeStyle = 'rgba(255,255,255,0.3)';
-  g.lineWidth = 1;
-  g.stroke();
-
+  // Header
   g.textAlign = 'center';
-  g.fillStyle = '#bae6fd';
-  g.font = 'bold 12px ' + F;
-  g.fillText(isEn ? 'CURRENT WEEK' : 'TUẦN BÁO CÁO', bx + badgeW / 2, by + 16);
+  g.fillStyle = '#1F4E78';
+  g.font = 'bold 22px ' + F;
+  const mainTitle = isEn ?
+    ('WEEKLY PROGRESS REPORT: 3-CONTRACTOR COMPARISON (' + prevWkStr + ' vs ' + curWkStr + ')') :
+    ('BÁO CÁO TIẾN ĐỘ TUẦN: ĐỐI CHIẾU 3 NHÀ THẦU (' + prevWkStr + ' vs ' + curWkStr + ')');
+  g.fillText(mainTitle, W / 2, y + 16);
+  y += 32;
 
-  g.fillStyle = '#ffffff';
-  g.font = 'bold 26px ' + F;
-  g.fillText(curWkStr, bx + badgeW / 2, by + 40);
-
-  g.textAlign = 'right';
-  g.fillStyle = '#cbd5e1';
-  g.font = '12px ' + F;
-  const timeStr = (isEn ? 'Exported: ' : 'Xuất lúc: ') + new Date().toLocaleString(isEn ? 'en-US' : 'vi-VN');
-  g.fillText(timeStr, W - M_PAD - 25, M_PAD + bannerH - 18);
-  g.textAlign = 'left';
-
-  // 3. Section I: Executive Progress Overview
-  let y = M_PAD + bannerH + 26;
-  const innerX = M_PAD + 20;
-  const innerW = W - 2 * innerX; // 1080px
-
-  g.fillStyle = '#0f172a';
-  g.font = 'bold 18px ' + F;
-  g.fillText(isEn ? 'I. EXECUTIVE PROGRESS OVERVIEW' : 'I. TỔNG QUAN TIẾN ĐỘ THI CÔNG TOÀN DỰ ÁN', innerX, y);
+  g.fillStyle = '#555555';
+  g.font = 'italic 12.5px ' + F;
+  const subTitle = isEn ?
+    'Project: C459 | Work Item: Electrical Cabling (Pulling & Termination) | Target W50: Pulling 95% – Termination 80%' :
+    'Dự án: C459 | Hạng mục: Cáp điện (Kéo dây & Đấu nối) | Mốc mục tiêu W50: Kéo dây 95% – Đấu nối 80%';
+  g.fillText(subTitle, W / 2, y + 14);
   y += 28;
 
-  const kpiCount = Math.min(structuredItems.length, 3);
-  const kpiSpacing = 16;
-  const kpiW = (innerW - (kpiCount - 1) * kpiSpacing) / kpiCount;
-  const kpiH = 155;
-  const contrs = ['HDC', 'NAUTICS', 'ST'];
-
-  structuredItems.slice(0, 3).forEach((it, idx) => {
-    const kx = innerX + idx * (kpiW + kpiSpacing);
-    const itTitle = getWorkItemTitle(it.name);
-    const itUnit = getUnitLabel(it.unit);
-    const totEntry = it.contractors.find(c => c.isTotal);
-    const totPlan = totEntry ? totEntry.plan : null;
-    const totQty = totEntry && totEntry.qtyRow && wcur ? parseNum(M.cell(totEntry.qtyRow, wcur.c)) : null;
-    const totPct = totEntry && totEntry.pctRow && wcur ? parsePct(M.cell(totEntry.pctRow, wcur.c)) : null;
-    const prevTotQty = totEntry && totEntry.qtyRow && wprev ? parseNum(M.cell(totEntry.qtyRow, wprev.c)) : null;
-    const prevTotPct = totEntry && totEntry.pctRow && wprev ? parsePct(M.cell(totEntry.pctRow, wprev.c)) : null;
-
-    const deltaQty = (totQty !== null && prevTotQty !== null) ? (totQty - prevTotQty) : null;
-    const deltaPct = (totPct !== null && prevTotPct !== null) ? (totPct - prevTotPct) : null;
-
-    // Card background
-    g.fillStyle = '#f8fafc';
-    drawCanvasRoundRect(g, kx, y, kpiW, kpiH, 12);
-    g.fill();
-    g.strokeStyle = '#e2e8f0';
-    g.lineWidth = 1.2;
-    g.stroke();
-
-    // Top item title
-    g.fillStyle = '#1e293b';
-    g.font = 'bold 15px ' + F;
-    g.fillText((idx + 1) + '. ' + itTitle, kx + 14, y + 14);
-
-    // Large Progress %
-    g.fillStyle = '#0D5966';
-    g.font = 'bold 28px ' + F;
-    g.fillText(fmtPctVal(totPct), kx + 14, y + 42);
-
-    // Delta badge next to progress %
-    if(deltaPct !== null){
-      const sign = deltaPct >= 0 ? '+' : '';
-      const arrow = deltaPct > 0.0001 ? '▲' : (deltaPct < -0.0001 ? '▼' : '—');
-      const dTxt = arrow + ' ' + sign + deltaPct.toFixed(1) + '% vs ' + prevWkStr;
-      const dWidth = 140;
-      const dBg = deltaPct > 0.0001 ? '#dcfce7' : (deltaPct < -0.0001 ? '#fee2e2' : '#f1f5f9');
-      const dFg = deltaPct > 0.0001 ? '#15803d' : (deltaPct < -0.0001 ? '#b91c1c' : '#475569');
-      drawCanvasBadge(g, dTxt, kx + kpiW - dWidth - 14, y + 44, dWidth, 26, dBg, dFg);
-      g.textBaseline = 'top';
-      g.textAlign = 'left';
-    }
-
-    // Cumulative Quantity & Plan
-    g.fillStyle = '#475569';
-    g.font = '13px ' + F;
-    let qtyLine = fmtVal(totQty) + ' / ' + fmtVal(totPlan) + ' ' + itUnit;
-    if(deltaQty !== null){
-      const dSign = deltaQty >= 0 ? '+' : '';
-      qtyLine += '  (' + dSign + fmtVal(deltaQty) + ' ' + itUnit + ')';
-    }
-    g.fillText(qtyLine, kx + 14, y + 80);
-
-    // Progress bar
-    const barW = kpiW - 28, barH = 8;
-    const fillW = Math.max(0, Math.min(barW, barW * (totPct || 0) / 100));
-    g.fillStyle = '#e2e8f0';
-    drawCanvasRoundRect(g, kx + 14, y + 102, barW, barH, 4);
-    g.fill();
-    if(fillW > 0){
-      g.fillStyle = '#1e3a8a';
-      drawCanvasRoundRect(g, kx + 14, y + 102, fillW, barH, 4);
-      g.fill();
-    }
-
-    // Contractor mini chips
-    let chipX = kx + 14;
-    contrs.forEach(cName => {
-      const cData = it.contractors.find(c => c.name.toUpperCase().includes(cName));
-      const cPct = cData && cData.pctRow && wcur ? parsePct(M.cell(cData.pctRow, wcur.c)) : null;
-      const col = getContrColor(cName);
-      g.fillStyle = col;
-      g.beginPath();
-      g.arc(chipX + 4, y + 130, 4, 0, Math.PI * 2);
-      g.fill();
-
-      g.fillStyle = '#334155';
-      g.font = 'bold 12px ' + F;
-      const tText = cName + ': ' + fmtPctVal(cPct);
-      g.fillText(tText, chipX + 12, y + 123);
-      chipX += g.measureText(tText).width + 16;
-    });
-  });
-
-  // 4. Section II: Detailed Comparison Matrix Table
-  y += kpiH + 30;
-  g.fillStyle = '#0f172a';
-  g.font = 'bold 18px ' + F;
-  g.fillText(isEn ? 'II. DETAILED PROGRESS & PREVIOUS WEEK COMPARISON MATRIX' : 'II. BẢNG ĐỐI CHIẾU TIẾN ĐỘ CHI TIẾT THEO HẠNG MỤC & NHÀ THẦU', innerX, y);
-  y += 24;
-
-  // Table Columns width: 280, 130, 150, 150, 160, 210 = 1080px
-  const CW = [280, 130, 150, 150, 160, 210];
-  const TH = 40;
-
-  // Table Header
-  g.fillStyle = '#0D5966';
-  drawCanvasRoundRect(g, innerX, y, innerW, TH, 8);
-  g.fill();
-
-  const headers = [
-    isEn ? 'Work Item / Contractor' : 'Hạng mục / Đơn vị thi công',
-    isEn ? 'Plan' : 'Kế hoạch',
-    isEn ? ('Prev Week (' + (prevWkStr || '—') + ')') : ('Tuần trước (' + (prevWkStr || '—') + ')'),
-    isEn ? ('This Week (' + curWkStr + ')') : ('Tuần này (' + curWkStr + ')'),
-    isEn ? 'Weekly Gain (Δ)' : 'Tăng trong tuần (Δ)',
-    isEn ? 'Cumulative Progress (%)' : 'Tiến độ lũy kế (%)'
-  ];
-
-  g.fillStyle = '#ffffff';
-  g.font = 'bold 14px ' + F;
-  let hx = innerX;
-  headers.forEach((h, k) => {
-    if(k === 0){
-      g.textAlign = 'left';
-      g.fillText(h, hx + 12, y + 12);
-    } else if(k === 5){
-      g.textAlign = 'center';
-      g.fillText(h, hx + CW[k] / 2, y + 12);
-    } else {
-      g.textAlign = 'right';
-      g.fillText(h, hx + CW[k] - 12, y + 12);
-    }
-    hx += CW[k];
-  });
-  g.textAlign = 'left';
-  y += TH + 4;
-
-  // Render Table Rows
-  structuredItems.forEach((it, idx) => {
-    const itTitle = getWorkItemTitle(it.name);
-    const itUnit = getUnitLabel(it.unit);
-    const totEntry = it.contractors.find(c => c.isTotal);
-    const totPlan = totEntry ? totEntry.plan : null;
-
-    // Group Header Row
-    const ghH = 32;
-    g.fillStyle = '#e2e8f0';
-    g.fillRect(innerX, y, innerW, ghH);
-    g.fillStyle = '#0f172a';
-    g.font = 'bold 14px ' + F;
-    g.fillText((idx + 1) + '. ' + itTitle.toUpperCase() + '  (' + (isEn ? 'Plan: ' : 'Kế hoạch: ') + fmtVal(totPlan) + ' ' + itUnit + '  ·  ' + (isEn ? 'Unit: ' : 'ĐVT: ') + itUnit + ')', innerX + 12, y + 8);
-    y += ghH;
-
-    const rowH = 34;
-
-    // Total Project Row
-    if(totEntry){
-      const qtyVal = totEntry.qtyRow && wcur ? parseNum(M.cell(totEntry.qtyRow, wcur.c)) : null;
-      const pctVal = totEntry.pctRow && wcur ? parsePct(M.cell(totEntry.pctRow, wcur.c)) : null;
-      const prevQtyVal = totEntry.qtyRow && wprev ? parseNum(M.cell(totEntry.qtyRow, wprev.c)) : null;
-      const prevPctVal = totEntry.pctRow && wprev ? parsePct(M.cell(totEntry.pctRow, wprev.c)) : null;
-
-      const deltaQty = (qtyVal !== null && prevQtyVal !== null) ? (qtyVal - prevQtyVal) : null;
-      const deltaPct = (pctVal !== null && prevPctVal !== null) ? (pctVal - prevPctVal) : null;
-
-      g.fillStyle = 'rgba(30, 58, 138, 0.08)';
-      g.fillRect(innerX, y, innerW, rowH);
-
-      g.strokeStyle = '#e2e8f0';
-      g.lineWidth = 1;
-      g.beginPath();
-      g.moveTo(innerX, y + rowH);
-      g.lineTo(innerX + innerW, y + rowH);
-      g.stroke();
-
-      let rx = innerX;
-      // Col 0
-      drawCanvasBadge(g, isEn ? 'TOTAL PROJECT' : 'TỔNG DỰ ÁN', rx + 12, y + 5, 120, 24, '#1e3a8a', '#ffffff');
-      g.textBaseline = 'top';
-      rx += CW[0];
-
-      // Col 1 (Plan)
-      g.textAlign = 'right';
-      g.font = 'bold 13px ' + F;
-      g.fillStyle = '#334155';
-      g.fillText(totPlan !== null ? (fmtVal(totPlan) + ' ' + itUnit) : '—', rx + CW[1] - 12, y + 9);
-      rx += CW[1];
-
-      // Col 2 (Prev Qty)
-      g.font = '13px ' + F;
-      g.fillStyle = '#64748b';
-      g.fillText(prevQtyVal !== null ? (fmtVal(prevQtyVal) + ' ' + itUnit) : '—', rx + CW[2] - 12, y + 9);
-      rx += CW[2];
-
-      // Col 3 (Cur Qty)
-      g.font = 'bold 13px ' + F;
-      g.fillStyle = '#1e3a8a';
-      g.fillText(qtyVal !== null ? (fmtVal(qtyVal) + ' ' + itUnit) : '—', rx + CW[3] - 12, y + 9);
-      rx += CW[3];
-
-      // Col 4 (Weekly Gain Δ)
-      if(deltaQty !== null){
-        const sign = deltaQty >= 0 ? '+' : '';
-        const arrow = deltaQty > 0 ? '▲' : (deltaQty < 0 ? '▼' : '—');
-        const dColor = deltaQty > 0 ? '#15803d' : (deltaQty < 0 ? '#b91c1c' : '#64748b');
-        g.font = 'bold 12px ' + F;
-        g.fillStyle = dColor;
-        g.fillText(arrow + ' ' + sign + fmtVal(deltaQty) + ' (' + sign + (deltaPct !== null ? deltaPct.toFixed(1) : '0') + '%)', rx + CW[4] - 12, y + 9);
-      } else {
-        g.font = '12px ' + F;
-        g.fillStyle = '#94a3b8';
-        g.fillText('—', rx + CW[4] - 12, y + 9);
-      }
-      rx += CW[4];
-
-      // Col 5 (Progress Bar & %)
-      g.textAlign = 'left';
-      const pbWidth = 100, pbHeight = 12;
-      const pbX = rx + 14, pbY = y + 11;
-      const pbFill = Math.max(0, Math.min(pbWidth, pbWidth * (pctVal || 0) / 100));
-      g.fillStyle = '#e2e8f0';
-      drawCanvasRoundRect(g, pbX, pbY, pbWidth, pbHeight, 6);
-      g.fill();
-      if(pbFill > 0){
-        g.fillStyle = '#1e3a8a';
-        drawCanvasRoundRect(g, pbX, pbY, pbFill, pbHeight, 6);
-        g.fill();
-      }
-      g.font = 'bold 13px ' + F;
-      g.fillStyle = '#1e3a8a';
-      g.fillText(fmtPctVal(pctVal), rx + 14 + pbWidth + 10, y + 9);
-
-      y += rowH;
-    }
-
-    // Contractor Rows
-    contrs.forEach((cName, ck) => {
-      const cData = it.contractors.find(c => c.name.toUpperCase().includes(cName));
-      if(!cData) return;
-
-      const cPlan = cData.plan;
-      const cQty = cData.qtyRow && wcur ? parseNum(M.cell(cData.qtyRow, wcur.c)) : null;
-      const cPct = cData.pctRow && wcur ? parsePct(M.cell(cData.pctRow, wcur.c)) : null;
-      const prevCQty = cData.qtyRow && wprev ? parseNum(M.cell(cData.qtyRow, wprev.c)) : null;
-      const prevCPct = cData.pctRow && wprev ? parsePct(M.cell(cData.pctRow, wprev.c)) : null;
-
-      const cDeltaQty = (cQty !== null && prevCQty !== null) ? (cQty - prevCQty) : null;
-      const cDeltaPct = (cPct !== null && prevCPct !== null) ? (cPct - prevCPct) : null;
-      const cCol = getContrColor(cName);
-
-      g.fillStyle = ck % 2 === 0 ? '#ffffff' : '#f8fafc';
-      g.fillRect(innerX, y, innerW, rowH);
-
-      g.strokeStyle = '#e2e8f0';
-      g.lineWidth = 1;
-      g.beginPath();
-      g.moveTo(innerX, y + rowH);
-      g.lineTo(innerX + innerW, y + rowH);
-      g.stroke();
-
-      let rx = innerX;
-      // Col 0
-      drawCanvasBadge(g, cName, rx + 12, y + 5, 75, 24, cCol, '#ffffff');
-      g.textBaseline = 'top';
-      rx += CW[0];
-
-      // Col 1 (Plan)
-      g.textAlign = 'right';
-      g.font = '13px ' + F;
-      g.fillStyle = '#334155';
-      g.fillText(cPlan !== null ? (fmtVal(cPlan) + ' ' + itUnit) : '—', rx + CW[1] - 12, y + 9);
-      rx += CW[1];
-
-      // Col 2 (Prev Qty)
-      g.font = '13px ' + F;
-      g.fillStyle = '#64748b';
-      g.fillText(prevCQty !== null ? (fmtVal(prevCQty) + ' ' + itUnit) : '—', rx + CW[2] - 12, y + 9);
-      rx += CW[2];
-
-      // Col 3 (Cur Qty)
-      g.font = '13px ' + F;
-      g.fillStyle = '#0f172a';
-      g.fillText(cQty !== null ? (fmtVal(cQty) + ' ' + itUnit) : '—', rx + CW[3] - 12, y + 9);
-      rx += CW[3];
-
-      // Col 4 (Weekly Gain Δ)
-      if(cDeltaQty !== null){
-        const sign = cDeltaQty >= 0 ? '+' : '';
-        const arrow = cDeltaQty > 0 ? '▲' : (cDeltaQty < 0 ? '▼' : '—');
-        const dColor = cDeltaQty > 0 ? '#15803d' : (cDeltaQty < 0 ? '#b91c1c' : '#64748b');
-        g.font = 'bold 12px ' + F;
-        g.fillStyle = dColor;
-        g.fillText(arrow + ' ' + sign + fmtVal(cDeltaQty) + ' (' + sign + (cDeltaPct !== null ? cDeltaPct.toFixed(1) : '0') + '%)', rx + CW[4] - 12, y + 9);
-      } else {
-        g.font = '12px ' + F;
-        g.fillStyle = '#94a3b8';
-        g.fillText('—', rx + CW[4] - 12, y + 9);
-      }
-      rx += CW[4];
-
-      // Col 5 (Progress Bar & %)
-      g.textAlign = 'left';
-      const pbWidth = 100, pbHeight = 12;
-      const pbX = rx + 14, pbY = y + 11;
-      const cPbFill = Math.max(0, Math.min(pbWidth, pbWidth * (cPct || 0) / 100));
-      g.fillStyle = '#e2e8f0';
-      drawCanvasRoundRect(g, pbX, pbY, pbWidth, pbHeight, 6);
-      g.fill();
-      if(cPbFill > 0){
-        g.fillStyle = cCol;
-        drawCanvasRoundRect(g, pbX, pbY, cPbFill, pbHeight, 6);
-        g.fill();
-      }
-      g.font = 'bold 13px ' + F;
-      g.fillStyle = '#0f172a';
-      g.fillText(fmtPctVal(cPct), rx + 14 + pbWidth + 10, y + 9);
-
-      y += rowH;
-    });
-
-    y += 8; // Spacing between work items
-  });
-
-  // 5. Notes & Remarks Card
-  const noteH = 92;
-  g.fillStyle = '#f8fafc';
-  drawCanvasRoundRect(g, innerX, y, innerW, noteH, 10);
-  g.fill();
-  g.strokeStyle = '#cbd5e1';
-  g.lineWidth = 1;
+  // Header separator line
+  g.strokeStyle = '#1F4E78';
+  g.lineWidth = 2.5;
+  g.beginPath();
+  g.moveTo(X_PAD, y);
+  g.lineTo(X_PAD + innerW, y);
   g.stroke();
+  y += 18;
 
-  g.fillStyle = '#0f172a';
-  g.font = 'bold 14px ' + F;
-  g.fillText(isEn ? '📌 Progress Notes & Analysis Remarks:' : '📌 Ghi chú đánh giá tiến độ thi công:', innerX + 16, y + 14);
+  // Helper drawing functions
+  function drawSectionTitle(secY, title){
+    g.fillStyle = '#1F4E78';
+    g.fillRect(X_PAD, secY, innerW, 30);
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 12.5px ' + F;
+    g.textAlign = 'left';
+    g.textBaseline = 'middle';
+    g.fillText(title, X_PAD + 12, secY + 15);
+    g.textBaseline = 'top';
+  }
 
-  g.fillStyle = '#334155';
-  g.font = '13px ' + F;
-  const note1 = isEn ?
-    ('• Week ' + curWkStr + ' shows weekly delta comparison against ' + (prevWkStr || 'initial project start') + '. Data is synced from Google Sheets.') :
-    ('• Báo cáo tiến độ tuần ' + curWkStr + ' đối chiếu trực tiếp với ' + (prevWkStr || 'mốc bắt đầu dự án') + ', thể hiện khối lượng lũy kế và tăng trưởng trong tuần của HDC, NAUTICS, ST.');
-  const note2 = isEn ?
-    '• Work items tracked: 1. Cable Cutting (m) · 2. Cable Pulling (m) · 3. Cable Termination (pts). Cumulative values calculated to date.' :
-    '• Các chỉ tiêu theo dõi: 1. Cắt cáp điện (m) · 2. Kéo dây cáp điện (m) · 3. Đấu nối đầu cáp (đầu cốt). Số liệu lũy kế tính đến tuần báo cáo.';
-  g.fillText(note1, innerX + 16, y + 40);
-  g.fillText(note2, innerX + 16, y + 64);
+  function drawCellText(x, y, w, h, text, weight, color, align){
+    g.fillStyle = color;
+    g.font = weight + ' 13px ' + F;
+    g.textAlign = align;
+    g.textBaseline = 'middle';
+    const tx = align === 'center' ? (x + w / 2) : (align === 'right' ? (x + w - 10) : (x + 10));
+    g.fillText(text, tx, y + h / 2);
+    g.textBaseline = 'top';
+    g.textAlign = 'left';
+  }
 
-  // 6. Page Footer
-  const footerY = H - M_PAD - 35;
-  g.strokeStyle = '#e2e8f0';
+  function drawTable1Row(rowY, rowH, label, planVal, hdcVal, nauVal, stVal, totVal, isBold){
+    const colW = [370, 150, 150, 150, 150, 150];
+    const vals = [label, planVal, hdcVal, nauVal, stVal, totVal];
+    let curX = X_PAD;
+
+    for(let c = 0; c < 6; c++){
+      const cw = colW[c];
+      let bg = '#ffffff';
+      if(c === 1) bg = '#FFF2CC'; // Plan col
+      else if(c === 5) bg = '#E2EFDA'; // Total col
+
+      g.fillStyle = bg;
+      g.fillRect(curX, rowY, cw, rowH);
+      g.strokeStyle = '#D9D9D9';
+      g.lineWidth = 1;
+      g.strokeRect(curX, rowY, cw, rowH);
+
+      const val = vals[c];
+      if(val !== undefined && val !== null){
+        let textCol = '#333333';
+        let weight = isBold || c === 1 || c === 5 ? 'bold' : 'normal';
+
+        if(typeof val === 'object' && val.text){
+          textCol = val.pass ? '#2e7d32' : '#c62828';
+          weight = 'bold';
+          drawCellText(curX, rowY, cw, rowH, val.text, weight, textCol, 'center');
+        } else {
+          drawCellText(curX, rowY, cw, rowH, String(val), weight, textCol, c === 0 ? 'left' : 'center');
+        }
+      }
+      curX += cw;
+    }
+  }
+
+  function drawGroupHeader(rowY, rowH, title){
+    g.fillStyle = '#B4C6E7';
+    g.fillRect(X_PAD, rowY, innerW, rowH);
+    g.strokeStyle = '#D9D9D9';
+    g.lineWidth = 1;
+    g.strokeRect(X_PAD, rowY, innerW, rowH);
+
+    g.fillStyle = '#002060';
+    g.font = 'bold 12.5px ' + F;
+    g.textAlign = 'left';
+    g.textBaseline = 'middle';
+    g.fillText(title, X_PAD + 12, rowY + rowH / 2);
+    g.textBaseline = 'top';
+  }
+
+  // --- BẢNG 1 ---
+  drawSectionTitle(y, isEn ?
+    'TABLE 1: 3-CONTRACTOR CABLE PULLING & TERMINATION PROGRESS COMPARISON' :
+    'BẢNG 1: SO SÁNH TIẾN ĐỘ KÉO DÂY & ĐẤU NỐI GIỮA 2 TUẦN CỦA 3 NHÀ THẦU');
+  y += 30;
+
+  // Table 1 Header
+  const t1ColW = [370, 150, 150, 150, 150, 150];
+  const t1Headers = [
+    isEn ? 'Work Item / Monitored Parameter' : 'Hạng mục / Thông số theo dõi',
+    (isEn ? 'Plan ' : 'Kế hoạch ') + curWkStr,
+    'HDC',
+    'NAUTICS',
+    'ST',
+    isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'
+  ];
+  let curHX = X_PAD;
+  for(let c = 0; c < 6; c++){
+    const cw = t1ColW[c];
+    g.fillStyle = '#D9E1F2';
+    g.fillRect(curHX, y, cw, 36);
+    g.strokeStyle = '#D9D9D9';
+    g.lineWidth = 1;
+    g.strokeRect(curHX, y, cw, 36);
+    drawCellText(curHX, y, cw, 36, t1Headers[c], 'bold', '#1F4E78', 'center');
+    curHX += cw;
+  }
+  y += 36;
+
+  // Group 1: Cable Pulling
+  drawGroupHeader(y, 30, t1Data.pull.title);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.pull.prev.label, t1Data.pull.prev.plan, t1Data.pull.prev.hdc, t1Data.pull.prev.nau, t1Data.pull.prev.st, t1Data.pull.prev.tot, false);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.pull.cur.label, t1Data.pull.cur.plan, t1Data.pull.cur.hdc, t1Data.pull.cur.nau, t1Data.pull.cur.st, t1Data.pull.cur.tot, false);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.pull.delta.label, t1Data.pull.delta.plan, t1Data.pull.delta.hdc, t1Data.pull.delta.nau, t1Data.pull.delta.st, t1Data.pull.delta.tot, true);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.pull.eval.label, t1Data.pull.eval.plan, t1Data.pull.eval.hdc, t1Data.pull.eval.nau, t1Data.pull.eval.st, t1Data.pull.eval.tot, false);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.pull.qty.label, t1Data.pull.qty.plan, t1Data.pull.qty.hdc, t1Data.pull.qty.nau, t1Data.pull.qty.st, t1Data.pull.qty.tot, false);
+  y += 30;
+
+  // Group 2: Termination
+  drawGroupHeader(y, 30, t1Data.term.title);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.term.prev.label, t1Data.term.prev.plan, t1Data.term.prev.hdc, t1Data.term.prev.nau, t1Data.term.prev.st, t1Data.term.prev.tot, false);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.term.cur.label, t1Data.term.cur.plan, t1Data.term.cur.hdc, t1Data.term.cur.nau, t1Data.term.cur.st, t1Data.term.cur.tot, false);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.term.delta.label, t1Data.term.delta.plan, t1Data.term.delta.hdc, t1Data.term.delta.nau, t1Data.term.delta.st, t1Data.term.delta.tot, true);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.term.eval.label, t1Data.term.eval.plan, t1Data.term.eval.hdc, t1Data.term.eval.nau, t1Data.term.eval.st, t1Data.term.eval.tot, false);
+  y += 30;
+  drawTable1Row(y, 30, t1Data.term.qty.label, t1Data.term.qty.plan, t1Data.term.qty.hdc, t1Data.term.qty.nau, t1Data.term.qty.st, t1Data.term.qty.tot, false);
+  y += 30;
+
+  y += 20;
+
+  // --- BẢNG 2 ---
+  drawSectionTitle(y, isEn ?
+    'TABLE 2: 3-CONTRACTOR COMMITMENT ROADMAP (W43 ➔ W50)' :
+    'BẢNG 2: LỘ TRÌNH MỤC TIÊU CAM KẾT CHO CẢ 3 NHÀ THẦU (W43 ➔ W50)');
+  y += 30;
+
+  // Table 2 Header
+  const t2ColW = [110, 180, 160, 180, 160, 330];
+  const t2Headers = [
+    isEn ? 'Week' : 'Tuần',
+    isEn ? 'CABLE PULLING Cum.' : 'KÉO DÂY Lũy kế',
+    isEn ? 'Weekly Inc. (Δ)' : 'Tăng tuần (Δ)',
+    isEn ? 'TERMINATION Cum.' : 'ĐẤU NỐI Lũy kế',
+    isEn ? 'Weekly Inc. (Δ)' : 'Tăng tuần (Δ)',
+    isEn ? 'Key Focus / Notes' : 'Trọng tâm kiểm soát / Ghi chú'
+  ];
+  let curH2X = X_PAD;
+  for(let c = 0; c < 6; c++){
+    const cw = t2ColW[c];
+    g.fillStyle = '#D9E1F2';
+    g.fillRect(curH2X, y, cw, 36);
+    g.strokeStyle = '#D9D9D9';
+    g.lineWidth = 1;
+    g.strokeRect(curH2X, y, cw, 36);
+    drawCellText(curH2X, y, cw, 36, t2Headers[c], 'bold', '#1F4E78', 'center');
+    curH2X += cw;
+  }
+  y += 36;
+
+  // Table 2 Data Rows
+  roadmap.forEach(r => {
+    let curX = X_PAD;
+    let bg = '#ffffff';
+    if(r.isCurrent) bg = '#FCE4D6';
+    else if(r.isTarget) bg = '#E8F5E9';
+
+    const isB = r.isCurrent || r.isTarget;
+    const rowVals = [
+      r.wk,
+      r.pullTot !== null ? r.pullTot.toFixed(1) + '%' : '—',
+      r.pullDelta !== null ? ((r.pullDelta > 0 ? '+' : '') + r.pullDelta.toFixed(1) + '%') : '—',
+      r.termTot !== null ? r.termTot.toFixed(1) + '%' : '—',
+      r.termDelta !== null ? ((r.termDelta > 0 ? '+' : '') + r.termDelta.toFixed(1) + '%') : '—',
+      isEn ? r.noteEn : r.note
+    ];
+
+    for(let c = 0; c < 6; c++){
+      const cw = t2ColW[c];
+      g.fillStyle = bg;
+      g.fillRect(curX, y, cw, 30);
+      g.strokeStyle = '#D9D9D9';
+      g.lineWidth = 1;
+      g.strokeRect(curX, y, cw, 30);
+
+      const val = rowVals[c];
+      const weight = isB ? 'bold' : 'normal';
+      drawCellText(curX, y, cw, 30, String(val), weight, '#333333', c === 5 ? 'left' : 'center');
+      curX += cw;
+    }
+    y += 30;
+  });
+
+  y += 20;
+
+  // --- BẢNG 3 ---
+  const nextWkLabel = (curWkStr === 'W44' || curWkStr === '44/26') ? 'W45' : (isEn ? 'Next Week' : 'Tuần tới');
+  drawSectionTitle(y, isEn ?
+    ('TABLE 3: DIRECTIVES & RECOMMENDATIONS FOR ' + nextWkLabel) :
+    ('BẢNG 3: NHẬN XÉT & CHỈ ĐẠO ĐIỀU HÀNH TUẦN TỚI (' + nextWkLabel + ')'));
+  y += 30;
+
+  // Table 3 Data Rows
+  const t3RowH = 74;
+  comments.forEach(cm => {
+    // Contractor name cell
+    g.fillStyle = '#D9E1F2';
+    g.fillRect(X_PAD, y, 180, t3RowH);
+    g.strokeStyle = '#D9D9D9';
+    g.lineWidth = 1;
+    g.strokeRect(X_PAD, y, 180, t3RowH);
+    drawCellText(X_PAD, y, 180, t3RowH, cm.name, 'bold', '#1F4E78', 'center');
+
+    // Comment cell
+    g.fillStyle = '#ffffff';
+    g.fillRect(X_PAD + 180, y, 940, t3RowH);
+    g.strokeStyle = '#D9D9D9';
+    g.strokeRect(X_PAD + 180, y, 940, t3RowH);
+
+    g.fillStyle = '#333333';
+    g.font = '12.5px ' + F;
+    g.textAlign = 'left';
+    g.textBaseline = 'top';
+    drawCanvasWrappedText(g, cm.desc, X_PAD + 180 + 14, y + 14, 940 - 28, 20);
+
+    y += t3RowH;
+  });
+
+  // Footer
+  const footerY = H - 45;
+  g.strokeStyle = '#D9D9D9';
   g.lineWidth = 1;
   g.beginPath();
-  g.moveTo(innerX, footerY);
-  g.lineTo(innerX + innerW, footerY);
+  g.moveTo(X_PAD, footerY);
+  g.lineTo(X_PAD + innerW, footerY);
   g.stroke();
 
   g.fillStyle = '#64748b';
-  g.font = '13px ' + F;
+  g.font = '12px ' + F;
   g.textAlign = 'left';
-  g.fillText(isEn ? 'TSC80 Shipbuilding Project   ·   Weekly Progress System' : 'Dự án Đóng tàu TSC80   ·   Hệ thống Báo cáo Tiến độ', innerX, footerY + 14);
+  g.fillText(isEn ? 'TSC80 Shipbuilding Project · Weekly Progress System' : 'Dự án Đóng tàu TSC80 · Hệ thống Báo cáo Tiến độ', X_PAD, footerY + 16);
 
   g.textAlign = 'center';
-  g.fillText(isEn ? ('Report ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')) : ('Báo cáo đối chiếu ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')), W / 2, footerY + 14);
+  g.fillText(isEn ? ('Report ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')) : ('Báo cáo đối chiếu ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')), W / 2, footerY + 16);
 
   g.textAlign = 'right';
-  g.fillText('Bản quyền © 2026 Jay Duy   ·   Trang 1/1', innerX + innerW, footerY + 14);
+  g.fillText('Bản quyền © 2026 Jay Duy · Trang 1/1', X_PAD + innerW, footerY + 16);
   g.textAlign = 'left';
 
-  // 7. Convert canvas to Blob & File for modal
+  // Build reportHtml for vector printing / PDF export (#spdf)
+  let roadmapRowsHtml = '';
+  roadmap.forEach(r => {
+    const cls = r.isCurrent ? ' class="curr-week"' : '';
+    const st = r.isTarget ? ' style="font-weight:bold; background-color:#e8f5e9;"' : '';
+    roadmapRowsHtml += '<tr' + cls + st + '>' +
+      '<td>' + esc(r.wk) + '</td>' +
+      '<td>' + (r.pullTot !== null ? r.pullTot.toFixed(1) + '%' : '—') + '</td>' +
+      '<td>' + (r.pullDelta !== null ? ((r.pullDelta > 0 ? '+' : '') + r.pullDelta.toFixed(1) + '%') : '—') + '</td>' +
+      '<td>' + (r.termTot !== null ? r.termTot.toFixed(1) + '%' : '—') + '</td>' +
+      '<td>' + (r.termDelta !== null ? ((r.termDelta > 0 ? '+' : '') + r.termDelta.toFixed(1) + '%') : '—') + '</td>' +
+      '<td style="text-align:left;">' + esc(isEn ? r.noteEn : r.note) + '</td>' +
+      '</tr>';
+  });
+
+  let commentsRowsHtml = '';
+  comments.forEach(c => {
+    commentsRowsHtml += '<tr>' +
+      '<td class="nt-name">' + esc(c.name) + '</td>' +
+      '<td class="nt-desc">' + esc(c.desc) + '</td>' +
+      '</tr>';
+  });
+
+  const evalTagHtml = ev => '<span class="' + (ev.pass ? 'tag-pass' : 'tag-fail') + '">' + esc(ev.text) + '</span>';
+
+  const reportHtml = `<!DOCTYPE html>
+<html lang="${isEn ? 'en' : 'vi'}">
+<head>
+<meta charset="UTF-8">
+<title>${isEn ? 'Weekly Progress Report - 3 Contractors' : 'Báo Cáo Tiến Độ Tuần - Đối Chiếu 3 Nhà Thầu'} (${prevWkStr} vs ${curWkStr})</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm 12mm; }
+  * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { margin: 0; padding: 20px; color: #333; background-color: #fff; font-size: 11px; }
+  .report-container { max-width: 800px; margin: 0 auto; }
+  .header-block { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #1F4E78; padding-bottom: 8px; }
+  .header-block h1 { font-size: 16px; font-weight: 700; color: #1F4E78; margin: 0 0 4px 0; text-transform: uppercase; }
+  .header-block p { font-size: 11px; color: #555; margin: 0; font-style: italic; }
+  .section-title { background-color: #1F4E78; color: #fff; padding: 5px 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-top: 10px; margin-bottom: 0; border-radius: 2px 2px 0 0; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  th, td { border: 1px solid #D9D9D9; padding: 5px 6px; text-align: center; }
+  th { background-color: #D9E1F2; color: #1F4E78; font-weight: bold; font-size: 10.5px; }
+  .col-label { text-align: left; width: 34%; font-weight: 500; }
+  .group-header { background-color: #B4C6E7; color: #002060; font-weight: bold; text-align: left; padding-left: 10px; }
+  .plan-col { background-color: #FFF2CC; font-weight: bold; }
+  .total-col { background-color: #E2EFDA; font-weight: bold; }
+  .curr-week { background-color: #FCE4D6; font-weight: bold; }
+  .tag-pass { color: #2e7d32; font-weight: bold; }
+  .tag-fail { color: #c62828; font-weight: bold; }
+  .comments-table td { padding: 6px 10px; }
+  .nt-name { width: 18%; background-color: #D9E1F2; font-weight: bold; color: #1F4E78; }
+  .nt-desc { text-align: left; }
+  @media print { body { padding: 0; } .no-print { display: none; } }
+  .btn-print { padding: 6px 14px; background: #1F4E78; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 15px; }
+</style>
+</head>
+<body>
+<div class="report-container">
+  <div class="no-print" style="text-align: right;">
+    <button class="btn-print" onclick="window.print()">🖨 In Báo Cáo / Xuất PDF (1 Trang A4)</button>
+  </div>
+  <div class="header-block">
+    <h1>${esc(mainTitle)}</h1>
+    <p>${esc(subTitle)}</p>
+  </div>
+
+  <div class="section-title">${isEn ? 'TABLE 1: 3-CONTRACTOR CABLE PULLING & TERMINATION PROGRESS COMPARISON' : 'BẢNG 1: SO SÁNH TIẾN ĐỘ KÉO DÂY & ĐẤU NỐI GIỮA 2 TUẦN CỦA 3 NHÀ THẦU'}</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:34%;">${isEn ? 'Work Item / Parameter' : 'Hạng mục / Thông số theo dõi'}</th>
+        <th style="width:13%;">${(isEn ? 'Plan ' : 'Kế hoạch ') + esc(curWkStr)}</th>
+        <th style="width:13%;">HDC</th>
+        <th style="width:13%;">NAUTICS</th>
+        <th style="width:13%;">ST</th>
+        <th style="width:14%;">${isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="6" class="group-header">${esc(t1Data.pull.title)}</td></tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.pull.prev.label)}</td>
+        <td class="plan-col">${esc(t1Data.pull.prev.plan)}</td>
+        <td>${esc(t1Data.pull.prev.hdc)}</td>
+        <td>${esc(t1Data.pull.prev.nau)}</td>
+        <td>${esc(t1Data.pull.prev.st)}</td>
+        <td class="total-col">${esc(t1Data.pull.prev.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.pull.cur.label)}</td>
+        <td class="plan-col">${esc(t1Data.pull.cur.plan)}</td>
+        <td>${esc(t1Data.pull.cur.hdc)}</td>
+        <td>${esc(t1Data.pull.cur.nau)}</td>
+        <td>${esc(t1Data.pull.cur.st)}</td>
+        <td class="total-col">${esc(t1Data.pull.cur.tot)}</td>
+      </tr>
+      <tr style="font-weight: bold;">
+        <td class="col-label">${esc(t1Data.pull.delta.label)}</td>
+        <td class="plan-col">${esc(t1Data.pull.delta.plan)}</td>
+        <td>${esc(t1Data.pull.delta.hdc)}</td>
+        <td>${esc(t1Data.pull.delta.nau)}</td>
+        <td>${esc(t1Data.pull.delta.st)}</td>
+        <td class="total-col">${esc(t1Data.pull.delta.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.pull.eval.label)}</td>
+        <td class="plan-col">${esc(t1Data.pull.eval.plan)}</td>
+        <td>${evalTagHtml(t1Data.pull.eval.hdc)}</td>
+        <td>${evalTagHtml(t1Data.pull.eval.nau)}</td>
+        <td>${evalTagHtml(t1Data.pull.eval.st)}</td>
+        <td class="total-col">${evalTagHtml(t1Data.pull.eval.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.pull.qty.label)}</td>
+        <td class="plan-col">${esc(t1Data.pull.qty.plan)}</td>
+        <td>${esc(t1Data.pull.qty.hdc)}</td>
+        <td>${esc(t1Data.pull.qty.nau)}</td>
+        <td>${esc(t1Data.pull.qty.st)}</td>
+        <td class="total-col">${esc(t1Data.pull.qty.tot)}</td>
+      </tr>
+
+      <tr><td colspan="6" class="group-header">${esc(t1Data.term.title)}</td></tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.term.prev.label)}</td>
+        <td class="plan-col">${esc(t1Data.term.prev.plan)}</td>
+        <td>${esc(t1Data.term.prev.hdc)}</td>
+        <td>${esc(t1Data.term.prev.nau)}</td>
+        <td>${esc(t1Data.term.prev.st)}</td>
+        <td class="total-col">${esc(t1Data.term.prev.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.term.cur.label)}</td>
+        <td class="plan-col">${esc(t1Data.term.cur.plan)}</td>
+        <td>${esc(t1Data.term.cur.hdc)}</td>
+        <td>${esc(t1Data.term.cur.nau)}</td>
+        <td>${esc(t1Data.term.cur.st)}</td>
+        <td class="total-col">${esc(t1Data.term.cur.tot)}</td>
+      </tr>
+      <tr style="font-weight: bold;">
+        <td class="col-label">${esc(t1Data.term.delta.label)}</td>
+        <td class="plan-col">${esc(t1Data.term.delta.plan)}</td>
+        <td>${esc(t1Data.term.delta.hdc)}</td>
+        <td>${esc(t1Data.term.delta.nau)}</td>
+        <td>${esc(t1Data.term.delta.st)}</td>
+        <td class="total-col">${esc(t1Data.term.delta.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.term.eval.label)}</td>
+        <td class="plan-col">${esc(t1Data.term.eval.plan)}</td>
+        <td>${evalTagHtml(t1Data.term.eval.hdc)}</td>
+        <td>${evalTagHtml(t1Data.term.eval.nau)}</td>
+        <td>${evalTagHtml(t1Data.term.eval.st)}</td>
+        <td class="total-col">${evalTagHtml(t1Data.term.eval.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.term.qty.label)}</td>
+        <td class="plan-col">${esc(t1Data.term.qty.plan)}</td>
+        <td>${esc(t1Data.term.qty.hdc)}</td>
+        <td>${esc(t1Data.term.qty.nau)}</td>
+        <td>${esc(t1Data.term.qty.st)}</td>
+        <td class="total-col">${esc(t1Data.term.qty.tot)}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">${isEn ? 'TABLE 2: 3-CONTRACTOR COMMITMENT ROADMAP (W43 ➔ W50)' : 'BẢNG 2: LỘ TRÌNH MỤC TIÊU CAM KẾT CHO CẢ 3 NHÀ THẦU (W43 ➔ W50)'}</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:12%;">${isEn ? 'Week' : 'Tuần'}</th>
+        <th style="width:16%;">${isEn ? 'CABLE PULLING Cum.' : 'KÉO DÂY Lũy kế'}</th>
+        <th style="width:14%;">${isEn ? 'Weekly Inc. (Δ)' : 'Tăng tuần (Δ)'}</th>
+        <th style="width:16%;">${isEn ? 'TERMINATION Cum.' : 'ĐẤU NỐI Lũy kế'}</th>
+        <th style="width:14%;">${isEn ? 'Weekly Inc. (Δ)' : 'Tăng tuần (Δ)'}</th>
+        <th style="width:28%;">${isEn ? 'Key Focus / Notes' : 'Trọng tâm kiểm soát / Ghi chú'}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${roadmapRowsHtml}
+    </tbody>
+  </table>
+
+  <div class="section-title">${isEn ? ('TABLE 3: DIRECTIVES & RECOMMENDATIONS FOR ' + nextWkLabel) : ('BẢNG 3: NHẬN XÉT & CHỈ ĐẠO ĐIỀU HÀNH TUẦN TỚI (' + nextWkLabel + ')')}</div>
+  <table class="comments-table">
+    <tbody>
+      ${commentsRowsHtml}
+    </tbody>
+  </table>
+</div>
+</body>
+</html>`;
+
+  // Convert canvas to Blob & File for modal
   const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/png'));
-  const fileName = 'BaoCaoTienDo_Tuan_' + curWkStr.replace(/[^A-Za-z0-9]+/g,'_') + (wprev ? ('_vs_' + prevWkStr.replace(/[^A-Za-z0-9]+/g,'_')) : '') + '.png';
+  const fileName = 'BaoCaoTienDo_3NhaThau_' + curWkStr.replace(/[^A-Za-z0-9]+/g,'_') + (wprev ? ('_vs_' + prevWkStr.replace(/[^A-Za-z0-9]+/g,'_')) : '') + '.png';
   const file = new File([blob], fileName, { type: 'image/png' });
 
   snapFiles = [file];
   const url = URL.createObjectURL(blob);
   $('#smt').textContent = isEn ?
-    ('Weekly Progress Report — ' + curWkStr + (wprev ? ' (vs ' + prevWkStr + ')' : ' (Initial)')) :
-    ('Ảnh Báo Cáo Tiến Độ Tuần ' + curWkStr + (wprev ? ' (so với ' + prevWkStr + ')' : ' (Tuần đầu)'));
-  $('#simgs').innerHTML = '<img src="' + url + '" alt="Báo cáo tiến độ tuần ' + curWkStr + '">';
+    ('Weekly Progress Report — ' + curWkStr + (wprev ? ' (vs ' + prevWkStr + ')' : '')) :
+    ('Báo Cáo Tiến Độ Tuần ' + curWkStr + (wprev ? ' (so với ' + prevWkStr + ')' : ''));
+  $('#simgs').innerHTML = '<img src="' + url + '" alt="Báo cáo tiến độ tuần ' + curWkStr + '" style="max-width:100%;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">';
   $('#smsg').textContent = isEn ?
-    'Click "Download" or press and hold image to save.' :
-    'Bấm "Tải về" hoặc nhấn giữ vào ảnh để lưu về máy / gửi Zalo.';
+    'Click "Print / Export PDF" for official A4 report, or "Download" for PNG image.' :
+    'Bấm "In Báo Cáo / Xuất PDF" để in 1 trang A4 hoặc xuất PDF, hoặc bấm "Tải về" để lưu ảnh PNG.';
+
+  // Enable and bind Print / Export PDF button
+  const spdfBtn = $('#spdf');
+  if(spdfBtn){
+    spdfBtn.style.display = 'inline-block';
+    spdfBtn.onclick = () => {
+      let printWin = window.open('', '_blank');
+      if(!printWin){
+        let iframe = document.getElementById('print-iframe');
+        if(!iframe){
+          iframe = document.createElement('iframe');
+          iframe.id = 'print-iframe';
+          iframe.style.position = 'fixed';
+          iframe.style.right = '0';
+          iframe.style.bottom = '0';
+          iframe.style.width = '0';
+          iframe.style.height = '0';
+          iframe.style.border = '0';
+          document.body.appendChild(iframe);
+        }
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(reportHtml);
+        doc.close();
+        iframe.contentWindow.focus();
+        setTimeout(()=>{ iframe.contentWindow.print(); }, 300);
+        return;
+      }
+      printWin.document.open();
+      printWin.document.write(reportHtml);
+      printWin.document.close();
+      printWin.focus();
+      setTimeout(()=>{ printWin.print(); }, 250);
+    };
+  }
+
   $('#sm-tabs').style.display = 'none';
   $('#sm').style.display = 'block';
   $('#sm').scrollTop = 0;
 }
+
 
 function renderProg(){
   const isEn=(curLang==='en');
@@ -3136,7 +3419,10 @@ function renderProg(){
   if(PS.chart){res.innerHTML=det+chartsHtml(sh,M,wd,cmap);return}
 
   // Extract structured items & contractors
-  const structuredItems=extractProgData(M);
+  const allStructuredItems=extractProgData(M);
+  // User requirement: chỉ so sánh trên 2 tiêu chí kéo dây và đấu nối
+  const compItems=allStructuredItems.filter(it=>/kéo|pulling|pull/i.test(it.name)||isTermination(it.name));
+  const structuredItems=compItems.length>0?compItems:allStructuredItems;
   const curIdx=wd.findIndex(w=>w.c===(wcur?wcur.c:-1));
   const wprev=curIdx>0?wd[curIdx-1]:null;
   const curWkStr=wkLabel(wcur);
