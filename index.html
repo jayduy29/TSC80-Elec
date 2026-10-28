@@ -255,38 +255,49 @@ td .c-tag{margin:0}
 .tw table{table-layout:fixed;border-collapse:collapse;width:100%}
 
 /* === Progress tab modern layout & KPI cards === */
-.prog-overview{margin:0 0 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.prog-overview-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:4px}
-.prog-overview-hdr b{font-size:13px;color:var(--acct);letter-spacing:.3px}
-.prog-overview-hdr span{font-size:11px;color:var(--mut)}
-.prog-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-.prog-kpi-card{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:5px}
+.prog-overview{margin:0 0 14px;background:var(--card);border:1.5px solid var(--acc);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(13,89,102,.08)}
+.prog-overview-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(135deg,#0a424c,#0D5966);color:#fff;border-bottom:2px solid #5cc6d9;flex-wrap:wrap;gap:6px}
+.prog-overview-hdr b{font-size:16px;color:#fff;font-weight:800;letter-spacing:.5px}
+.prog-overview-hdr span{font-size:13px;color:#e0f2fe;font-weight:500}
+.prog-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;padding:14px}
+.prog-kpi-card{background:var(--bg);border:1.5px solid var(--line);border-top:4px solid var(--acc);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .prog-kpi-top{display:flex;justify-content:space-between;align-items:center}
-.prog-kpi-name{font-size:12px;font-weight:bold;color:var(--fg)}
-.prog-kpi-pct{font-size:14px;font-weight:800;color:var(--acct)}
-.prog-kpi-sub{font-size:11px;color:var(--mut)}
-.prog-kpi-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
-.c-chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;border:1px solid var(--line);background:var(--card)}
-.c-chip i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.prog-kpi-name{font-size:15px;font-weight:bold;color:var(--fg)}
+.prog-kpi-pct{font-size:18px;font-weight:800;color:var(--acc)}
+.prog-kpi-sub{font-size:12.5px;color:var(--mut);font-weight:500}
+.kpi-delta{font-size:12px;font-weight:700;padding:2px 6px;border-radius:6px;display:inline-block}
+.kpi-delta.up{background:#dcfce7;color:#15803d}
+.kpi-delta.down{background:#fee2e2;color:#b91c1c}
+.kpi-delta.same{background:#f1f5f9;color:#64748b}
+.prog-kpi-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.c-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:bold;padding:3px 9px;border-radius:12px;border:1.5px solid;background:var(--card)}
+.c-chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.c-chip.HDC{color:#d84315;border-color:#d84315;background:rgba(216,67,21,0.06)}
+.c-chip.NAUTICS{color:#1565c0;border-color:#1565c0;background:rgba(21,101,192,0.06)}
+.c-chip.ST{color:#2e7d32;border-color:#2e7d32;background:rgba(46,125,50,0.06)}
 
-.prog-sec-hdr{font-size:12px;font-weight:bold;color:var(--mut);margin:8px 2px 6px;letter-spacing:.5px}
-.prog-card{margin:0 0 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.prog-card-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg);border-bottom:1px solid var(--line);flex-wrap:wrap;gap:6px}
-.prog-card-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.prog-card-num{display:inline-flex;width:20px;height:20px;background:var(--acc);color:#fff;border-radius:50%;font-size:11px;font-weight:bold;align-items:center;justify-content:center}
-.prog-card-title b{font-size:13px;color:var(--fg)}
-.prog-card-meta{font-size:11px;color:var(--mut)}
-.prog-card-badge{font-size:13px;font-weight:800;color:var(--acct);background:rgba(13,89,102,.12);padding:2px 9px;border-radius:12px}
+.prog-sec-hdr{font-size:15px;font-weight:bold;color:var(--acc);margin:14px 4px 8px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.prog-card{margin:0 0 16px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.prog-card-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(135deg,rgba(13,89,102,.08),rgba(13,89,102,.03));border-bottom:1.5px solid var(--line);flex-wrap:wrap;gap:8px}
+.prog-card-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.prog-card-num{display:inline-flex;width:24px;height:24px;background:var(--acc);color:#fff;border-radius:50%;font-size:13px;font-weight:bold;align-items:center;justify-content:center}
+.prog-card-title b{font-size:15.5px;color:var(--fg)}
+.prog-card-meta{font-size:12.5px;color:var(--mut)}
+.prog-card-badge{font-size:15px;font-weight:800;color:var(--acc);background:rgba(13,89,102,.12);padding:3px 12px;border-radius:14px;border:1px solid rgba(13,89,102,.2)}
 
-.prog-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.prog-tbl th{padding:7px 10px;background:var(--bg);color:var(--mut);font-weight:600;font-size:11px;text-align:left;border-bottom:1px solid var(--line)}
-.prog-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.prog-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.prog-tbl th{padding:9px 12px;background:rgba(13,89,102,.06);color:var(--acc);font-weight:700;font-size:13px;text-align:left;border-bottom:1.5px solid var(--line)}
+.prog-tbl td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
 .prog-tbl tr:last-child td{border-bottom:0}
-.prog-tbl td.r{text-align:center;font-variant-numeric:tabular-nums}
-.prog-tbl td.r small{color:var(--mut);font-size:10px;display:block}
-.prog-row-tot{background:rgba(30,58,138,.05);font-weight:bold}
-.prog-row-tot td{border-bottom:1px solid rgba(30,58,138,.15)}
-.cb-tot{display:inline-flex;align-items:center;gap:4px;color:#fff;background:#1e3a8a;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:bold;line-height:16px;letter-spacing:.2px}
+.prog-tbl td.r{text-align:center;font-variant-numeric:tabular-nums;font-size:13.5px}
+.prog-tbl td.r b{font-size:14px}
+.prog-tbl td.r small{color:var(--mut);font-size:11px;display:block}
+.prog-row-tot{background:rgba(13,89,102,.06);font-weight:bold}
+.prog-row-tot td{border-bottom:1.5px solid rgba(13,89,102,.2)}
+.cb-tot{display:inline-flex;align-items:center;gap:5px;color:#fff;background:var(--acc);border-radius:6px;padding:3px 10px;font-size:12.5px;font-weight:bold;line-height:18px;letter-spacing:.3px}
+.c-tag-pill{display:inline-flex;align-items:center;gap:4px;color:#fff;border-radius:6px;padding:3px 10px;font-size:12.5px;font-weight:bold;line-height:18px}
+.pb{position:relative;height:20px;background:var(--line);border-radius:10px;overflow:hidden;min-width:90px;text-align:center}
+.pb span{position:relative;font-size:12px;font-weight:bold;line-height:20px;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.7)}
 
 #pleg .tag-btn{flex:0 0 auto;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:11px;font-weight:bold;cursor:pointer;transition:all .15s}
 #pleg .tag-btn.on{border-color:currentColor;box-shadow:0 0 0 1px currentColor}
@@ -2812,29 +2823,32 @@ async function snapProg(){
     { wk: 'W50', pullTot: 95.0, pullDelta: 2.0, termTot: 80.0, termDelta: 8.0, note: 'Mốc đợt 1 (Sẵn sàng Test & Comm)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true }
   ];
 
-  // Table 3 Directives
+  // Table 3 Directives with distinct contractor colors
   const comments = [
     {
       name: 'HDC',
+      color: '#d84315',
       desc: isEn ?
         'Cable pulling showed remarkable breakthrough (+14.3%, reaching 82.3% far exceeding plan). Termination accelerated to 13.1% (+238 ends). Request W45 to maintain workforce and finalize Axis A switchboard termination to reach 26% target.' :
         'Kéo dây bứt phá rất xuất sắc (+14.3%, đạt 82.3% vượt xa kế hoạch). Đấu nối tăng tốc đạt 13.1% (+238 đầu). Yêu cầu tuần W45 giữ vững quân số, tập trung dứt điểm đấu nối phòng điện trục A để hướng tới mốc 26%.'
     },
     {
       name: 'NAUTICS',
+      color: '#1565c0',
       desc: isEn ?
         'Cable pulling showed signs of slowing (+2.7%, reaching 72.2%). Termination remains behind (+91 ends, reaching only 10.3% vs 15% plan). Request immediate addition of 3-4 skilled electricians from early W45 to catch up.' :
         'Tiến độ kéo dây có dấu hiệu chậm lại (+2.7%, đạt 72.2%). Đấu nối còn chậm (+91 đầu, chỉ đạt 10.3% vs 15% yêu cầu). Yêu cầu bổ sung ngay 3-4 thợ đấu nối tay nghề cao từ đầu tuần W45 để bắt kịp lộ trình.'
     },
     {
       name: 'ST',
+      color: '#2e7d32',
       desc: isEn ?
         'Cable pulling accelerated impressively (+11.1%, reaching 66.6% exceeding plan). However, TERMINATION HAS NOT STARTED (0/554 ends). Request urgent deployment of dedicated termination team from early W45, avoiding workload accumulation.' :
         'Kéo dây tăng tốc ấn tượng (+11.1%, đạt 66.6% vượt kế hoạch). Tuy nhiên ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu). Yêu cầu khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45, không để dồn ứ việc về cuối.'
     }
   ];
 
-  // Render on A4 Canvas (1200 x 1697)
+  // Render on A4 Canvas (1200 x 1697) with larger fonts & PM contractor colors
   const cv = document.createElement('canvas');
   const W = 1200, H = 1697;
   cv.width = W; cv.height = H;
@@ -2847,53 +2861,53 @@ async function snapProg(){
   g.fillStyle = '#ffffff';
   g.fillRect(0, 0, W, H);
 
-  let y = 36;
+  let y = 38;
 
-  // Header
+  // Header (Web Teal brand)
   g.textAlign = 'center';
-  g.fillStyle = '#1F4E78';
-  g.font = 'bold 22px ' + F;
+  g.fillStyle = '#0D5966';
+  g.font = 'bold 28px ' + F;
   const mainTitle = isEn ?
     ('WEEKLY PROGRESS REPORT: 3-CONTRACTOR COMPARISON (' + prevWkStr + ' vs ' + curWkStr + ')') :
     ('BÁO CÁO TIẾN ĐỘ TUẦN: ĐỐI CHIẾU 3 NHÀ THẦU (' + prevWkStr + ' vs ' + curWkStr + ')');
-  g.fillText(mainTitle, W / 2, y + 16);
-  y += 32;
+  g.fillText(mainTitle, W / 2, y + 20);
+  y += 42;
 
   g.fillStyle = '#555555';
-  g.font = 'italic 12.5px ' + F;
+  g.font = 'italic 15px ' + F;
   const subTitle = isEn ?
     'Project: C459 | Work Item: Electrical Cabling (Pulling & Termination) | Target W50: Pulling 95% – Termination 80%' :
     'Dự án: C459 | Hạng mục: Cáp điện (Kéo dây & Đấu nối) | Mốc mục tiêu W50: Kéo dây 95% – Đấu nối 80%';
-  g.fillText(subTitle, W / 2, y + 14);
-  y += 28;
+  g.fillText(subTitle, W / 2, y + 16);
+  y += 32;
 
-  // Header separator line
-  g.strokeStyle = '#1F4E78';
-  g.lineWidth = 2.5;
+  // Header separator line (Teal)
+  g.strokeStyle = '#0D5966';
+  g.lineWidth = 3;
   g.beginPath();
   g.moveTo(X_PAD, y);
   g.lineTo(X_PAD + innerW, y);
   g.stroke();
-  y += 18;
+  y += 20;
 
   // Helper drawing functions
   function drawSectionTitle(secY, title){
-    g.fillStyle = '#1F4E78';
-    g.fillRect(X_PAD, secY, innerW, 30);
+    g.fillStyle = '#0D5966';
+    g.fillRect(X_PAD, secY, innerW, 36);
     g.fillStyle = '#ffffff';
-    g.font = 'bold 12.5px ' + F;
+    g.font = 'bold 16px ' + F;
     g.textAlign = 'left';
     g.textBaseline = 'middle';
-    g.fillText(title, X_PAD + 12, secY + 15);
+    g.fillText(title, X_PAD + 14, secY + 18);
     g.textBaseline = 'top';
   }
 
-  function drawCellText(x, y, w, h, text, weight, color, align){
+  function drawCellText(x, y, w, h, text, weight, color, align, customFont){
     g.fillStyle = color;
-    g.font = weight + ' 13px ' + F;
+    g.font = customFont || (weight + ' 15.5px ' + F);
     g.textAlign = align;
     g.textBaseline = 'middle';
-    const tx = align === 'center' ? (x + w / 2) : (align === 'right' ? (x + w - 10) : (x + 10));
+    const tx = align === 'center' ? (x + w / 2) : (align === 'right' ? (x + w - 12) : (x + 12));
     g.fillText(text, tx, y + h / 2);
     g.textBaseline = 'top';
     g.textAlign = 'left';
@@ -2902,29 +2916,26 @@ async function snapProg(){
   function drawTable1Row(rowY, rowH, label, planVal, hdcVal, nauVal, stVal, totVal, isBold){
     const colW = [370, 150, 150, 150, 150, 150];
     const vals = [label, planVal, hdcVal, nauVal, stVal, totVal];
+    const colBgs = ['#ffffff', '#fffbe6', '#fff8f6', '#f4f8ff', '#f4faf5', '#f0f7f8'];
     let curX = X_PAD;
 
     for(let c = 0; c < 6; c++){
       const cw = colW[c];
-      let bg = '#ffffff';
-      if(c === 1) bg = '#FFF2CC'; // Plan col
-      else if(c === 5) bg = '#E2EFDA'; // Total col
-
-      g.fillStyle = bg;
+      g.fillStyle = colBgs[c];
       g.fillRect(curX, rowY, cw, rowH);
-      g.strokeStyle = '#D9D9D9';
+      g.strokeStyle = '#d3dae3';
       g.lineWidth = 1;
       g.strokeRect(curX, rowY, cw, rowH);
 
       const val = vals[c];
       if(val !== undefined && val !== null){
-        let textCol = '#333333';
-        let weight = isBold || c === 1 || c === 5 ? 'bold' : 'normal';
+        let textCol = (c === 1) ? '#78350f' : (c === 5 ? '#0D5966' : '#1d2733');
+        let weight = (isBold || c === 1 || c === 5) ? 'bold' : 'normal';
 
         if(typeof val === 'object' && val.text){
-          textCol = val.pass ? '#2e7d32' : '#c62828';
+          textCol = val.pass ? '#15803d' : '#b91c1c';
           weight = 'bold';
-          drawCellText(curX, rowY, cw, rowH, val.text, weight, textCol, 'center');
+          drawCellText(curX, rowY, cw, rowH, val.text, weight, textCol, 'center', 'bold 15px ' + F);
         } else {
           drawCellText(curX, rowY, cw, rowH, String(val), weight, textCol, c === 0 ? 'left' : 'center');
         }
@@ -2934,17 +2945,17 @@ async function snapProg(){
   }
 
   function drawGroupHeader(rowY, rowH, title){
-    g.fillStyle = '#B4C6E7';
+    g.fillStyle = '#d4e8eb';
     g.fillRect(X_PAD, rowY, innerW, rowH);
-    g.strokeStyle = '#D9D9D9';
+    g.strokeStyle = '#d3dae3';
     g.lineWidth = 1;
     g.strokeRect(X_PAD, rowY, innerW, rowH);
 
-    g.fillStyle = '#002060';
-    g.font = 'bold 12.5px ' + F;
+    g.fillStyle = '#0a424c';
+    g.font = 'bold 16px ' + F;
     g.textAlign = 'left';
     g.textBaseline = 'middle';
-    g.fillText(title, X_PAD + 12, rowY + rowH / 2);
+    g.fillText(title, X_PAD + 14, rowY + rowH / 2);
     g.textBaseline = 'top';
   }
 
@@ -2952,9 +2963,9 @@ async function snapProg(){
   drawSectionTitle(y, isEn ?
     'TABLE 1: 3-CONTRACTOR CABLE PULLING & TERMINATION PROGRESS COMPARISON' :
     'BẢNG 1: SO SÁNH TIẾN ĐỘ KÉO DÂY & ĐẤU NỐI GIỮA 2 TUẦN CỦA 3 NHÀ THẦU');
-  y += 30;
+  y += 36;
 
-  // Table 1 Header
+  // Table 1 Header with distinct PM colors
   const t1ColW = [370, 150, 150, 150, 150, 150];
   const t1Headers = [
     isEn ? 'Work Item / Monitored Parameter' : 'Hạng mục / Thông số theo dõi',
@@ -2964,54 +2975,58 @@ async function snapProg(){
     'ST',
     isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'
   ];
+  const t1HdrBgs = ['#e6f2f4', '#fffbe6', '#d84315', '#1565c0', '#2e7d32', '#0D5966'];
+  const t1HdrFgs = ['#0D5966', '#78350f', '#ffffff', '#ffffff', '#ffffff', '#ffffff'];
+
   let curHX = X_PAD;
   for(let c = 0; c < 6; c++){
     const cw = t1ColW[c];
-    g.fillStyle = '#D9E1F2';
-    g.fillRect(curHX, y, cw, 36);
-    g.strokeStyle = '#D9D9D9';
+    g.fillStyle = t1HdrBgs[c];
+    g.fillRect(curHX, y, cw, 44);
+    g.strokeStyle = '#d3dae3';
     g.lineWidth = 1;
-    g.strokeRect(curHX, y, cw, 36);
-    drawCellText(curHX, y, cw, 36, t1Headers[c], 'bold', '#1F4E78', 'center');
+    g.strokeRect(curHX, y, cw, 44);
+    drawCellText(curHX, y, cw, 44, t1Headers[c], 'bold', t1HdrFgs[c], 'center', 'bold 16px ' + F);
     curHX += cw;
   }
-  y += 36;
+  y += 44;
 
+  const rowH1 = 35;
   // Group 1: Cable Pulling
-  drawGroupHeader(y, 30, t1Data.pull.title);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.pull.prev.label, t1Data.pull.prev.plan, t1Data.pull.prev.hdc, t1Data.pull.prev.nau, t1Data.pull.prev.st, t1Data.pull.prev.tot, false);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.pull.cur.label, t1Data.pull.cur.plan, t1Data.pull.cur.hdc, t1Data.pull.cur.nau, t1Data.pull.cur.st, t1Data.pull.cur.tot, false);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.pull.delta.label, t1Data.pull.delta.plan, t1Data.pull.delta.hdc, t1Data.pull.delta.nau, t1Data.pull.delta.st, t1Data.pull.delta.tot, true);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.pull.eval.label, t1Data.pull.eval.plan, t1Data.pull.eval.hdc, t1Data.pull.eval.nau, t1Data.pull.eval.st, t1Data.pull.eval.tot, false);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.pull.qty.label, t1Data.pull.qty.plan, t1Data.pull.qty.hdc, t1Data.pull.qty.nau, t1Data.pull.qty.st, t1Data.pull.qty.tot, false);
-  y += 30;
+  drawGroupHeader(y, 34, t1Data.pull.title);
+  y += 34;
+  drawTable1Row(y, rowH1, t1Data.pull.prev.label, t1Data.pull.prev.plan, t1Data.pull.prev.hdc, t1Data.pull.prev.nau, t1Data.pull.prev.st, t1Data.pull.prev.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.pull.cur.label, t1Data.pull.cur.plan, t1Data.pull.cur.hdc, t1Data.pull.cur.nau, t1Data.pull.cur.st, t1Data.pull.cur.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.pull.delta.label, t1Data.pull.delta.plan, t1Data.pull.delta.hdc, t1Data.pull.delta.nau, t1Data.pull.delta.st, t1Data.pull.delta.tot, true);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.pull.eval.label, t1Data.pull.eval.plan, t1Data.pull.eval.hdc, t1Data.pull.eval.nau, t1Data.pull.eval.st, t1Data.pull.eval.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.pull.qty.label, t1Data.pull.qty.plan, t1Data.pull.qty.hdc, t1Data.pull.qty.nau, t1Data.pull.qty.st, t1Data.pull.qty.tot, false);
+  y += rowH1;
 
   // Group 2: Termination
-  drawGroupHeader(y, 30, t1Data.term.title);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.term.prev.label, t1Data.term.prev.plan, t1Data.term.prev.hdc, t1Data.term.prev.nau, t1Data.term.prev.st, t1Data.term.prev.tot, false);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.term.cur.label, t1Data.term.cur.plan, t1Data.term.cur.hdc, t1Data.term.cur.nau, t1Data.term.cur.st, t1Data.term.cur.tot, false);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.term.delta.label, t1Data.term.delta.plan, t1Data.term.delta.hdc, t1Data.term.delta.nau, t1Data.term.delta.st, t1Data.term.delta.tot, true);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.term.eval.label, t1Data.term.eval.plan, t1Data.term.eval.hdc, t1Data.term.eval.nau, t1Data.term.eval.st, t1Data.term.eval.tot, false);
-  y += 30;
-  drawTable1Row(y, 30, t1Data.term.qty.label, t1Data.term.qty.plan, t1Data.term.qty.hdc, t1Data.term.qty.nau, t1Data.term.qty.st, t1Data.term.qty.tot, false);
-  y += 30;
+  drawGroupHeader(y, 34, t1Data.term.title);
+  y += 34;
+  drawTable1Row(y, rowH1, t1Data.term.prev.label, t1Data.term.prev.plan, t1Data.term.prev.hdc, t1Data.term.prev.nau, t1Data.term.prev.st, t1Data.term.prev.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.term.cur.label, t1Data.term.cur.plan, t1Data.term.cur.hdc, t1Data.term.cur.nau, t1Data.term.cur.st, t1Data.term.cur.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.term.delta.label, t1Data.term.delta.plan, t1Data.term.delta.hdc, t1Data.term.delta.nau, t1Data.term.delta.st, t1Data.term.delta.tot, true);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.term.eval.label, t1Data.term.eval.plan, t1Data.term.eval.hdc, t1Data.term.eval.nau, t1Data.term.eval.st, t1Data.term.eval.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.term.qty.label, t1Data.term.qty.plan, t1Data.term.qty.hdc, t1Data.term.qty.nau, t1Data.term.qty.st, t1Data.term.qty.tot, false);
+  y += rowH1;
 
-  y += 20;
+  y += 24;
 
   // --- BẢNG 2 ---
   drawSectionTitle(y, isEn ?
     'TABLE 2: 3-CONTRACTOR COMMITMENT ROADMAP (W43 ➔ W50)' :
     'BẢNG 2: LỘ TRÌNH MỤC TIÊU CAM KẾT CHO CẢ 3 NHÀ THẦU (W43 ➔ W50)');
-  y += 30;
+  y += 36;
 
   // Table 2 Header
   const t2ColW = [110, 180, 160, 180, 160, 330];
@@ -3026,22 +3041,28 @@ async function snapProg(){
   let curH2X = X_PAD;
   for(let c = 0; c < 6; c++){
     const cw = t2ColW[c];
-    g.fillStyle = '#D9E1F2';
-    g.fillRect(curH2X, y, cw, 36);
-    g.strokeStyle = '#D9D9D9';
+    g.fillStyle = '#e6f2f4';
+    g.fillRect(curH2X, y, cw, 44);
+    g.strokeStyle = '#d3dae3';
     g.lineWidth = 1;
-    g.strokeRect(curH2X, y, cw, 36);
-    drawCellText(curH2X, y, cw, 36, t2Headers[c], 'bold', '#1F4E78', 'center');
+    g.strokeRect(curH2X, y, cw, 44);
+    drawCellText(curH2X, y, cw, 44, t2Headers[c], 'bold', '#0D5966', 'center', 'bold 15.5px ' + F);
     curH2X += cw;
   }
-  y += 36;
+  y += 44;
 
   // Table 2 Data Rows
+  const rowH2 = 35;
   roadmap.forEach(r => {
     let curX = X_PAD;
     let bg = '#ffffff';
-    if(r.isCurrent) bg = '#FCE4D6';
-    else if(r.isTarget) bg = '#E8F5E9';
+    let textCol = '#1d2733';
+    if(r.isCurrent){
+      bg = '#fff3e0'; // Warm peach current week
+    } else if(r.isTarget){
+      bg = '#e8f5e9'; // Light green target W50
+      textCol = '#1b5e20';
+    }
 
     const isB = r.isCurrent || r.isTarget;
     const rowVals = [
@@ -3056,80 +3077,80 @@ async function snapProg(){
     for(let c = 0; c < 6; c++){
       const cw = t2ColW[c];
       g.fillStyle = bg;
-      g.fillRect(curX, y, cw, 30);
-      g.strokeStyle = '#D9D9D9';
+      g.fillRect(curX, y, cw, rowH2);
+      g.strokeStyle = '#d3dae3';
       g.lineWidth = 1;
-      g.strokeRect(curX, y, cw, 30);
+      g.strokeRect(curX, y, cw, rowH2);
 
       const val = rowVals[c];
       const weight = isB ? 'bold' : 'normal';
-      drawCellText(curX, y, cw, 30, String(val), weight, '#333333', c === 5 ? 'left' : 'center');
+      drawCellText(curX, y, cw, rowH2, String(val), weight, textCol, c === 5 ? 'left' : 'center', weight + ' 15.5px ' + F);
       curX += cw;
     }
-    y += 30;
+    y += rowH2;
   });
 
-  y += 20;
+  y += 24;
 
   // --- BẢNG 3 ---
   const nextWkLabel = (curWkStr === 'W44' || curWkStr === '44/26') ? 'W45' : (isEn ? 'Next Week' : 'Tuần tới');
   drawSectionTitle(y, isEn ?
     ('TABLE 3: DIRECTIVES & RECOMMENDATIONS FOR ' + nextWkLabel) :
     ('BẢNG 3: NHẬN XÉT & CHỈ ĐẠO ĐIỀU HÀNH TUẦN TỚI (' + nextWkLabel + ')'));
-  y += 30;
+  y += 36;
 
-  // Table 3 Data Rows
-  const t3RowH = 74;
+  // Table 3 Data Rows (with distinct PM contractor colors)
+  const t3RowH = 96;
   comments.forEach(cm => {
-    // Contractor name cell
-    g.fillStyle = '#D9E1F2';
+    // Contractor name cell in PM brand color
+    g.fillStyle = cm.color;
     g.fillRect(X_PAD, y, 180, t3RowH);
-    g.strokeStyle = '#D9D9D9';
+    g.strokeStyle = '#d3dae3';
     g.lineWidth = 1;
     g.strokeRect(X_PAD, y, 180, t3RowH);
-    drawCellText(X_PAD, y, 180, t3RowH, cm.name, 'bold', '#1F4E78', 'center');
+    drawCellText(X_PAD, y, 180, t3RowH, cm.name, 'bold', '#ffffff', 'center', 'bold 20px ' + F);
 
     // Comment cell
     g.fillStyle = '#ffffff';
     g.fillRect(X_PAD + 180, y, 940, t3RowH);
-    g.strokeStyle = '#D9D9D9';
+    g.strokeStyle = '#d3dae3';
     g.strokeRect(X_PAD + 180, y, 940, t3RowH);
 
-    g.fillStyle = '#333333';
-    g.font = '12.5px ' + F;
+    g.fillStyle = '#1d2733';
+    g.font = '15.5px ' + F;
     g.textAlign = 'left';
     g.textBaseline = 'top';
-    drawCanvasWrappedText(g, cm.desc, X_PAD + 180 + 14, y + 14, 940 - 28, 20);
+    drawCanvasWrappedText(g, cm.desc, X_PAD + 180 + 16, y + 16, 940 - 32, 24);
 
     y += t3RowH;
   });
 
   // Footer
-  const footerY = H - 45;
-  g.strokeStyle = '#D9D9D9';
-  g.lineWidth = 1;
+  const footerY = H - 50;
+  g.strokeStyle = '#d3dae3';
+  g.lineWidth = 1.5;
   g.beginPath();
   g.moveTo(X_PAD, footerY);
   g.lineTo(X_PAD + innerW, footerY);
   g.stroke();
 
-  g.fillStyle = '#64748b';
-  g.font = '12px ' + F;
+  g.fillStyle = '#5b6877';
+  g.font = '14.5px ' + F;
   g.textAlign = 'left';
-  g.fillText(isEn ? 'TSC80 Shipbuilding Project · Weekly Progress System' : 'Dự án Đóng tàu TSC80 · Hệ thống Báo cáo Tiến độ', X_PAD, footerY + 16);
+  g.fillText(isEn ? 'TSC80 Shipbuilding Project · Weekly Progress System' : 'Dự án Đóng tàu TSC80 · Hệ thống Báo cáo Tiến độ', X_PAD, footerY + 18);
 
   g.textAlign = 'center';
-  g.fillText(isEn ? ('Report ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')) : ('Báo cáo đối chiếu ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')), W / 2, footerY + 16);
+  g.fillText(isEn ? ('Report ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')) : ('Báo cáo đối chiếu ' + curWkStr + (prevWkStr ? ' vs ' + prevWkStr : '')), W / 2, footerY + 18);
 
   g.textAlign = 'right';
-  g.fillText('Bản quyền © 2026 Jay Duy · Trang 1/1', X_PAD + innerW, footerY + 16);
+  g.fillText('Bản quyền © 2026 Jay Duy · Trang 1/1', X_PAD + innerW, footerY + 18);
   g.textAlign = 'left';
 
   // Build reportHtml for vector printing / PDF export (#spdf)
   let roadmapRowsHtml = '';
   roadmap.forEach(r => {
     const cls = r.isCurrent ? ' class="curr-week"' : '';
-    const st = r.isTarget ? ' style="font-weight:bold; background-color:#e8f5e9;"' : '';
+    const st = r.isTarget ? ' style="font-weight:bold; background-color:#e8f5e9; color:#1b5e20;"' : '';
     roadmapRowsHtml += '<tr' + cls + st + '>' +
       '<td>' + esc(r.wk) + '</td>' +
       '<td>' + (r.pullTot !== null ? r.pullTot.toFixed(1) + '%' : '—') + '</td>' +
@@ -3143,7 +3164,7 @@ async function snapProg(){
   let commentsRowsHtml = '';
   comments.forEach(c => {
     commentsRowsHtml += '<tr>' +
-      '<td class="nt-name">' + esc(c.name) + '</td>' +
+      '<td class="nt-name ' + esc(c.name) + '">' + esc(c.name) + '</td>' +
       '<td class="nt-desc">' + esc(c.desc) + '</td>' +
       '</tr>';
   });
@@ -3158,27 +3179,38 @@ async function snapProg(){
 <style>
   @page { size: A4 portrait; margin: 10mm 12mm; }
   * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-  body { margin: 0; padding: 20px; color: #333; background-color: #fff; font-size: 11px; }
-  .report-container { max-width: 800px; margin: 0 auto; }
-  .header-block { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #1F4E78; padding-bottom: 8px; }
-  .header-block h1 { font-size: 16px; font-weight: 700; color: #1F4E78; margin: 0 0 4px 0; text-transform: uppercase; }
-  .header-block p { font-size: 11px; color: #555; margin: 0; font-style: italic; }
-  .section-title { background-color: #1F4E78; color: #fff; padding: 5px 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-top: 10px; margin-bottom: 0; border-radius: 2px 2px 0 0; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  th, td { border: 1px solid #D9D9D9; padding: 5px 6px; text-align: center; }
-  th { background-color: #D9E1F2; color: #1F4E78; font-weight: bold; font-size: 10.5px; }
-  .col-label { text-align: left; width: 34%; font-weight: 500; }
-  .group-header { background-color: #B4C6E7; color: #002060; font-weight: bold; text-align: left; padding-left: 10px; }
-  .plan-col { background-color: #FFF2CC; font-weight: bold; }
-  .total-col { background-color: #E2EFDA; font-weight: bold; }
-  .curr-week { background-color: #FCE4D6; font-weight: bold; }
-  .tag-pass { color: #2e7d32; font-weight: bold; }
-  .tag-fail { color: #c62828; font-weight: bold; }
-  .comments-table td { padding: 6px 10px; }
-  .nt-name { width: 18%; background-color: #D9E1F2; font-weight: bold; color: #1F4E78; }
-  .nt-desc { text-align: left; }
+  body { margin: 0; padding: 24px; color: #1d2733; background-color: #fff; font-size: 13px; line-height: 1.4; }
+  .report-container { max-width: 860px; margin: 0 auto; }
+  .header-block { text-align: center; margin-bottom: 16px; border-bottom: 3px solid #0D5966; padding-bottom: 10px; }
+  .header-block h1 { font-size: 20px; font-weight: 800; color: #0D5966; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+  .header-block p { font-size: 13px; color: #555; margin: 0; font-style: italic; }
+  .section-title { background: linear-gradient(135deg, #0a424c, #0D5966); color: #fff; padding: 8px 12px; font-size: 13.5px; font-weight: bold; text-transform: uppercase; margin-top: 14px; margin-bottom: 0; border-radius: 4px 4px 0 0; letter-spacing: 0.3px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th, td { border: 1px solid #d3dae3; padding: 7px 8px; text-align: center; font-size: 13px; }
+  th { background-color: #e6f2f4; color: #0D5966; font-weight: 700; font-size: 13px; }
+  .col-label { text-align: left; width: 34%; font-weight: 600; }
+  .group-header { background-color: #d4e8eb; color: #0a424c; font-weight: 700; font-size: 13.5px; text-align: left; padding-left: 12px; }
+  .plan-col { background-color: #fffbe6; color: #78350f; font-weight: bold; }
+  .total-col { background-color: #f0f7f8; color: #0D5966; font-weight: bold; }
+  .curr-week { background-color: #fff3e0; font-weight: bold; }
+  .tag-pass { color: #15803d; font-weight: bold; }
+  .tag-fail { color: #b91c1c; font-weight: bold; }
+  .comments-table td { padding: 10px 14px; }
+  .nt-name { width: 18%; font-weight: bold; font-size: 15px; color: #ffffff; vertical-align: middle; }
+  .nt-name.HDC { background-color: #d84315; }
+  .nt-name.NAUTICS { background-color: #1565c0; }
+  .nt-name.ST { background-color: #2e7d32; }
+  .nt-desc { text-align: left; font-size: 13px; line-height: 1.5; }
+  .th-hdc { background-color: #d84315; color: #ffffff; font-weight: bold; }
+  .th-nautics { background-color: #1565c0; color: #ffffff; font-weight: bold; }
+  .th-st { background-color: #2e7d32; color: #ffffff; font-weight: bold; }
+  .th-tot { background-color: #0D5966; color: #ffffff; font-weight: bold; }
+  .th-plan { background-color: #fffbe6; color: #78350f; font-weight: bold; }
+  .col-hdc { background-color: #fff8f6; }
+  .col-nautics { background-color: #f4f8ff; }
+  .col-st { background-color: #f4faf5; }
   @media print { body { padding: 0; } .no-print { display: none; } }
-  .btn-print { padding: 6px 14px; background: #1F4E78; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 15px; }
+  .btn-print { padding: 8px 16px; background: #0D5966; color: white; border: none; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 13px; margin-bottom: 15px; }
 </style>
 </head>
 <body>
@@ -3195,12 +3227,12 @@ async function snapProg(){
   <table>
     <thead>
       <tr>
-        <th style="width:34%;">${isEn ? 'Work Item / Parameter' : 'Hạng mục / Thông số theo dõi'}</th>
-        <th style="width:13%;">${(isEn ? 'Plan ' : 'Kế hoạch ') + esc(curWkStr)}</th>
-        <th style="width:13%;">HDC</th>
-        <th style="width:13%;">NAUTICS</th>
-        <th style="width:13%;">ST</th>
-        <th style="width:14%;">${isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'}</th>
+        <th style="width:34%; text-align: left; padding-left: 10px;">${isEn ? 'Work Item / Parameter' : 'Hạng mục / Thông số theo dõi'}</th>
+        <th style="width:13%;" class="th-plan">${(isEn ? 'Plan ' : 'Kế hoạch ') + esc(curWkStr)}</th>
+        <th style="width:13%;" class="th-hdc">HDC</th>
+        <th style="width:13%;" class="th-nautics">NAUTICS</th>
+        <th style="width:13%;" class="th-st">ST</th>
+        <th style="width:14%;" class="th-tot">${isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'}</th>
       </tr>
     </thead>
     <tbody>
@@ -3208,41 +3240,41 @@ async function snapProg(){
       <tr>
         <td class="col-label">${esc(t1Data.pull.prev.label)}</td>
         <td class="plan-col">${esc(t1Data.pull.prev.plan)}</td>
-        <td>${esc(t1Data.pull.prev.hdc)}</td>
-        <td>${esc(t1Data.pull.prev.nau)}</td>
-        <td>${esc(t1Data.pull.prev.st)}</td>
+        <td class="col-hdc">${esc(t1Data.pull.prev.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.pull.prev.nau)}</td>
+        <td class="col-st">${esc(t1Data.pull.prev.st)}</td>
         <td class="total-col">${esc(t1Data.pull.prev.tot)}</td>
       </tr>
       <tr>
         <td class="col-label">${esc(t1Data.pull.cur.label)}</td>
         <td class="plan-col">${esc(t1Data.pull.cur.plan)}</td>
-        <td>${esc(t1Data.pull.cur.hdc)}</td>
-        <td>${esc(t1Data.pull.cur.nau)}</td>
-        <td>${esc(t1Data.pull.cur.st)}</td>
+        <td class="col-hdc">${esc(t1Data.pull.cur.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.pull.cur.nau)}</td>
+        <td class="col-st">${esc(t1Data.pull.cur.st)}</td>
         <td class="total-col">${esc(t1Data.pull.cur.tot)}</td>
       </tr>
       <tr style="font-weight: bold;">
         <td class="col-label">${esc(t1Data.pull.delta.label)}</td>
         <td class="plan-col">${esc(t1Data.pull.delta.plan)}</td>
-        <td>${esc(t1Data.pull.delta.hdc)}</td>
-        <td>${esc(t1Data.pull.delta.nau)}</td>
-        <td>${esc(t1Data.pull.delta.st)}</td>
+        <td class="col-hdc">${esc(t1Data.pull.delta.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.pull.delta.nau)}</td>
+        <td class="col-st">${esc(t1Data.pull.delta.st)}</td>
         <td class="total-col">${esc(t1Data.pull.delta.tot)}</td>
       </tr>
       <tr>
         <td class="col-label">${esc(t1Data.pull.eval.label)}</td>
         <td class="plan-col">${esc(t1Data.pull.eval.plan)}</td>
-        <td>${evalTagHtml(t1Data.pull.eval.hdc)}</td>
-        <td>${evalTagHtml(t1Data.pull.eval.nau)}</td>
-        <td>${evalTagHtml(t1Data.pull.eval.st)}</td>
+        <td class="col-hdc">${evalTagHtml(t1Data.pull.eval.hdc)}</td>
+        <td class="col-nautics">${evalTagHtml(t1Data.pull.eval.nau)}</td>
+        <td class="col-st">${evalTagHtml(t1Data.pull.eval.st)}</td>
         <td class="total-col">${evalTagHtml(t1Data.pull.eval.tot)}</td>
       </tr>
       <tr>
         <td class="col-label">${esc(t1Data.pull.qty.label)}</td>
         <td class="plan-col">${esc(t1Data.pull.qty.plan)}</td>
-        <td>${esc(t1Data.pull.qty.hdc)}</td>
-        <td>${esc(t1Data.pull.qty.nau)}</td>
-        <td>${esc(t1Data.pull.qty.st)}</td>
+        <td class="col-hdc">${esc(t1Data.pull.qty.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.pull.qty.nau)}</td>
+        <td class="col-st">${esc(t1Data.pull.qty.st)}</td>
         <td class="total-col">${esc(t1Data.pull.qty.tot)}</td>
       </tr>
 
@@ -3250,41 +3282,41 @@ async function snapProg(){
       <tr>
         <td class="col-label">${esc(t1Data.term.prev.label)}</td>
         <td class="plan-col">${esc(t1Data.term.prev.plan)}</td>
-        <td>${esc(t1Data.term.prev.hdc)}</td>
-        <td>${esc(t1Data.term.prev.nau)}</td>
-        <td>${esc(t1Data.term.prev.st)}</td>
+        <td class="col-hdc">${esc(t1Data.term.prev.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.term.prev.nau)}</td>
+        <td class="col-st">${esc(t1Data.term.prev.st)}</td>
         <td class="total-col">${esc(t1Data.term.prev.tot)}</td>
       </tr>
       <tr>
         <td class="col-label">${esc(t1Data.term.cur.label)}</td>
         <td class="plan-col">${esc(t1Data.term.cur.plan)}</td>
-        <td>${esc(t1Data.term.cur.hdc)}</td>
-        <td>${esc(t1Data.term.cur.nau)}</td>
-        <td>${esc(t1Data.term.cur.st)}</td>
+        <td class="col-hdc">${esc(t1Data.term.cur.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.term.cur.nau)}</td>
+        <td class="col-st">${esc(t1Data.term.cur.st)}</td>
         <td class="total-col">${esc(t1Data.term.cur.tot)}</td>
       </tr>
       <tr style="font-weight: bold;">
         <td class="col-label">${esc(t1Data.term.delta.label)}</td>
         <td class="plan-col">${esc(t1Data.term.delta.plan)}</td>
-        <td>${esc(t1Data.term.delta.hdc)}</td>
-        <td>${esc(t1Data.term.delta.nau)}</td>
-        <td>${esc(t1Data.term.delta.st)}</td>
+        <td class="col-hdc">${esc(t1Data.term.delta.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.term.delta.nau)}</td>
+        <td class="col-st">${esc(t1Data.term.delta.st)}</td>
         <td class="total-col">${esc(t1Data.term.delta.tot)}</td>
       </tr>
       <tr>
         <td class="col-label">${esc(t1Data.term.eval.label)}</td>
         <td class="plan-col">${esc(t1Data.term.eval.plan)}</td>
-        <td>${evalTagHtml(t1Data.term.eval.hdc)}</td>
-        <td>${evalTagHtml(t1Data.term.eval.nau)}</td>
-        <td>${evalTagHtml(t1Data.term.eval.st)}</td>
+        <td class="col-hdc">${evalTagHtml(t1Data.term.eval.hdc)}</td>
+        <td class="col-nautics">${evalTagHtml(t1Data.term.eval.nau)}</td>
+        <td class="col-st">${evalTagHtml(t1Data.term.eval.st)}</td>
         <td class="total-col">${evalTagHtml(t1Data.term.eval.tot)}</td>
       </tr>
       <tr>
         <td class="col-label">${esc(t1Data.term.qty.label)}</td>
         <td class="plan-col">${esc(t1Data.term.qty.plan)}</td>
-        <td>${esc(t1Data.term.qty.hdc)}</td>
-        <td>${esc(t1Data.term.qty.nau)}</td>
-        <td>${esc(t1Data.term.qty.st)}</td>
+        <td class="col-hdc">${esc(t1Data.term.qty.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.term.qty.nau)}</td>
+        <td class="col-st">${esc(t1Data.term.qty.st)}</td>
         <td class="total-col">${esc(t1Data.term.qty.tot)}</td>
       </tr>
     </tbody>
@@ -3299,7 +3331,7 @@ async function snapProg(){
         <th style="width:14%;">${isEn ? 'Weekly Inc. (Δ)' : 'Tăng tuần (Δ)'}</th>
         <th style="width:16%;">${isEn ? 'TERMINATION Cum.' : 'ĐẤU NỐI Lũy kế'}</th>
         <th style="width:14%;">${isEn ? 'Weekly Inc. (Δ)' : 'Tăng tuần (Δ)'}</th>
-        <th style="width:28%;">${isEn ? 'Key Focus / Notes' : 'Trọng tâm kiểm soát / Ghi chú'}</th>
+        <th style="width:28%; text-align: left; padding-left: 10px;">${isEn ? 'Key Focus / Notes' : 'Trọng tâm kiểm soát / Ghi chú'}</th>
       </tr>
     </thead>
     <tbody>
@@ -3397,7 +3429,7 @@ function renderProg(){
   // Quick contractor filter pills in legend: ALL, TOTAL, HDC, NAUTICS, ST
   const filterOptions=[
     {key:'ALL',label:t('allContractors'),col:''},
-    {key:'TOTAL',label:isEn?'TOTAL PROJECT':'TỔNG DỰ ÁN',col:'#1e3a8a'},
+    {key:'TOTAL',label:isEn?'TOTAL PROJECT':'TỔNG DỰ ÁN',col:'#0D5966'},
     {key:'HDC',label:'HDC',col:getContrColor('HDC')},
     {key:'NAUTICS',label:'NAUTICS',col:getContrColor('NAUTICS')},
     {key:'ST',label:'ST',col:getContrColor('ST')}
@@ -3414,7 +3446,7 @@ function renderProg(){
   const wkLabel=w=>w.y?(w.w+'/'+String(w.y).slice(2)):(w.w>=10?'W'+w.w:'W0'+w.w);
   wk.innerHTML=wd.length?t('weekLabel')+wd.map(w=>`<span class="wk${wcur&&w.c===wcur.c?' on':''}" data-c="${w.c}">${wkLabel(w)}</span>`).join(''):'';
 
-  const cmap={'HDC':'#d84315','NAUTICS':'#1565c0','ST':'#2e7d32','TOTAL PROJECT':'#1e3a8a','TỔNG DỰ ÁN':'#1e3a8a'};
+  const cmap={'HDC':'#d84315','NAUTICS':'#1565c0','ST':'#2e7d32','TOTAL PROJECT':'#0D5966','TỔNG DỰ ÁN':'#0D5966'};
 
   if(PS.chart){res.innerHTML=det+chartsHtml(sh,M,wd,cmap);return}
 
@@ -3471,7 +3503,7 @@ function renderProg(){
           cDeltaHtml=` <small class="kpi-delta ${cCls}" style="padding:0 3px">${cArrow} ${(cDelta>0?'+':'')+cDelta.toFixed(1)}%</small>`;
         }
         const col=getContrColor(cName);
-        return `<span class="c-chip" style="color:${col};border-color:${col}"><i style="background:${col}"></i>${cName}: ${fmtPctVal(cPct)}${cDeltaHtml}</span>`;
+        return `<span class="c-chip ${cName}" style="color:${col};border-color:${col}"><i style="background:${col}"></i>${cName}: ${fmtPctVal(cPct)}${cDeltaHtml}</span>`;
       }).filter(Boolean).join('');
 
       let totDeltaPctHtml='';
@@ -3484,7 +3516,7 @@ function renderProg(){
       let totDeltaQtyHtml='';
       if(totDeltaQty!==null){
         const sign=totDeltaQty>=0?'+':'';
-        totDeltaQtyHtml=` <span style="font-size:11px;font-weight:600;color:${totDeltaQty>=0?'#16a34a':'#dc2626'}">(${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)} ${t('vsPrev')})</span>`;
+        totDeltaQtyHtml=` <span style="font-size:12px;font-weight:600;color:${totDeltaQty>=0?'#16a34a':'#dc2626'}">(${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)} ${t('vsPrev')})</span>`;
       }
 
       overviewKpis+=`
@@ -3494,7 +3526,7 @@ function renderProg(){
             <span class="prog-kpi-pct">${fmtPctVal(totPct)} ${totDeltaPctHtml}</span>
           </div>
           <div class="prog-kpi-sub">${fmtVal(totQty)} / ${fmtVal(totPlan)} ${esc(itUnit)}${totDeltaQtyHtml}</div>
-          <div class="pb"><i style="width:${Math.max(0,Math.min(100,totPct||0))}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div>
+          <div class="pb"><i style="width:${Math.max(0,Math.min(100,totPct||0))}%;background:var(--acc,#0D5966)"></i><span>${fmtPctVal(totPct)}</span></div>
           <div class="prog-kpi-chips">${cChips}</div>
         </div>`;
 
@@ -3508,7 +3540,7 @@ function renderProg(){
         if(totDeltaQty!==null){
           const sign=totDeltaQty>=0?'+':'';
           const dCls=totDeltaQty>0?'up':(totDeltaQty<0?'down':'same');
-          deltaTotQtyHtml=`<div style="font-size:10px;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)}</span></div>`;
+          deltaTotQtyHtml=`<div style="font-size:11px;margin-top:2px"><span class="kpi-delta ${dCls}">${sign}${fmtVal(totDeltaQty)} ${esc(itUnit)}</span></div>`;
         }
         let deltaTotPctHtml='';
         if(totDeltaPct!==null){
@@ -3522,7 +3554,7 @@ function renderProg(){
             <td class="r">${fmtVal(totPlan)} <small>${esc(itUnit)}</small></td>
             <td class="r"><b>${fmtVal(totQty)}</b> <small>${esc(itUnit)}</small>${deltaTotQtyHtml}</td>
             <td>
-              <div class="pb"><i style="width:${pbW}%;background:#1e3a8a"></i><span>${fmtPctVal(totPct)}</span></div>
+              <div class="pb"><i style="width:${pbW}%;background:var(--acc,#0D5966)"></i><span>${fmtPctVal(totPct)}</span></div>
               ${deltaTotPctHtml}
             </td>
           </tr>`;

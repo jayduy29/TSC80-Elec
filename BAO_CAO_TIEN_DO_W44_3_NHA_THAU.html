@@ -14,117 +14,171 @@
   }
   body {
     margin: 0;
-    padding: 20px;
-    color: #333;
+    padding: 24px;
+    color: #1d2733;
     background-color: #fff;
-    font-size: 11px;
+    font-size: 13px;
+    line-height: 1.4;
   }
   .report-container {
-    max-width: 800px;
+    max-width: 860px;
     margin: 0 auto;
   }
   .header-block {
     text-align: center;
-    margin-bottom: 14px;
-    border-bottom: 2px solid #1F4E78;
-    padding-bottom: 8px;
+    margin-bottom: 16px;
+    border-bottom: 3px solid #0D5966;
+    padding-bottom: 10px;
   }
   .header-block h1 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1F4E78;
-    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0D5966;
+    margin: 0 0 6px 0;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   .header-block p {
-    font-size: 11px;
+    font-size: 13px;
     color: #555;
     margin: 0;
     font-style: italic;
   }
   .section-title {
-    background-color: #1F4E78;
+    background: linear-gradient(135deg, #0a424c, #0D5966);
     color: #fff;
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 8px 12px;
+    font-size: 13.5px;
     font-weight: bold;
     text-transform: uppercase;
-    margin-top: 10px;
+    margin-top: 14px;
     margin-bottom: 0;
-    border-radius: 2px 2px 0 0;
+    border-radius: 4px 4px 0 0;
+    letter-spacing: 0.3px;
   }
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   th, td {
-    border: 1px solid #D9D9D9;
-    padding: 5px 6px;
+    border: 1px solid #d3dae3;
+    padding: 7px 8px;
     text-align: center;
+    font-size: 13px;
   }
   th {
-    background-color: #D9E1F2;
-    color: #1F4E78;
-    font-weight: bold;
-    font-size: 10.5px;
+    background-color: #e6f2f4;
+    color: #0D5966;
+    font-weight: 700;
+    font-size: 13px;
   }
   .col-label {
     text-align: left;
     width: 32%;
-    font-weight: 500;
+    font-weight: 600;
   }
   .group-header {
-    background-color: #B4C6E7;
-    color: #002060;
-    font-weight: bold;
+    background-color: #d4e8eb;
+    color: #0a424c;
+    font-weight: 700;
+    font-size: 13.5px;
     text-align: left;
-    padding-left: 10px;
+    padding-left: 12px;
   }
   .plan-col {
-    background-color: #FFF2CC;
+    background-color: #fffbe6;
+    color: #78350f;
     font-weight: bold;
   }
   .total-col {
-    background-color: #E2EFDA;
+    background-color: #f0f7f8;
+    color: #0D5966;
     font-weight: bold;
   }
   .curr-week {
-    background-color: #FCE4D6;
+    background-color: #fff3e0;
     font-weight: bold;
   }
   .tag-pass {
-    color: #2e7d32;
+    color: #15803d;
     font-weight: bold;
   }
   .tag-fail {
-    color: #c62828;
+    color: #b91c1c;
     font-weight: bold;
   }
   .comments-table td {
-    padding: 6px 10px;
+    padding: 10px 14px;
   }
   .nt-name {
     width: 18%;
-    background-color: #D9E1F2;
     font-weight: bold;
-    color: #1F4E78;
+    font-size: 15px;
+    color: #ffffff;
+    vertical-align: middle;
+  }
+  .nt-name.HDC {
+    background-color: #d84315;
+  }
+  .nt-name.NAUTICS {
+    background-color: #1565c0;
+  }
+  .nt-name.ST {
+    background-color: #2e7d32;
   }
   .nt-desc {
     text-align: left;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .th-hdc {
+    background-color: #d84315;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-nautics {
+    background-color: #1565c0;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-st {
+    background-color: #2e7d32;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-tot {
+    background-color: #0D5966;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  .th-plan {
+    background-color: #fffbe6;
+    color: #78350f;
+    font-weight: bold;
+  }
+  .col-hdc {
+    background-color: #fff8f6;
+  }
+  .col-nautics {
+    background-color: #f4f8ff;
+  }
+  .col-st {
+    background-color: #f4faf5;
   }
   @media print {
     body { padding: 0; }
     .no-print { display: none; }
   }
   .btn-print {
-    padding: 6px 14px;
-    background: #1F4E78;
+    padding: 8px 16px;
+    background: #0D5966;
     color: white;
     border: none;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: bold;
+    font-size: 13px;
     margin-bottom: 15px;
   }
 </style>
@@ -145,12 +199,12 @@
   <table>
     <thead>
       <tr>
-        <th style="width:34%;">Hạng mục / Thông số theo dõi</th>
-        <th style="width:13%;">Kế hoạch W44</th>
-        <th style="width:13%;">HDC</th>
-        <th style="width:13%;">NAUTICS</th>
-        <th style="width:13%;">ST</th>
-        <th style="width:14%;">TOÀN DỰ ÁN</th>
+        <th style="width:34%; text-align: left; padding-left: 10px;">Hạng mục / Thông số theo dõi</th>
+        <th style="width:13%;" class="th-plan">Kế hoạch W44</th>
+        <th style="width:13%;" class="th-hdc">HDC</th>
+        <th style="width:13%;" class="th-nautics">NAUTICS</th>
+        <th style="width:13%;" class="th-st">ST</th>
+        <th style="width:14%;" class="th-tot">TOÀN DỰ ÁN</th>
       </tr>
     </thead>
     <tbody>
@@ -159,41 +213,41 @@
       <tr>
         <td class="col-label">• Tuần trước (W43)</td>
         <td class="plan-col">67.0%</td>
-        <td>68.0%</td>
-        <td>69.5%</td>
-        <td>55.5%</td>
+        <td class="col-hdc">68.0%</td>
+        <td class="col-nautics">69.5%</td>
+        <td class="col-st">55.5%</td>
         <td class="total-col">67.0%</td>
       </tr>
       <tr>
         <td class="col-label">• Tuần này (W44)</td>
         <td class="plan-col">71.0%</td>
-        <td>82.3%</td>
-        <td>72.2%</td>
-        <td>66.6%</td>
+        <td class="col-hdc">82.3%</td>
+        <td class="col-nautics">72.2%</td>
+        <td class="col-st">66.6%</td>
         <td class="total-col">76.2%</td>
       </tr>
       <tr style="font-weight: bold;">
         <td class="col-label">• Tăng trong tuần (Δ = W44 - W43)</td>
         <td class="plan-col">+4.0%</td>
-        <td>+14.3%</td>
-        <td>+2.7%</td>
-        <td>+11.1%</td>
+        <td class="col-hdc">+14.3%</td>
+        <td class="col-nautics">+2.7%</td>
+        <td class="col-st">+11.1%</td>
         <td class="total-col">+9.2%</td>
       </tr>
       <tr>
-        <td class="col-label">• Đánh giá (vs Kế hoạch +4%)</td>
+        <td class="col-label">• Đánh giá (vs Kế hoạch +4.0%)</td>
         <td class="plan-col">Chuẩn</td>
-        <td><span class="tag-pass">🟢 Vượt (+10.3%)</span></td>
-        <td><span class="tag-fail">🔴 Chậm (-1.3%)</span></td>
-        <td><span class="tag-pass">🟢 Vượt (+7.1%)</span></td>
+        <td class="col-hdc"><span class="tag-pass">🟢 Vượt (+10.3%)</span></td>
+        <td class="col-nautics"><span class="tag-fail">🔴 Chậm (-1.3%)</span></td>
+        <td class="col-st"><span class="tag-pass">🟢 Vượt (+7.1%)</span></td>
         <td class="total-col"><span class="tag-pass">🟢 Vượt (+5.2%)</span></td>
       </tr>
       <tr>
         <td class="col-label">• Khối lượng thực hiện tuần (mét)</td>
         <td class="plan-col">2,610 m</td>
-        <td>4,324 m</td>
-        <td>714 m</td>
-        <td>956 m</td>
+        <td class="col-hdc">4,324 m</td>
+        <td class="col-nautics">714 m</td>
+        <td class="col-st">956 m</td>
         <td class="total-col">5,994 m</td>
       </tr>
 
@@ -202,41 +256,41 @@
       <tr>
         <td class="col-label">• Tuần trước (W43)</td>
         <td class="plan-col">4.4%</td>
-        <td>4.3%</td>
-        <td>5.8%</td>
-        <td>0.0%</td>
+        <td class="col-hdc">4.3%</td>
+        <td class="col-nautics">5.8%</td>
+        <td class="col-st">0.0%</td>
         <td class="total-col">4.4%</td>
       </tr>
       <tr>
         <td class="col-label">• Tuần này (W44)</td>
         <td class="plan-col">15.0%</td>
-        <td>13.1%</td>
-        <td>10.3%</td>
-        <td>0.0%</td>
+        <td class="col-hdc">13.1%</td>
+        <td class="col-nautics">10.3%</td>
+        <td class="col-st">0.0%</td>
         <td class="total-col">10.7%</td>
       </tr>
       <tr style="font-weight: bold;">
         <td class="col-label">• Tăng trong tuần (Δ = W44 - W43)</td>
         <td class="plan-col">+10.6%</td>
-        <td>+8.8%</td>
-        <td>+4.5%</td>
-        <td>0.0%</td>
+        <td class="col-hdc">+8.8%</td>
+        <td class="col-nautics">+4.5%</td>
+        <td class="col-st">0.0%</td>
         <td class="total-col">+6.3%</td>
       </tr>
       <tr>
         <td class="col-label">• Đánh giá (vs Kế hoạch +10.6%)</td>
         <td class="plan-col">Chuẩn</td>
-        <td><span class="tag-fail">🔴 Chậm nhẹ (-1.8%)</span></td>
-        <td><span class="tag-fail">🔴 Chậm (-6.1%)</span></td>
-        <td><span class="tag-fail">🔴 Chưa triển khai</span></td>
+        <td class="col-hdc"><span class="tag-fail">🔴 Chậm nhẹ (-1.8%)</span></td>
+        <td class="col-nautics"><span class="tag-fail">🔴 Chậm (-6.1%)</span></td>
+        <td class="col-st"><span class="tag-fail">🔴 Chưa triển khai</span></td>
         <td class="total-col"><span class="tag-fail">🔴 Chậm (-4.3%)</span></td>
       </tr>
       <tr>
         <td class="col-label">• Khối lượng thực hiện tuần (đầu cáp)</td>
         <td class="plan-col">578 đầu</td>
-        <td>238 đầu</td>
-        <td>91 đầu</td>
-        <td>0 đầu</td>
+        <td class="col-hdc">238 đầu</td>
+        <td class="col-nautics">91 đầu</td>
+        <td class="col-st">0 đầu</td>
         <td class="total-col">329 đầu</td>
       </tr>
     </tbody>
@@ -251,7 +305,7 @@
         <th style="width:14%;">Tăng tuần (Δ)</th>
         <th style="width:16%;">ĐẤU NỐI Lũy kế</th>
         <th style="width:14%;">Tăng tuần (Δ)</th>
-        <th style="width:28%;">Trọng tâm kiểm soát / Ghi chú</th>
+        <th style="width:28%; text-align: left; padding-left: 10px;">Trọng tâm kiểm soát / Ghi chú</th>
       </tr>
     </thead>
     <tbody>
@@ -311,7 +365,7 @@
         <td>+10.0%</td>
         <td style="text-align:left;">Giai đoạn nước rút rải cáp & đấu nối</td>
       </tr>
-      <tr style="font-weight:bold; background-color:#e8f5e9;">
+      <tr style="font-weight:bold; background-color:#e8f5e9; color:#1b5e20;">
         <td>W50</td>
         <td>95.0%</td>
         <td>+2.0%</td>
@@ -326,15 +380,15 @@
   <table class="comments-table">
     <tbody>
       <tr>
-        <td class="nt-name">HDC</td>
+        <td class="nt-name HDC">HDC</td>
         <td class="nt-desc">Kéo dây bứt phá rất xuất sắc (+14.3%, đạt 82.3% vượt xa kế hoạch). Đấu nối tăng tốc đạt 13.1% (+238 đầu). Yêu cầu tuần W45 giữ vững quân số, tập trung dứt điểm đấu nối phòng điện trục A để hướng tới mốc 26%.</td>
       </tr>
       <tr>
-        <td class="nt-name">NAUTICS</td>
+        <td class="nt-name NAUTICS">NAUTICS</td>
         <td class="nt-desc">Tiến độ kéo dây có dấu hiệu chậm lại (+2.7%, đạt 72.2%). Đấu nối còn chậm (+91 đầu, chỉ đạt 10.3% vs 15% yêu cầu). Yêu cầu bổ sung ngay 3-4 thợ đấu nối tay nghề cao từ đầu tuần W45 để bắt kịp lộ trình.</td>
       </tr>
       <tr>
-        <td class="nt-name">ST</td>
+        <td class="nt-name ST">ST</td>
         <td class="nt-desc">Kéo dây tăng tốc ấn tượng (+11.1%, đạt 66.6% vượt kế hoạch). Tuy nhiên ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu). Yêu cầu khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45, không để dồn ứ việc về cuối.</td>
       </tr>
     </tbody>
