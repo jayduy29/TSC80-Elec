@@ -97,7 +97,7 @@ body.sys #tabs,body.sys #vp,body.sys #pn,body.prog #tabs,body.prog #vp,body.prog
 #pres td.lb{font-weight:bold}#pres td.lb small{font-weight:normal;font-size:10px;color:var(--mut);line-height:1.25}#pres tr.sec td{background:var(--bg);font-weight:bold;color:var(--acct)}
 #pres th.cur,#pres td.cur{background:rgba(13,89,102,.1)}#pres th{font-size:11px;text-align:center}#pres th.l{text-align:left}#pres td{text-align:center}#pres td.lb{text-align:left}
 #pres .pb{min-width:40px;height:15px}#pres .pb span{font-size:10px;line-height:15px}
-#pwk{padding:2px 8px;font-size:12px;color:var(--mut)}.wk{display:inline-block;padding:3px 10px;margin:2px 3px 2px 0;border-radius:12px;border:1px solid var(--acc);color:var(--acct);font-size:12px;cursor:pointer}.wk.on{background:var(--acc);color:#fff}
+#pwk{padding:4px 8px 3px;font-size:12px;color:var(--mut);display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x}#pwk::-webkit-scrollbar{display:none}#pwk .wk-lbl{flex-shrink:0;font-weight:600;margin-right:2px;white-space:nowrap}.wk{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:3px 10px;border-radius:12px;border:1px solid var(--acc);color:var(--acct);font-size:12px;cursor:pointer;white-space:nowrap;user-select:none}.wk.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 #sq{margin:8px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);font-size:15px;min-width:0;max-width:calc(100% - 16px);box-sizing:border-box}
 #sgrp-bar{display:flex;gap:5px;overflow-x:auto;padding:0 8px 6px;margin-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-width:0;max-width:100%;width:100%;touch-action:pan-x}
 #sgrp-bar::-webkit-scrollbar{display:none}
@@ -3720,7 +3720,14 @@ function renderProg(){
   lg.innerHTML=plegHtml;
 
   const wkLabel=w=>w.y?(w.w+'/'+String(w.y).slice(2)):(w.w>=10?'W'+w.w:'W0'+w.w);
-  wk.innerHTML=wd.length?t('weekLabel')+wd.map(w=>`<span class="wk${wcur&&w.c===wcur.c?' on':''}" data-c="${w.c}">${wkLabel(w)}</span>`).join(''):'';
+  wk.innerHTML=wd.length?`<span class="wk-lbl">${esc(t('weekLabel'))}</span>`+wd.map(w=>`<span class="wk${wcur&&w.c===wcur.c?' on':''}" data-c="${w.c}">${wkLabel(w)}</span>`).join(''):'';
+  if(wcur){
+    const aw=wk.querySelector(`.wk[data-c="${wcur.c}"]`);
+    if(aw&&!window.__wkScrolledOnce){
+      window.__wkScrolledOnce=true;
+      setTimeout(()=>aw.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}),100);
+    }
+  }
 
   const cmap={'HDC':'#d84315','NAUTICS':'#1565c0','ST':'#2e7d32','TOTAL PROJECT':'#1e3a8a','TỔNG DỰ ÁN':'#1e3a8a'};
 
@@ -3948,7 +3955,14 @@ function renderProg(){
   res.innerHTML=det+h+'</table>';
 }
 
-$('#pwk').onclick=e=>{const s=e.target.closest('.wk');if(!s)return;PS.wk=+s.dataset.c;renderProg()};
+$('#pwk').onclick=e=>{
+  const s=e.target.closest('.wk');
+  if(!s)return;
+  PS.wk=+s.dataset.c;
+  renderProg();
+  const ab=$(`#pwk [data-c="${PS.wk}"]`);
+  if(ab) ab.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+};
 $('#pleg').onclick=e=>{
   const s=e.target.closest('[data-cf]');
   if(!s)return;
