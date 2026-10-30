@@ -144,5 +144,6 @@
 {"id":"n1793353891018","c":"601JB16","v":5,"x":2357,"y":257,"n":"\"601JB16\" TEMPERATURE AND HUMIDITY J-BOX (LOW FORE HOLD)","s":"","a":0,"dc":["(+601JB16)"]},
 {"id":"n1793354002986","c":"461JB300","v":4,"x":2139,"y":116,"n":"\"461JB300\" E3 JUNCTION BOX (MIDDLE FORE HOLD)","s":"","a":0,"dc":["(+461JB300)"]},
 {"id":"n1793354035058","c":"461JB70","v":4,"x":2217,"y":242,"n":"\"461JB70\" E1 JUNCTION BOX (MIDDLE FORE HOLD)","s":"","a":0,"dc":["(+461JB70)"]},
-{"id":"n1793354130826","c":"601JB42","v":3,"x":2870,"y":385,"n":"\"601JB42\" TEMPERATURE AND HUMIDITY J-BOX (HOLD)","s":"","a":0,"dc":["(=601++3020+-601JB42)"]}
+{"id":"n1793354130826","c":"601JB42","v":3,"x":2870,"y":385,"n":"\"601JB42\" TEMPERATURE AND HUMIDITY J-BOX (HOLD)","s":"","a":0,"dc":["(=601++3020+-601JB42)"]},
+{"id":"n1793356760413","c":"461U18","v":2,"x":1790,"y":458,"n":"JB F ( MIZZEN FORESTAY )","s":"","a":0,"dc":["(=461++4040+-461U18)"]}
 ]
