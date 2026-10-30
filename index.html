@@ -4024,7 +4024,7 @@ function flag(m){msg=m;dirty=true;tb()}
 function tb(){const b=$('#tb');b.style.display=editing?'flex':'none';st.classList.toggle('ed',editing);if(!editing)return;
   b.innerHTML=`<button data-a="add">${addMode?'Chạm lên bản đồ…':'＋ Thêm điểm'}</button><button data-a="code">✏️ Đổi mã</button><button data-a="del">🗑 Xóa</button><button data-a="save">💾 Lưu${dirty?' *':''}</button><button data-a="exp">📋 Xuất</button><button data-a="gh">⚙ GitHub</button><button data-a="exit">✖ Thoát</button>${msg?'<span>'+esc(msg)+'</span>':''}`}
 function refresh(){if(vi<0)return;const t0={...T};show(vi);T=t0;apply()}
-function findDev(code){const rx=new RegExp('^\\((?:\\+|=\\d+(?:\\.\\d+)?\\+\\+\\d+\\+-)'+code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\d*(?:\\.\\d+)*)\\)$','i');const r=[];D.dev.forEach((d,i)=>{if(rx.test(d[0]))r.push(i)});return r}
+function findDev(code){const rx=new RegExp('^\\((?:\\+|=\\d+(?:\\.\\d+)?\\+\\+\\d+\\+-)'+code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\.\\d+)*\\)$','i');const r=[];D.dev.forEach((d,i)=>{if(rx.test(d[0]))r.push(i)});return r}
 function addAt(x,y){addMode=false;ask('Mã panel của điểm mới (vd 14E1)','',c=>{if(!c){tb();return}c=c.toUpperCase();const d=findDev(c);
   const fin=n=>{const id='n'+Date.now();E.add.push({id,v:vi,x:Math.round(x),y:Math.round(y),c,n:n,s:'',a:0,d});rebuild();refresh();const k=D.pins.findIndex(p=>p.id===id);flag('Đã thêm '+c+' (chưa lưu)');pickPin(k)};
   if(d.length)fin(D.dev[d[0]][1]);else ask('Không có trong cable list. Nhập tên thiết bị (có thể bỏ trống)','',n=>fin(n))})}
