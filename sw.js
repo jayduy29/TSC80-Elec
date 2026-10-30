@@ -1,8 +1,9 @@
-const CACHE_NAME = 'tsc80-pwa-v2.5';
+const CACHE_NAME = 'tsc80-pwa-v2.6';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
   './pins.json',
+  './prog_data.json',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -59,6 +60,26 @@ self.addEventListener('fetch', event => {
         })
         .catch(async () => {
           const cached = await caches.match('./pins.json') || await caches.match('pins.json');
+          if (cached) return cached;
+          return new Response('[]', { headers: { 'Content-Type': 'application/json' } });
+        })
+    );
+    return;
+  }
+
+  // Specific handler for prog_data.json (Network First, Cache Fallback)
+  if (url.pathname.endsWith('/prog_data.json')) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put('./prog_data.json', copy));
+          }
+          return res;
+        })
+        .catch(async () => {
+          const cached = await caches.match('./prog_data.json') || await caches.match('prog_data.json');
           if (cached) return cached;
           return new Response('[]', { headers: { 'Content-Type': 'application/json' } });
         })
