@@ -421,12 +421,23 @@ tr.row-pulled td{background:transparent}
 </header>
 <div id="modes"><button data-m="map" class="on"><i style="background:#d84315"></i><span>Sơ đồ</span></button><button data-m="sys"><i style="background:#1565c0"></i><span>Hệ thống</span></button><button data-m="prog"><i style="background:#2e7d32"></i><span>Tiến độ</span></button></div>
 <div id="tabs"></div>
-<div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pimp" title="Nhập trực tiếp file TCS80-C459-ELECTRICAL PROGRESS.xlsx">📁 Nhập Excel</button><input type="file" id="pfile" accept=".xlsx,.xlsm" style="display:none"><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button><button id="pexp">📊 Xuất báo cáo</button></div><div id="pwk-bar"><span id="pwk-lbl">Tuần:</span><div id="pwk"></div></div><div id="pleg"></div><div id="pstat"></div><div id="pres"></div></div>
+<div id="progv"><div id="pbar"><select id="psheet" style="display:none"></select><button id="pref">⟳ Cập nhật</button><button id="pch">Biểu đồ</button><button id="pfr">Bản gốc</button><button id="pexp">📊 Xuất báo cáo</button><button id="pgd" title="Đổi link Google Drive của file tiến độ">⚙ Link GG Drive</button></div><div id="pwk-bar"><span id="pwk-lbl">Tuần:</span><div id="pwk"></div></div><div id="pleg"></div><div id="pstat"></div><div id="pres"></div></div>
 <div id="sysv"><input id="sq" placeholder="Tìm mã hoặc tên hệ thống (vd 903, nav lighting)" autocomplete="off"><div id="sgrp-bar"></div><div id="ssel"></div><div id="slist"></div><div id="sres"></div></div>
 <div id="vp"><div id="st"><img id="im" alt="Sơ đồ bố trí số phòng"></div><div id="zm"><button id="zin" aria-label="Phóng to">+</button><button id="zout" aria-label="Thu nhỏ">−</button></div><div id="tb"></div><div id="hint">Kéo để di chuyển · chụm / cuộn để phóng to</div></div>
 <div id="pn"><div class="m" id="pn-hint">Chưa chọn phòng. Bấm vào một ô xanh trên sơ đồ.</div></div>
 <footer>COPYRIGHT (C) 2026 BY Jay Duy <span id="lock" title="Chỉnh sửa vị trí">🔒</span></footer>
-<div id="gm"><div class="box"><b>Cài đặt lưu vị trí về GitHub</b><label>Repo (chủ/tên, ví dụ: jayduy/tsc80)</label><input id="gr" autocomplete="off" placeholder="owner/repo"><label>Nhánh</label><input id="gb" autocomplete="off" value="main"><label>Đường dẫn file vị trí trong repo</label><input id="gp" autocomplete="off" value="pins.json"><label>Token (Personal Access Token, chỉ lưu trên máy này)</label><input id="gt" type="password" autocomplete="off" placeholder="github_pat_..."><div id="gmsg"></div><div class="r"><button id="gok">Lưu &amp; kiểm tra</button><button id="gx">Đóng</button></div></div></div>
+<div id="gm"><div class="box"><b>⚙ Cài đặt lưu vị trí về GitHub</b>
+<label>Repo (chủ/tên repo)</label>
+<input id="gr" autocomplete="off" value="jayduy29/TSC80-Elec" placeholder="jayduy29/TSC80-Elec">
+<label>Nhánh</label>
+<input id="gb" autocomplete="off" value="main">
+<label>Đường dẫn file vị trí trong repo</label>
+<input id="gp" autocomplete="off" value="pins.json">
+<label>Token (GitHub Personal Access Token)</label>
+<input id="gt" type="password" autocomplete="off" placeholder="ghp_... hoặc github_pat_...">
+<div style="font-size:11px;color:var(--mut);line-height:1.4;margin:3px 0 6px">Token cần quyền <b>Contents: Read and write</b> trên repo này để đẩy điểm mới lên GitHub. <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--acc);font-weight:600;text-decoration:underline">Bấm vào đây để tạo Token</a></div>
+<div id="gmsg"></div>
+<div class="r"><button id="gok">Lưu &amp; kiểm tra</button><button id="gx">Đóng</button></div></div></div>
 <div id="sm"><div class="box"><b id="smt"></b>
   <div id="sm-tabs">
     <button id="sm-btn-rt" class="sm-tab-btn rt on" data-mode="realtime">⚡ 2. Tiến độ Realtime (+Kéo dây)</button>
@@ -2322,6 +2333,10 @@ async function loadProg(){
   if(PS.loading)return;PS.loading=true;PS.errs=[];pstat(t('progLoading'));let ok=false;
   const pUrlT=k=>PURL(k)+(PURL(k).includes('?')?'&_t=':'?_t=')+Date.now();
   const tryit=async(name,fn)=>{if(ok)return;try{const r=await fn();if(r&&r.length){PS.sheets=r;PS.ts=Date.now();PS.fromCache=false;ok=true}else PS.errs.push(name+': rỗng')}catch(e){PS.errs.push(name+': '+String((e&&e.message)||e))}};
+  const csv=k=>async()=>{const r=await fetch(pUrlT(k),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(/^\s*</.test(tx))throw new Error('Google trả về trang web (chưa chia sẻ công khai?)');return [{name:'Trang 1',rows:parseCsv(tx)}]};
+  await tryit('gviz-csv',csv('g'));await tryit('export-csv',csv('c'));
+  await tryit('xlsx',async()=>{const r=await fetch(pUrlT('x'),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.arrayBuffer();if(new Uint8Array(b)[0]!==0x50)throw new Error('không phải tệp xlsx (có thể cần chia sẻ công khai)');return await readXlsx(b)});
+  await tryit('gviz-script',async()=>[{name:'Trang 1',rows:await gvizJsonp()}]);
   const localJson=async()=>{
     const r=await fetch('prog_data.json?_t='+Date.now(),{cache:'no-store'});
     if(!r.ok)throw new Error('HTTP '+r.status);
@@ -2330,10 +2345,6 @@ async function loadProg(){
     return j;
   };
   await tryit('local-json',localJson);
-  const csv=k=>async()=>{const r=await fetch(pUrlT(k),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(/^\s*</.test(tx))throw new Error('Google trả về trang web (chưa chia sẻ công khai?)');return [{name:'Trang 1',rows:parseCsv(tx)}]};
-  await tryit('gviz-csv',csv('g'));await tryit('export-csv',csv('c'));
-  await tryit('xlsx',async()=>{const r=await fetch(pUrlT('x'),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.arrayBuffer();if(new Uint8Array(b)[0]!==0x50)throw new Error('không phải tệp xlsx (có thể cần chia sẻ công khai)');return await readXlsx(b)});
-  await tryit('gviz-script',async()=>[{name:'Trang 1',rows:await gvizJsonp()}]);
   PS.loading=false;
   if(ok){let bi=0,bn=-1;PS.sheets.forEach((s,i)=>{const n=(s.rows.slice(0,12).map(r=>r.filter(x=>wkInfo(x)!==null).length).sort((a,b)=>b-a)[0])||0;if(n>bn){bn=n;bi=i}});PS.cur=bi;try{localStorage.setItem('tsc80_prog2',JSON.stringify({sheets:PS.sheets,ts:PS.ts}))}catch(_){}PS.err=''}else{PS.err=PS.errs[0]||'lỗi'}
   if(!ok&&!PS.sheets.length)PS.frame=1;
@@ -3986,76 +3997,22 @@ $('#pleg').onclick=e=>{
 };
 $('#pch').onclick=()=>{PS.chart=!PS.chart;if(PS.chart)PS.frame=0;renderProg()};
 const pexpBtn=$('#pexp');if(pexpBtn)pexpBtn.onclick=()=>snapProg();
-const pImpBtn=$('#pimp'), pFileIn=$('#pfile');
-if(pImpBtn && pFileIn){
-  pImpBtn.onclick=()=>pFileIn.click();
-  pFileIn.onchange=async e=>{
-    const file=e.target.files&&e.target.files[0];
-    if(!file)return;
-    try{
-      pstat('Đang đọc file Excel '+file.name+'...');
-      const buf=await file.arrayBuffer();
-      const parsedSheets=await readXlsx(buf);
-      if(!parsedSheets||!parsedSheets.length)throw new Error('Không đọc được dữ liệu');
-      const tongSheet=parsedSheets.find(s=>s.name&&s.name.toUpperCase().includes('TỔNG'));
-      if(tongSheet){
-        let cCut={},cPull={},cConn={};
-        tongSheet.rows.forEach(r=>{
-          const c1=String(r[0]||'').toLowerCase();
-          if(c1.includes('total')||c1.includes('tổng'))return;
-          if(c1.includes('cut')||c1.includes('cắt')){
-            cCut={HDC:parseNum(r[1])||0,NAUTICS:parseNum(r[3])||0,ST:parseNum(r[5])||0,TOTAL:parseNum(r[7])||0};
-          }else if(c1.includes('pull')||c1.includes('kéo')){
-            cPull={HDC:parseNum(r[1])||0,NAUTICS:parseNum(r[3])||0,ST:parseNum(r[5])||0,TOTAL:parseNum(r[7])||0};
-          }else if(c1.includes('connect')||c1.includes('đấu')){
-            cConn={HDC:parseNum(r[1])||0,NAUTICS:parseNum(r[3])||0,ST:parseNum(r[5])||0,TOTAL:parseNum(r[7])||0};
-          }
-        });
-        if(PS.sheets&&PS.sheets.length&&PS.wk!==undefined){
-          const sh=PS.sheets[PS.cur||0];
-          const colWk=PS.wk;
-          sh.rows.forEach(row=>{
-            const contr=String(row[0]||'').toUpperCase();
-            const item=String(row[1]||'').toLowerCase();
-            const ind=String(row[3]||'').toLowerCase();
-            if(ind.includes('cumulative')||ind.includes('lũy kế')||ind.includes('qty')||ind.includes('khối lượng')){
-              if(item.includes('cut')||item.includes('cắt')){
-                if(contr.includes('HDC'))row[colWk]=cCut.HDC;
-                else if(contr.includes('NAUTICS'))row[colWk]=cCut.NAUTICS;
-                else if(contr.includes('ST'))row[colWk]=cCut.ST;
-                else if(contr.includes('TOTAL')||contr.includes('TỔNG'))row[colWk]=cCut.TOTAL||(cCut.HDC+cCut.NAUTICS+cCut.ST);
-              }else if(item.includes('pull')||item.includes('kéo')){
-                if(contr.includes('HDC'))row[colWk]=cPull.HDC;
-                else if(contr.includes('NAUTICS'))row[colWk]=cPull.NAUTICS;
-                else if(contr.includes('ST'))row[colWk]=cPull.ST;
-                else if(contr.includes('TOTAL')||contr.includes('TỔNG'))row[colWk]=cPull.TOTAL||(cPull.HDC+cPull.NAUTICS+cPull.ST);
-              }else if(item.includes('connect')||item.includes('termination')||item.includes('đấu')){
-                if(contr.includes('HDC'))row[colWk]=cConn.HDC;
-                else if(contr.includes('NAUTICS'))row[colWk]=cConn.NAUTICS;
-                else if(contr.includes('ST'))row[colWk]=cConn.ST;
-                else if(contr.includes('TOTAL')||contr.includes('TỔNG'))row[colWk]=cConn.TOTAL||(cConn.HDC+cConn.NAUTICS+cConn.ST);
-              }
-            }
-          });
-          PS.ts=Date.now();
-          PS.fromCache=false;
-          try{localStorage.setItem('tsc80_prog2',JSON.stringify({sheets:PS.sheets,ts:PS.ts}))}catch(_){}
-          renderProg();
-          alert('✅ Đã nạp thành công số liệu tuần mới từ file: '+file.name);
-        }
+const pgdBtn=$('#pgd');
+if(pgdBtn){
+  pgdBtn.onclick=()=>{
+    ask('Nhập Link hoặc ID file Google Drive của file tiến độ', PID, s=>{
+      if(!s)return;
+      const m=s.match(/[-\w]{25,}/);
+      if(m){
+        PID=m[0];
+        try{localStorage.setItem('tsc80_prog_id', PID)}catch(_){}
+        PS.sheets=[];
+        loadProg();
+        flag('Đã đổi link Google Drive: '+PID);
       }else{
-        PS.sheets=parsedSheets;
-        PS.ts=Date.now();
-        PS.fromCache=false;
-        try{localStorage.setItem('tsc80_prog2',JSON.stringify({sheets:PS.sheets,ts:PS.ts}))}catch(_){}
-        renderProg();
-        alert('✅ Đã nạp thành công bảng tiến độ từ: '+file.name);
+        alert('Không tìm thấy File ID hợp lệ trong link vừa nhập');
       }
-    }catch(err){
-      alert('❌ Lỗi khi đọc file Excel: '+(err.message||err));
-    }finally{
-      pFileIn.value='';
-    }
+    });
   };
 }
 // ===== chế độ chỉnh sửa =====
@@ -4090,11 +4047,20 @@ async function save(){try{localStorage.setItem('tsc80_pin_edits',JSON.stringify(
   if(c&&c.repo&&c.token){msg='Đang lưu lên GitHub…';tb();const r=await ghSave();
     if(r.ok){const keep=selP>=0&&D.pins[selP]?D.pins[selP].id:null;const fin=pinsIn(JSON.parse(JSON.stringify(pinsOut())));BASE.length=0;fin.forEach(p=>BASE.push(p));E={m:{},del:[],add:[]};try{localStorage.removeItem('tsc80_pin_edits')}catch(_){}
       rebuild();selP=keep?D.pins.findIndex(p=>p.id===keep):-1;refresh();dirty=false;msg='✅ Đã lưu lên GitHub (commit '+r.sha+'). Vercel sẽ tự cập nhật web sau ít phút.';tb();return}
-    msg='⚠ Lỗi GitHub: '+r.why+'. Đã lưu trên máy này.'}
+    msg='⚠ Lỗi GitHub: '+r.why+'. Đã lưu trên máy này.';
+    tb();
+    setTimeout(()=>openGh(),600);
+    return;
+  }
   else if(dbRef){try{await dbRef.set({json:JSON.stringify(E),t:Date.now()});dirty=false;msg='Đã lưu chung cho mọi người';tb();return}catch(_){msg='Đã lưu trên máy này (không có quyền lưu chung)'}}
-  else msg='Đã lưu trên máy này. Bấm ⚙ GitHub để cài đặt lưu về GitHub.';
+  else {
+    msg='⚠️ Chưa cài đặt GitHub Token. Đang mở cài đặt để kết nối...';
+    dirty=false;tb();
+    setTimeout(()=>openGh(),300);
+    return;
+  }
   dirty=false;tb()}
-function openGh(){const c=gh()||{};$('#gr').value=c.repo||'';$('#gb').value=c.branch||'main';$('#gp').value=c.path||'pins.json';$('#gt').value=c.token||'';$('#gmsg').textContent='';$('#gm').style.display='flex'}
+function openGh(){const c=gh()||{};$('#gr').value=c.repo||'jayduy29/TSC80-Elec';$('#gb').value=c.branch||'main';$('#gp').value=c.path||'pins.json';$('#gt').value=c.token||'';$('#gmsg').textContent='';$('#gm').style.display='flex'}
 $('#gx').onclick=()=>{$('#gm').style.display='none'};
 $('#gok').onclick=async()=>{const c={repo:$('#gr').value.trim().replace(/^https?:\/\/github\.com\//i,'').replace(/\.git$/,'').replace(/\/$/,''),branch:$('#gb').value.trim()||'main',path:$('#gp').value.trim()||'pins.json',token:$('#gt').value.trim()},m=$('#gmsg');
   if(!/^[\w.-]+\/[\w.-]+$/.test(c.repo)){m.style.color='#c62828';m.textContent='Repo phải dạng chủ/tên, ví dụ jayduy/tsc80';return}
