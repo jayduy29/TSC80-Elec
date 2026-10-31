@@ -1332,11 +1332,15 @@ function cabTable(i,filterState){
     const otherDev=D.dev[c[3]]||['?','?'];
     const otherRoom=devRoom[c[3]]||'';
     return `<tr class="${isP?'row-pulled':'row-unpulled'}">
-      <td><span class="cl" data-cab="${esc(c[0])}"><b>${esc(c[0])}</b></span><small>${esc(c[1])}</small></td>
-      <td class="tc"><span class="c-tag ${contr}">${contr}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+          <span class="cl" data-cab="${esc(c[0])}"><b>${esc(c[0])}</b></span>
+          <span class="c-tag ${contr}">${contr}</span>
+        </div>
+        <small>${esc(c[1])}</small>
+      </td>
       <td class="tc">${statusPill}</td>
-      <td class="tc">${c[2]?t('to'):t('from')}</td>
-      <td><span class="dl" data-dv="${c[3]}"><b>${esc(otherDev[0])}</b></span><span class="dl" data-dv="${c[3]}">${esc(otherDev[1])}</span>${otherRoom?`<small>🚪 ${t('room')} ${esc(otherRoom)}</small>`:''}</td>
+      <td><span class="dl" data-dv="${c[3]}"><b>${esc(otherDev[0])}</b></span> <span class="dl" data-dv="${c[3]}">${esc(otherDev[1])}</span>${otherRoom?`<small>🚪 ${t('room')} ${esc(otherRoom)}</small>`:''}</td>
     </tr>`;
   }).join('');
 
@@ -1344,10 +1348,10 @@ function cabTable(i,filterState){
     ${banner}
     ${actionsBar}
     ${filterBar}
-    <table style="min-width:550px">
-      <colgroup><col style="width:130px"><col style="width:75px"><col style="width:95px"><col style="width:65px"><col style="min-width:185px"></colgroup>
-      <tr><th>${t('colCableId')}</th><th class="tc">${t('colContr')}</th><th class="tc">${t('colStatus')}</th><th class="tc">${t('colFrom')}/${t('to')}</th><th>${t('colOtherDev')}</th></tr>
-      ${rows||'<tr><td colspan="5" style="text-align:center;padding:10px;color:var(--mut)">Không có dây phù hợp bộ lọc</td></tr>'}
+    <table style="min-width:100%">
+      <colgroup><col style="width:145px"><col style="width:95px"><col style="min-width:140px"></colgroup>
+      <tr><th>${t('colCableId')}</th><th class="tc">${t('colStatus')}</th><th>${t('colOtherDev')}</th></tr>
+      ${rows||'<tr><td colspan="3" style="text-align:center;padding:10px;color:var(--mut)">Không có dây phù hợp bộ lọc</td></tr>'}
     </table>
   </div>`}
 
