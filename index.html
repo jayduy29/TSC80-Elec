@@ -377,8 +377,8 @@ tr.row-pulled td{background:transparent}
 .pin.done i{box-shadow:0 0 0 2px #16a34a, 0 0 0 4px rgba(22,163,74,.4)}
 
 /* Action buttons in dev panel */
-.dev-actions-bar{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap;align-items:center}
-.act-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:12px;cursor:pointer;font-weight:bold;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+.dev-actions-bar{display:flex;gap:5px;margin:8px 0;width:100%;box-sizing:border-box}
+.act-btn{flex:1 1 0;min-width:0;padding:6px 3px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:clamp(10px,2.8vw,12px);cursor:pointer;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .15s}
 .act-btn:hover{background:var(--bg);border-color:var(--acc)}
 .act-btn.act-rt{background:rgba(239,68,68,.1);border-color:#ef4444;color:#dc2626}
 .act-btn.act-rt:hover{background:#dc2626;color:#fff}
@@ -593,9 +593,9 @@ const I18N = {
     devUnpulledBanner: '⏳ CHƯA KÉO ĐỦ: Còn {un}/{tot} dây chưa kéo',
     devUnpulledSub: 'Vui lòng kiểm tra các dây đánh dấu màu đỏ dưới đây.',
     devNoCable: 'ℹ️ Chưa có thông tin cáp',
-    btnCopyExcel: '📋 Copy bảng Excel',
-    btnSnapRt: '⚡ Ảnh Realtime (Tiến độ)',
-    btnSnapDs: '📄 Ảnh thiết kế (+Nhà thầu)',
+    btnCopyExcel: '📋 Copy Excel',
+    btnSnapRt: '⚡ Ảnh Realtime',
+    btnSnapDs: '📄 Ảnh thiết kế',
     sysTitle: 'Tiến độ hoàn thiện: ',
     sysSearchPh: 'Tìm mã hoặc tên hệ thống (vd 903, nav lighting)',
     sysCabSearchPh: 'Lọc nhanh cáp, thiết bị, phòng...',
@@ -755,9 +755,9 @@ const I18N = {
     devUnpulledBanner: '⏳ INCOMPLETE: {un}/{tot} cables remaining',
     devUnpulledSub: 'Please check the unpulled cables highlighted in red below.',
     devNoCable: 'ℹ️ No cable information available',
-    btnCopyExcel: '📋 Copy Excel Table',
-    btnSnapRt: '⚡ Realtime Image (Progress)',
-    btnSnapDs: '📄 Design Image (+Contractor)',
+    btnCopyExcel: '📋 Copy Excel',
+    btnSnapRt: '⚡ Realtime Photo',
+    btnSnapDs: '📄 Design Photo',
     sysTitle: 'Completion Progress: ',
     sysSearchPh: 'Search system code or name (e.g. 903, nav lighting)',
     sysCabSearchPh: 'Quick search cable, equipment, room...',
@@ -1302,7 +1302,6 @@ function cabTable(i,filterState){
   }else{
     banner=`<div class="dev-stat-card is-pending">
       <div class="dsc-title">${t('devUnpulledBanner').replace('{un}',st.unpulled).replace('{tot}',st.total)}</div>
-      <div class="dsc-sub">${t('devUnpulledSub')}</div>
     </div>`;
   }
 
