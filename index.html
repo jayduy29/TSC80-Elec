@@ -1333,11 +1333,9 @@ function cabTable(i,filterState){
     const otherRoom=devRoom[c[3]]||'';
     return `<tr class="${isP?'row-pulled':'row-unpulled'}">
       <td>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
-          <span class="cl" data-cab="${esc(c[0])}"><b>${esc(c[0])}</b></span>
-          <span class="c-tag ${contr}">${contr}</span>
-        </div>
-        <small>${esc(c[1])}</small>
+        <span class="cl" data-cab="${esc(c[0])}"><b>${esc(c[0])}</b></span>
+        <small style="display:block;margin:1px 0 3px">${esc(c[1])}</small>
+        <span class="c-tag ${contr}">${contr}</span>
       </td>
       <td class="tc">${statusPill}</td>
       <td><span class="dl" data-dv="${c[3]}"><b>${esc(otherDev[0])}</b></span> <span class="dl" data-dv="${c[3]}">${esc(otherDev[1])}</span>${otherRoom?`<small>🚪 ${t('room')} ${esc(otherRoom)}</small>`:''}</td>
@@ -1384,12 +1382,14 @@ function pickPin(k){
   setPaneMode('both');updatePaneTitle(p.c+(p.n?' · '+p.n:''));
   st.querySelectorAll('.pin').forEach(e=>e.classList.toggle('on',+e.dataset.p===k));
   const s=Math.max(T.s,Math.min(3,vp.clientWidth/300));T.s=s;T.x=vp.clientWidth/2-p.x*s;T.y=vp.clientHeight/2-p.y*s;apply();
-  let vName = D.views[p.v].name;
-  if(curLang==='en'&&(vName==='Mặt cắt dọc'||vName==='Mat cat doc')) vName = t('profileView');
-  else if(curLang==='vi') vName = vName.replace(/^Level\s*(\d+)/i, 'Tầng $1');
-  pn.innerHTML=`<h2>${esc(p.c)}</h2><div class="m">${esc(p.n)}<br>${esc(vName)}${p.a?' · '+t('approxLocation'):''}</div>`+
-   (p.d.length?p.d.map(i=>devRow(i,p.d.length<=2)).join(''):'<div class="m">'+t('noCableInList')+'</div>');
-  pn.scrollTop=0}
+  if(!p.d || !p.d.length){
+    pn.innerHTML=`<div class="m" style="padding:15px;text-align:center">${t('noCableInList')}</div>`;
+  }else if(p.d.length===1){
+    pn.innerHTML=cabTable(p.d[0]);
+  }else{
+    pn.innerHTML=p.d.map(i=>devRow(i,true)).join('');
+  }
+  pn.scrollTop=0;}
 pn.addEventListener('click',e=>{
   const rtb=e.target.closest('.rtb');
   if(rtb){
