@@ -318,6 +318,10 @@ td .c-tag{margin:0}
 .c-tag.NAUTICS{background:#1565c0;color:#fff}
 .c-tag.ST{background:#2e7d32;color:#fff}
 .c-tag.Khac,.c-tag.Other{background:#64748b;color:#fff}
+.st-pill{display:inline-block;padding:2px 4px;border-radius:5px;font-size:10px;font-weight:bold;line-height:1.2;white-space:nowrap;text-align:center}
+.st-pill.ok{background:#16a34a;color:#fff}
+.st-pill.no{background:#dc2626;color:#fff}
+.c-tag-sm{display:inline-block;padding:1px 5px;border-radius:4px;font-size:9.5px;font-weight:bold;line-height:1.2;white-space:nowrap}
 
 /* Room progress card */
 .room-prog-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0 10px}
@@ -577,7 +581,7 @@ const I18N = {
     filterShowAll: 'Hiện tất cả',
     filterDevPh: 'Lọc thiết bị theo mã / tên...',
     roomAllDoneNotice: '✓ Tuyệt vời! Toàn bộ {n} dây trong phòng này đã hoàn thành kéo dây.',
-    colCableId: 'Mã dây / Loại',
+    colCableId: 'Mã / Loại / NT',
     colContr: 'Nhà thầu',
     colStatus: 'Trạng thái',
     colPull: 'Kéo dây',
@@ -739,7 +743,7 @@ const I18N = {
     filterShowAll: 'Show all',
     filterDevPh: 'Filter equipment by code / name...',
     roomAllDoneNotice: '✓ Excellent! All {n} cables in this room are completely pulled.',
-    colCableId: 'Cable ID / Type',
+    colCableId: 'ID / Type / Contr',
     colContr: 'Contractor',
     colStatus: 'Status',
     colPull: 'Pulling',
@@ -1328,16 +1332,16 @@ function cabTable(i,filterState){
     const meta=CBL[c[0]]||[3,0,0,0,'',''];
     const contr=CONTR_NAMES[meta[0]]||'Khác';
     const isP=meta[1]===1;
-    const statusPill=isP?`<span class="c-badge c-done">${t('pulled')}</span>`:`<span class="c-badge c-pend">${t('unpulled')}</span>`;
+    const statusPill=isP?`<span class="st-pill ok">${t('pulled')}</span>`:`<span class="st-pill no">${t('unpulled')}</span>`;
     const otherDev=D.dev[c[3]]||['?','?'];
     const otherRoom=devRoom[c[3]]||'';
     return `<tr class="${isP?'row-pulled':'row-unpulled'}">
       <td>
         <span class="cl" data-cab="${esc(c[0])}"><b>${esc(c[0])}</b></span>
-        <small style="display:block;margin:1px 0 3px">${esc(c[1])}</small>
-        <span class="c-tag ${contr}">${contr}</span>
+        <small style="display:block;margin:1px 0 2px;line-height:1.2;font-size:10.5px">${esc(c[1])}</small>
+        <span class="c-tag c-tag-sm ${contr}">${contr}</span>
       </td>
-      <td class="tc">${statusPill}</td>
+      <td class="tc" style="vertical-align:middle;padding:4px 2px">${statusPill}</td>
       <td><span class="dl" data-dv="${c[3]}"><b>${esc(otherDev[0])}</b></span> <span class="dl" data-dv="${c[3]}">${esc(otherDev[1])}</span>${otherRoom?`<small>🚪 ${t('room')} ${esc(otherRoom)}</small>`:''}</td>
     </tr>`;
   }).join('');
@@ -1346,9 +1350,9 @@ function cabTable(i,filterState){
     ${banner}
     ${actionsBar}
     ${filterBar}
-    <table style="min-width:100%">
-      <colgroup><col style="width:145px"><col style="width:95px"><col style="min-width:140px"></colgroup>
-      <tr><th>${t('colCableId')}</th><th class="tc">${t('colStatus')}</th><th>${t('colOtherDev')}</th></tr>
+    <table style="width:100%">
+      <colgroup><col style="width:102px"><col style="width:72px"><col style="min-width:140px"></colgroup>
+      <tr><th>${t('colCableId')}</th><th class="tc" style="font-size:11.5px">${t('colStatus')}</th><th>${t('colOtherDev')}</th></tr>
       ${rows||'<tr><td colspan="3" style="text-align:center;padding:10px;color:var(--mut)">Không có dây phù hợp bộ lọc</td></tr>'}
     </table>
   </div>`}
