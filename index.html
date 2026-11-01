@@ -34,9 +34,11 @@ header b{font-size:15px}header small{opacity:.9;display:block}#lg{white-space:no
 #vp{position:relative;overflow:hidden;background:#fff;touch-action:none;min-height:0}
 #st{position:absolute;left:0;top:0;transform-origin:0 0}
 #st img{display:block;user-select:none;-webkit-user-drag:none}
-.hs{position:absolute;border:3px solid transparent;border-radius:4px;cursor:pointer}
-.hs.done{background:rgba(22,163,74,.25);border-color:#16a34a}
-.hs.pend{background:rgba(225,29,72,.18);border-color:#e11d48}
+.hs{position:absolute;border:3px solid transparent;border-radius:4px;cursor:pointer;transition:background .15s,border-color .15s}
+.hs.p100,.hs.done{background:rgba(22,163,74,.25);border-color:#16a34a}
+.hs.p70{background:rgba(37,99,235,.22);border-color:#2563eb}
+.hs.p1{background:rgba(217,119,6,.22);border-color:#d97706}
+.hs.p0,.hs.pend{background:rgba(225,29,72,.18);border-color:#e11d48}
 .hs.has{background:rgba(22,163,74,.25);border-color:#16a34a}
 .hs.no{background:rgba(120,130,140,.18);border-color:rgba(120,130,140,.6)}
 .hs.on{background:rgba(255,127,0,.4)!important;border-color:var(--hot)!important;box-shadow:0 0 0 4px rgba(255,127,0,.45)!important}
@@ -68,8 +70,11 @@ table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12px}th{b
 th,td{padding:4px 5px;border:1px solid var(--line);white-space:normal;overflow-wrap:anywhere;vertical-align:top}td small{display:block;color:var(--mut);font-size:11px;margin-top:1px}td .dl{display:block}td .dl+.dl{margin-top:2px;font-size:11px}
 .pin{position:absolute;width:0;height:0;z-index:5;transform:scale(var(--inv,1));transform-origin:0 0;cursor:pointer}
 .pin i{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#e11d48;border:2px solid #fff;box-shadow:0 0 0 1px #e11d48;color:#fff;font:bold 0/0 Arial,sans-serif;text-align:center;white-space:nowrap;box-sizing:content-box}
-.pin.done i{background:#16a34a!important;box-shadow:0 0 0 1px #16a34a!important}
-.pin.a:not(.done) i{background:#f59e0b;box-shadow:0 0 0 1px #f59e0b}
+.pin.p100 i,.pin.done i{background:#16a34a!important;box-shadow:0 0 0 1px #16a34a!important}
+.pin.p70 i{background:#2563eb!important;box-shadow:0 0 0 1px #2563eb!important}
+.pin.p1 i{background:#d97706!important;box-shadow:0 0 0 1px #d97706!important}
+.pin.p0 i{background:#e11d48!important;box-shadow:0 0 0 1px #e11d48!important}
+.pin.a i{background:#d97706;box-shadow:0 0 0 1px #d97706}
 #st.lab .pin i{width:max-content;min-width:30px;height:30px;padding:0 7px;border-radius:18px;font:bold 10px/30px Arial,sans-serif}
 .pin.on{z-index:9}
 .pin.on i{background:var(--hot)!important;box-shadow:0 0 0 4px rgba(255,127,0,.5)!important}
@@ -448,7 +453,7 @@ tr.row-pulled td{background:transparent}
     </div>
   </div>
   <input id="q" placeholder="Tìm phòng, thiết bị hoặc số dây (vd 1060, 14E1, 903W0017)" autocomplete="off">
-  <small id="lg">🟢 Xanh = Đủ dây · 🔴 Đỏ = Chưa đủ dây (ô = phòng, chấm = tủ)</small>
+  <small id="lg">🟢 100% · 🔵 70-99% · 🟡 1-69% · 🔴 0% (ô = phòng, chấm = tủ)</small>
   <div id="res"></div>
 </header>
 <div id="modes"><button data-m="map" class="on"><i style="background:#d84315"></i><span>Sơ đồ</span></button><button data-m="sys"><i style="background:#1565c0"></i><span>Hệ thống</span></button><button data-m="prog"><i style="background:#2e7d32"></i><span>Tiến độ</span></button></div>
@@ -542,7 +547,7 @@ let curLang = localStorage.getItem('tsc80_lang') || 'vi';
 const I18N = {
   vi: {
     hdrTitle: 'TSC80 - Hệ thống điện',
-    hdrSub: '🟢 Xanh = Đủ dây · 🔴 Đỏ = Chưa đủ dây (ô = phòng, chấm = tủ)',
+    hdrSub: '🟢 100% · 🔵 70-99% · 🟡 1-69% · 🔴 0% (ô = phòng, chấm = tủ)',
     searchPh: 'Tìm phòng, thiết bị hoặc số dây (vd 1060, 14E1, 903W0017)',
     modeMap: 'Sơ đồ',
     modeSys: 'Hệ thống',
@@ -705,7 +710,7 @@ const I18N = {
   },
   en: {
     hdrTitle: 'TSC80 - Electrical System',
-    hdrSub: '🟢 Green = Done · 🔴 Red = Pending (box = room, dot = panel)',
+    hdrSub: '🟢 100% · 🔵 70-99% · 🟡 1-69% · 🔴 0% (box = room, dot = panel)',
     searchPh: 'Search room, equipment or cable (e.g. 1060, 14E1, 903W0017)',
     modeMap: 'Arrangement',
     modeSys: 'Systems',
@@ -1067,12 +1072,20 @@ function dblZoom(clientX,clientY){
   const r=vp.getBoundingClientRect();
   smoothZoomAt(clientX-r.left,clientY-r.top,1.45);
 }
+function getProgressBand(pulled,total){
+  if(total<=0)return 'no';
+  const pct=Math.round((pulled/total)*100);
+  if(pct>=100)return 'p100';
+  if(pct>=70)return 'p70';
+  if(pct>0)return 'p1';
+  return 'p0';
+}
 function getRoomStatus(n){
   const rc=getRoomCables(n);
-  if(!rc.length){const r=R[n];return (r&&r.d&&r.d.length)?'has':'no'}
-  let un=0;
-  for(let cid of rc){const meta=CBL[cid];if(!meta||meta[1]!==1)un++}
-  return un===0?'done':'pend';
+  if(!rc.length){const r=R[n];return (r&&r.d&&r.d.length)?'p0':'no'}
+  let pulled=0;
+  for(let cid of rc){const meta=CBL[cid];if(meta&&meta[1]===1)pulled++}
+  return getProgressBand(pulled,rc.length);
 }
 function show(i){
   vi=i;const v=D.views[i];im.src=v.img;im.width=v.w;im.height=v.h;st.style.width=v.w+'px';st.style.height=v.h+'px';
@@ -1080,12 +1093,12 @@ function show(i){
   v.boxes.forEach(b=>{const e=document.createElement('div'),rStat=getRoomStatus(b[4]);e.className='hs '+rStat+(b[4]===sel?' on':'');
     e.dataset.n=b[4];e.style.cssText=`left:${b[0]-8}px;top:${b[1]-8}px;width:${b[2]+16}px;height:${b[3]+16}px`;st.appendChild(e)});
   D.pins.forEach((p,k)=>{if(p.v!==i||p.del)return;const e=document.createElement('div');
-    let totCabs=0,unpulled=0;
+    let totCabs=0,pulled=0;
     if(p.d&&p.d.length>0){
-      for(let di of p.d){const st=getDevStats(di);totCabs+=st.total;unpulled+=st.unpulled;}
+      for(let di of p.d){const st=getDevStats(di);totCabs+=st.total;pulled+=st.pulled;}
     }
-    const allPulled=(totCabs>0&&unpulled===0);
-    e.className='pin'+(p.a?' a':'')+(allPulled?' done':'')+(k===selP?' on':'');e.dataset.p=k;e.style.cssText=`left:${p.x}px;top:${p.y}px`;e.innerHTML='<i>'+esc(lbl(p.c))+'</i>';st.appendChild(e)});
+    const band=totCabs>0?getProgressBand(pulled,totCabs):(p.a?'a':'p0');
+    e.className='pin '+(p.a?'a ':'')+band+(band==='p100'?' done':'')+(k===selP?' on':'');e.dataset.p=k;e.style.cssText=`left:${p.x}px;top:${p.y}px`;e.innerHTML='<i>'+esc(lbl(p.c))+'</i>';st.appendChild(e)});
   document.querySelectorAll('#tabs button').forEach((t,j)=>t.classList.toggle('on',j===i));fit()}
 function pick(n){
   sel=n;const o=occ[n]||[];let hit=o.find(x=>x[0]===vi)||o[0];
