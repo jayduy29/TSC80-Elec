@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsc80-pwa-v4.1';
+const CACHE_NAME = 'tsc80-pwa-v4.2';
 const PRECACHE_ASSETS = [
   './',
   './index.html',

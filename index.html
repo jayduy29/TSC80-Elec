@@ -3047,7 +3047,7 @@ async function snapProg(){
     return;
   }
   const M = pmodel(sh);
-  const wd = M.weeks.filter(w=>M.body.some(r=>!zeroLike(M.cell(r,w.c))));
+  const wd = M.weeks.filter(w=>M.body.some(r=>isNum(M.cell(r,w.c))&&!zeroLike(M.cell(r,w.c))));
   if(!wd.length){
     alert(t('progNoData'));
     return;
@@ -4001,7 +4001,7 @@ function renderProg(){
   if(PS.frame){if(pwkBar)pwkBar.style.display='none';wk.innerHTML='';lg.innerHTML='';res.innerHTML=det+'<iframe src="'+(PS.frame===1?'https://drive.google.com/file/d/'+PID+'/preview':'https://docs.google.com/spreadsheets/d/'+PID+'/htmlview')+'" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff" allow="fullscreen"></iframe>';return}
   const sh=PS.sheets[PS.cur];if(!sh){if(pwkBar)pwkBar.style.display='none';wk.innerHTML='';lg.innerHTML='';res.innerHTML=det||'';return}
   const M=pmodel(sh),k=PS.q.trim().toLowerCase();
-  const wd=M.weeks.filter(w=>M.body.some(r=>!zeroLike(M.cell(r,w.c))));
+  const wd=M.weeks.filter(w=>M.body.some(r=>isNum(M.cell(r,w.c))&&!zeroLike(M.cell(r,w.c))));
   const key=PS.cur+':'+wd.map(w=>w.c).join(',');if(PS.wkKey!==key){PS.wkKey=key;const d=wd.find(w=>w.k===curK);PS.wk=(d||wd[wd.length-1]||{}).c}
   const wcur=wd.find(w=>w.c===PS.wk)||wd[wd.length-1];
 
