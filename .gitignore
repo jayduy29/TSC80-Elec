@@ -1,0 +1,4 @@
+auto_sync.log
+~$*.xlsx
+~$*.xlsm
+__pycache__/

@@ -266,7 +266,7 @@ def sync_cables_to_html(excel_path):
 
     if diff_count > 0:
         new_cbl_str = json.dumps(cur_cbl, separators=(',', ':'))
-        new_html = html[:pos1+6] + new_cbl_str[1:-1] + html[pos2:]
+        new_html = html[:pos1+6] + new_cbl_str + html[pos2+1:]
         with open(HTML_FILE, 'w', encoding='utf-8') as f:
             f.write(new_html)
         print(f"✅ Đã cập nhật {diff_count} dây thay đổi trạng thái vào {HTML_FILE}")
@@ -277,8 +277,14 @@ def sync_cables_to_html(excel_path):
 
 def git_commit_and_push(target_week):
     try:
+        from datetime import datetime
         subprocess.run(['git', 'add', OVERVIEW_FILE, JSON_OUT, HTML_FILE, MASTER_FILE], check=True)
-        msg = f"feat(prog): cap nhat tien do tuan {target_week} tu {MASTER_FILE}"
+        st = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True)
+        if not st.stdout.strip():
+            print("ℹ️ Không có thay đổi mới nào so với bản trên GitHub. Bỏ qua commit & push.")
+            return
+        now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+        msg = f"feat(prog): cap nhat tien do tuan {target_week} luc {now_str}"
         subprocess.run(['git', 'commit', '-m', msg], check=False)
         res = subprocess.run(['git', 'push', 'origin', 'main'], capture_output=True, text=True)
         if res.returncode == 0:
