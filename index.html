@@ -439,6 +439,7 @@ tr.row-pulled td{background:transparent}
 .net-badge.off{background:#f59e0b;color:#1d2733;border-color:#d97706}
 .pwa-btn{background:#f59e0b;color:#111;border:0;padding:3px 9px;border-radius:14px;font-size:11px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:3px;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .1s}
 .pwa-btn:active{transform:scale(.95)}
+#psheet{display:none!important}
 </style></head><body class="pn-top">
 <header>
   <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
@@ -3226,12 +3227,16 @@ async function snapProg(){
     }
   };
 
-  // Roadmap commitment targets (W43 to W50)
-  // Roadmap commitment targets (W43 to W50)
+  // Dynamic roadmap commitment targets (W43 to W50)
+  const curPullPct = (totPull && totPull.curPct !== null) ? +totPull.curPct.toFixed(1) : 77.1;
+  const curPullDelta = (totPull && totPull.deltaPct !== null) ? +totPull.deltaPct.toFixed(1) : 10.1;
+  const curTermPct = (totTerm && totTerm.curPct !== null) ? +totTerm.curPct.toFixed(1) : 11.2;
+  const curTermDelta = (totTerm && totTerm.deltaPct !== null) ? +totTerm.deltaPct.toFixed(1) : 6.8;
+
   const roadmap = [
     { wk: 'W43', pullTot: 67.0, pullDelta: null, termTot: 4.4, termDelta: null, note: 'Đã qua (Mốc xuất phát đấu nối)', noteEn: 'Passed (Termination baseline)', isCurrent: (wcur && wcur.w === 43) || curWkStr === 'W43' },
-    { wk: 'W44', pullTot: 76.2, pullDelta: 9.2, termTot: 10.7, termDelta: 6.3, note: 'Tuần báo cáo (Kéo dây vượt, đấu nối chậm)', noteEn: 'Report week (Pulling ahead, termination behind)', isCurrent: (wcur && wcur.w === 44) || curWkStr === 'W44' },
-    { wk: 'W45', pullTot: 80.0, pullDelta: 3.8, termTot: 26.0, termDelta: 15.3, note: 'Mốc tuần tới (Tập trung toàn lực đấu nối)', noteEn: 'Next milestone (Full focus on termination)', isCurrent: (wcur && wcur.w === 45) || curWkStr === 'W45' },
+    { wk: 'W44', pullTot: curPullPct, pullDelta: curPullDelta, termTot: curTermPct, termDelta: curTermDelta, note: 'Tuần báo cáo (Kéo dây bứt phá, đấu nối tăng tốc)', noteEn: 'Report week (Pulling ahead, termination accelerated)', isCurrent: (wcur && wcur.w === 44) || curWkStr === 'W44' },
+    { wk: 'W45', pullTot: 80.0, pullDelta: +(80.0 - curPullPct).toFixed(1), termTot: 26.0, termDelta: +(26.0 - curTermPct).toFixed(1), note: 'Mốc tuần tới (Tập trung toàn lực đấu nối)', noteEn: 'Next milestone (Full focus on termination)', isCurrent: (wcur && wcur.w === 45) || curWkStr === 'W45' },
     { wk: 'W46', pullTot: 84.0, pullDelta: 4.0, termTot: 38.0, termDelta: 12.0, note: 'Duy trì ổn định nhân lực đấu nối', noteEn: 'Maintain stable termination workforce', isCurrent: (wcur && wcur.w === 46) || curWkStr === 'W46' },
     { wk: 'W47', pullTot: 88.0, pullDelta: 4.0, termTot: 50.0, termDelta: 12.0, note: 'Đấu nối tiệm cận 50%', noteEn: 'Termination approaching 50%', isCurrent: (wcur && wcur.w === 47) || curWkStr === 'W47' },
     { wk: 'W48', pullTot: 91.0, pullDelta: 3.0, termTot: 62.0, termDelta: 12.0, note: 'Nghiệm thu phân đoạn 1', noteEn: 'Stage 1 acceptance', isCurrent: (wcur && wcur.w === 48) || curWkStr === 'W48' },
@@ -3354,6 +3359,21 @@ async function snapProg(){
 
   // Pre-configured expert directives for W44, or dynamic auto-generated for other weeks
   const isW44 = (curWkStr === 'W44' || curWkStr === '44/26');
+  const hdcPullDeltaStr = (hdcPull.deltaPct !== null ? (hdcPull.deltaPct > 0 ? '+' : '') + hdcPull.deltaPct.toFixed(1) + '%' : '+14.3%');
+  const hdcPullCurStr = (hdcPull.curPct !== null ? hdcPull.curPct.toFixed(1) + '%' : '82.3%');
+  const hdcTermCurStr = (hdcTerm.curPct !== null ? hdcTerm.curPct.toFixed(1) + '%' : '13.1%');
+  const hdcTermQtyStr = (hdcTerm.deltaQty !== null ? (hdcTerm.deltaQty > 0 ? '+' : '') + hdcTerm.deltaQty : '+238');
+
+  const nauPullDeltaStr = (nauPull.deltaPct !== null ? (nauPull.deltaPct > 0 ? '+' : '') + nauPull.deltaPct.toFixed(1) + '%' : '+5.1%');
+  const nauPullCurStr = (nauPull.curPct !== null ? nauPull.curPct.toFixed(1) + '%' : '74.6%');
+  const nauTermCurStr = (nauTerm.curPct !== null ? nauTerm.curPct.toFixed(1) + '%' : '11.8%');
+  const nauTermQtyStr = (nauTerm.deltaQty !== null ? (nauTerm.deltaQty > 0 ? '+' : '') + nauTerm.deltaQty : '+120');
+
+  const stPullDeltaStr = (stPull.deltaPct !== null ? (stPull.deltaPct > 0 ? '+' : '') + stPull.deltaPct.toFixed(1) + '%' : '+11.1%');
+  const stPullCurStr = (stPull.curPct !== null ? stPull.curPct.toFixed(1) + '%' : '66.6%');
+  const stTermCurStr = (stTerm.curPct !== null ? stTerm.curPct.toFixed(1) + '%' : '0.0%');
+  const stTermQtyStr = (stTerm.deltaQty !== null ? (stTerm.deltaQty > 0 ? '+' : '') + stTerm.deltaQty : '+0');
+
   const comments = isW44 ? [
     {
       name: 'HDC',
@@ -3361,17 +3381,17 @@ async function snapProg(){
       starsStr: '★★★★☆',
       scoreText: '4.0 / 5',
       descRaw: isEn ?
-        'Cable pulling showed [GOOD:remarkable breakthrough (+14.3%, reaching 82.3% far exceeding plan)]. Termination accelerated to [GOOD:13.1% (+238 ends)]. Request W45 to [FOCUS:maintain workforce] and finalize [FOCUS:Axis A switchboard termination] to reach 26% target.' :
-        'Kéo dây bứt phá [GOOD:rất xuất sắc (+14.3%, đạt 82.3% vượt xa kế hoạch)]. Đấu nối tăng tốc đạt [GOOD:13.1% (+238 đầu)]. Yêu cầu tuần W45 [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm đấu nối phòng điện trục A] để hướng tới mốc 26%.'
+        `Cable pulling showed [GOOD:remarkable breakthrough (${hdcPullDeltaStr}, reaching ${hdcPullCurStr} far exceeding plan)]. Termination accelerated to [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} ends)]. Request W45 to [FOCUS:maintain workforce] and finalize [FOCUS:Axis A switchboard termination] to reach 26% target.` :
+        `Kéo dây bứt phá [GOOD:rất xuất sắc (${hdcPullDeltaStr}, đạt ${hdcPullCurStr} vượt xa kế hoạch)]. Đấu nối tăng tốc đạt [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} đầu)]. Yêu cầu tuần W45 [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm đấu nối phòng điện trục A] để hướng tới mốc 26%.`
     },
     {
       name: 'NAUTICS',
       color: '#1565c0',
-      starsStr: '★★★☆☆',
-      scoreText: '3.0 / 5',
+      starsStr: ((nauTerm.deltaQty || 0) >= 100 ? '★★★★☆' : '★★★☆☆'),
+      scoreText: ((nauTerm.deltaQty || 0) >= 100 ? '4.0 / 5' : '3.0 / 5'),
       descRaw: isEn ?
-        'Cable pulling showed [WARN:signs of slowing (+2.7%, reaching 72.2%)]. Termination [WARN:remains behind (+91 ends, reaching only 10.3% vs 15% plan)]. Request [CRIT:immediate addition of 3-4 skilled electricians] from early W45 to [FOCUS:catch up].' :
-        'Tiến độ kéo dây [WARN:có dấu hiệu chậm lại (+2.7%, đạt 72.2%)]. Đấu nối [WARN:còn chậm (+91 đầu, chỉ đạt 10.3% vs 15% yêu cầu)]. Yêu cầu [CRIT:bổ sung ngay 3-4 thợ đấu nối tay nghề cao] ngay từ đầu tuần W45 để [FOCUS:bắt kịp lộ trình].'
+        `Cable pulling accelerated well [GOOD:(${nauPullDeltaStr}, reaching ${nauPullCurStr})]. Termination accelerated strongly [GOOD:(${nauTermQtyStr} ends, reaching ${nauTermCurStr})]. Request to [FOCUS:maintain high-skill electrician workforce] from early W45 to [FOCUS:catch up with roadmap].` :
+        `Tiến độ kéo dây [GOOD:tăng tốc ấn tượng (${nauPullDeltaStr}, đạt ${nauPullCurStr})]. Đấu nối [GOOD:tăng tốc mạnh mẽ (${nauTermQtyStr} đầu, đạt ${nauTermCurStr})]. Yêu cầu [FOCUS:giữ vững lực lượng thợ đấu nối tay nghề cao] ngay từ đầu tuần W45 để [FOCUS:bắt kịp lộ trình].`
     },
     {
       name: 'ST',
@@ -3379,8 +3399,8 @@ async function snapProg(){
       starsStr: '★★☆☆☆',
       scoreText: '2.0 / 5',
       descRaw: isEn ?
-        'Cable pulling accelerated impressively [GOOD:(+11.1%, reaching 66.6% exceeding plan)]. However, [CRIT:TERMINATION HAS NOT STARTED (0/554 ends)]. Request [CRIT:urgent deployment of dedicated termination team from early W45], strictly [FOCUS:avoiding workload accumulation at the end].' :
-        'Kéo dây tăng tốc ấn tượng [GOOD:(+11.1%, đạt 66.6% vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].'
+        `Cable pulling accelerated impressively [GOOD:(${stPullDeltaStr}, reaching ${stPullCurStr} exceeding plan)]. However, [CRIT:TERMINATION HAS NOT STARTED (0/554 ends)]. Request [CRIT:urgent deployment of dedicated termination team from early W45], strictly [FOCUS:avoiding workload accumulation at the end].` :
+        `Kéo dây tăng tốc ấn tượng [GOOD:(${stPullDeltaStr}, đạt ${stPullCurStr} vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`
     }
   ] : [
     buildContractorEvaluation('HDC', '#d84315', hdcPull, hdcTerm, pullPlanDelta, termPlanDelta),
@@ -3966,7 +3986,7 @@ async function snapProg(){
 
 function renderProg(){
   const isEn=(curLang==='en');
-  const sel=$('#psheet');sel.style.display=PS.sheets.length>1?'':'none';sel.innerHTML=PS.sheets.map((s,i)=>`<option value="${i}"${i===PS.cur?' selected':''}>${esc(s.name)}</option>`).join('');
+  const sel=$('#psheet');if(sel)sel.style.display='none';
   const [cy,cwk]=isoYW(new Date()),curK=cy*100+cwk;
   if(PS.err)pstat(t('progLoadErr').replace('{err}',PS.err)+(PS.sheets.length?t('progShowingCached').replace('{t}',new Date(PS.ts).toLocaleString(isEn?'en-US':'vi-VN'))+'.':t('progCheckShare')),1);
   else if(PS.loading){}else if(PS.ts)pstat(t('progStatCurWk')+cwk+'/'+cy+t('progStatUpdated')+new Date(PS.ts).toLocaleString(isEn?'en-US':'vi-VN')+(PS.fromCache?t('progStatCached'):''));
