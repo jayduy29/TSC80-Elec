@@ -35,9 +35,11 @@ header b{font-size:15px}header small{opacity:.9;display:block}#lg{white-space:no
 #st{position:absolute;left:0;top:0;transform-origin:0 0}
 #st img{display:block;user-select:none;-webkit-user-drag:none}
 .hs{position:absolute;border:3px solid transparent;border-radius:4px;cursor:pointer}
-.hs.has{background:rgba(46,160,67,.28);border-color:rgba(46,160,67,.9)}
-.hs.no{background:rgba(120,130,140,.22);border-color:rgba(120,130,140,.7)}
-.hs.on{background:rgba(255,127,0,.4);border-color:var(--hot);box-shadow:0 0 0 4px rgba(255,127,0,.45)}
+.hs.done{background:rgba(22,163,74,.25);border-color:#16a34a}
+.hs.pend{background:rgba(225,29,72,.18);border-color:#e11d48}
+.hs.has{background:rgba(22,163,74,.25);border-color:#16a34a}
+.hs.no{background:rgba(120,130,140,.18);border-color:rgba(120,130,140,.6)}
+.hs.on{background:rgba(255,127,0,.4)!important;border-color:var(--hot)!important;box-shadow:0 0 0 4px rgba(255,127,0,.45)!important}
 #hint{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;pointer-events:none}
 #pn-sheet{grid-row:5;display:flex;flex-direction:column;min-height:0;background:var(--card);border-top:2px solid var(--acc);position:relative;z-index:15;box-shadow:0 -2px 10px rgba(0,0,0,.08);transition:all .2s ease-out}
 #pn-bar{display:flex;flex-direction:column;background:var(--bg);border-bottom:1px solid var(--line);user-select:none;touch-action:none;cursor:grab;flex-shrink:0}
@@ -66,10 +68,11 @@ table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12px}th{b
 th,td{padding:4px 5px;border:1px solid var(--line);white-space:normal;overflow-wrap:anywhere;vertical-align:top}td small{display:block;color:var(--mut);font-size:11px;margin-top:1px}td .dl{display:block}td .dl+.dl{margin-top:2px;font-size:11px}
 .pin{position:absolute;width:0;height:0;z-index:5;transform:scale(var(--inv,1));transform-origin:0 0;cursor:pointer}
 .pin i{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#e11d48;border:2px solid #fff;box-shadow:0 0 0 1px #e11d48;color:#fff;font:bold 0/0 Arial,sans-serif;text-align:center;white-space:nowrap;box-sizing:content-box}
-.pin.a i{background:#f59e0b;box-shadow:0 0 0 1px #f59e0b}
+.pin.done i{background:#16a34a!important;box-shadow:0 0 0 1px #16a34a!important}
+.pin.a:not(.done) i{background:#f59e0b;box-shadow:0 0 0 1px #f59e0b}
 #st.lab .pin i{width:max-content;min-width:30px;height:30px;padding:0 7px;border-radius:18px;font:bold 10px/30px Arial,sans-serif}
 .pin.on{z-index:9}
-.pin.on i{background:var(--hot);box-shadow:0 0 0 4px rgba(255,127,0,.5)}
+.pin.on i{background:var(--hot)!important;box-shadow:0 0 0 4px rgba(255,127,0,.5)!important}
 .loc{float:right;margin-left:6px;font-size:15px;cursor:pointer}
 footer{padding:4px 8px;text-align:center;font-size:11px;color:var(--mut);background:var(--card);border-top:1px solid var(--line)}
 #tb{position:absolute;left:6px;top:6px;z-index:30;display:none;flex-wrap:wrap;gap:4px;max-width:calc(100% - 12px)}
@@ -380,7 +383,7 @@ tr.row-unpulled td{background:rgba(239,68,68,.03)}
 tr.row-pulled td{background:transparent}
 
 /* Pin indicator */
-.pin.done i{box-shadow:0 0 0 2px #16a34a, 0 0 0 4px rgba(22,163,74,.4)}
+.pin.done i{background:#16a34a!important;box-shadow:0 0 0 1px #16a34a!important}
 
 /* Action buttons in dev panel */
 .dev-actions-bar{display:flex;gap:5px;margin:8px 0;width:100%;box-sizing:border-box}
@@ -445,7 +448,7 @@ tr.row-pulled td{background:transparent}
     </div>
   </div>
   <input id="q" placeholder="Tìm phòng, thiết bị hoặc số dây (vd 1060, 14E1, 903W0017)" autocomplete="off">
-  <small id="lg">Chấm đỏ = vị trí thiết bị · ô xanh = phòng · bấm để xem dây</small>
+  <small id="lg">🟢 Xanh = Đủ dây · 🔴 Đỏ = Chưa đủ dây (ô = phòng, chấm = tủ)</small>
   <div id="res"></div>
 </header>
 <div id="modes"><button data-m="map" class="on"><i style="background:#d84315"></i><span>Sơ đồ</span></button><button data-m="sys"><i style="background:#1565c0"></i><span>Hệ thống</span></button><button data-m="prog"><i style="background:#2e7d32"></i><span>Tiến độ</span></button></div>
@@ -539,13 +542,13 @@ let curLang = localStorage.getItem('tsc80_lang') || 'vi';
 const I18N = {
   vi: {
     hdrTitle: 'TSC80 - Hệ thống điện',
-    hdrSub: 'Chấm đỏ = vị trí thiết bị · ô xanh = phòng · bấm để xem dây',
+    hdrSub: '🟢 Xanh = Đủ dây · 🔴 Đỏ = Chưa đủ dây (ô = phòng, chấm = tủ)',
     searchPh: 'Tìm phòng, thiết bị hoặc số dây (vd 1060, 14E1, 903W0017)',
     modeMap: 'Sơ đồ',
     modeSys: 'Hệ thống',
     modeProg: 'Tiến độ',
     hintPan: 'Kéo để di chuyển · chụm / cuộn để phóng to',
-    noRoomSel: 'Chưa chọn phòng. Bấm vào một ô xanh trên sơ đồ.',
+    noRoomSel: 'Chưa chọn phòng. Bấm vào một ô phòng trên sơ đồ.',
     paneTop: 'Sơ đồ',
     paneBoth: 'Cả 2',
     paneBottom: 'Bảng dây',
@@ -702,13 +705,13 @@ const I18N = {
   },
   en: {
     hdrTitle: 'TSC80 - Electrical System',
-    hdrSub: 'Red dot = equipment · green box = room · click to view cables',
+    hdrSub: '🟢 Green = Done · 🔴 Red = Pending (box = room, dot = panel)',
     searchPh: 'Search room, equipment or cable (e.g. 1060, 14E1, 903W0017)',
     modeMap: 'Arrangement',
     modeSys: 'Systems',
     modeProg: 'Progress',
     hintPan: 'Drag to pan · pinch / scroll to zoom',
-    noRoomSel: 'No room selected. Click a green box on the plan.',
+    noRoomSel: 'No room selected. Click a room box on the plan.',
     paneTop: 'Map',
     paneBoth: 'Both',
     paneBottom: 'Cables',
@@ -1064,19 +1067,24 @@ function dblZoom(clientX,clientY){
   const r=vp.getBoundingClientRect();
   smoothZoomAt(clientX-r.left,clientY-r.top,1.45);
 }
+function getRoomStatus(n){
+  const rc=getRoomCables(n);
+  if(!rc.length){const r=R[n];return (r&&r.d&&r.d.length)?'has':'no'}
+  let un=0;
+  for(let cid of rc){const meta=CBL[cid];if(!meta||meta[1]!==1)un++}
+  return un===0?'done':'pend';
+}
 function show(i){
   vi=i;const v=D.views[i];im.src=v.img;im.width=v.w;im.height=v.h;st.style.width=v.w+'px';st.style.height=v.h+'px';
   st.querySelectorAll('.hs,.pin').forEach(e=>e.remove());
-  v.boxes.forEach(b=>{const e=document.createElement('div'),r=R[b[4]];e.className='hs '+(r&&r.d.length?'has':'no')+(b[4]===sel?' on':'');
+  v.boxes.forEach(b=>{const e=document.createElement('div'),rStat=getRoomStatus(b[4]);e.className='hs '+rStat+(b[4]===sel?' on':'');
     e.dataset.n=b[4];e.style.cssText=`left:${b[0]-8}px;top:${b[1]-8}px;width:${b[2]+16}px;height:${b[3]+16}px`;st.appendChild(e)});
   D.pins.forEach((p,k)=>{if(p.v!==i||p.del)return;const e=document.createElement('div');
-    let allPulled = (p.d && p.d.length > 0);
-    if (allPulled) {
-      for (let di of p.d) {
-        const st = getDevStats(di);
-        if (st.hasNoCable || st.unpulled > 0) { allPulled = false; break; }
-      }
+    let totCabs=0,unpulled=0;
+    if(p.d&&p.d.length>0){
+      for(let di of p.d){const st=getDevStats(di);totCabs+=st.total;unpulled+=st.unpulled;}
     }
+    const allPulled=(totCabs>0&&unpulled===0);
     e.className='pin'+(p.a?' a':'')+(allPulled?' done':'')+(k===selP?' on':'');e.dataset.p=k;e.style.cssText=`left:${p.x}px;top:${p.y}px`;e.innerHTML='<i>'+esc(lbl(p.c))+'</i>';st.appendChild(e)});
   document.querySelectorAll('#tabs button').forEach((t,j)=>t.classList.toggle('on',j===i));fit()}
 function pick(n){
