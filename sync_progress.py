@@ -13,7 +13,7 @@ import sys
 import json
 import re
 import subprocess
-from datetime import date
+from datetime import date, timedelta
 import openpyxl
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -323,7 +323,10 @@ def main():
             target_week = f"W{m.group(1)}"
         else:
             today = date.today()
-            target_week = f"W{today.isocalendar()[1]:02d}"
+            # Dữ liệu tuần mới được tính từ Thứ 5 hàng tuần (Thứ 5 đến Thứ 4 tuần sau cùng 1 chu kỳ)
+            offset = (today.weekday() - 3) % 7
+            report_thu = today - timedelta(days=offset)
+            target_week = f"W{report_thu.isocalendar()[1]:02d}"
 
     print(f"\n🎯 Đồng bộ cho tuần: {target_week}")
 
