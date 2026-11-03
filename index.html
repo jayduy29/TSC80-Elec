@@ -2765,21 +2765,39 @@ function extractProgData(M){
 
     if(!curItem||!curContr)return;
 
+    const isPct=ind.includes('%')||/\(%\)/.test(ind);
+    const isQty=/cumulative|qty|quantity|khối lượng|lũy kế/i.test(ind);
+    const pVal=parseNum(plan);
+
     let cEntry=curItem.contractors.find(c=>c.name.toLowerCase()===curContr.toLowerCase());
     if(!cEntry){
       const isTot=/total|tổng/i.test(curContr);
-      cEntry={name:curContr,isTotal:isTot,plan:parseNum(plan),qtyRow:null,pctRow:null};
+      cEntry={name:curContr,isTotal:isTot,plan:(!isPct&&pVal&&pVal>1)?pVal:null,qtyRow:null,pctRow:null};
       curItem.contractors.push(cEntry);
     }
-    if(plan&&!cEntry.plan)cEntry.plan=parseNum(plan);
-
-    const isPct=ind.includes('%')||/\(%\)/.test(ind);
-    const isQty=/cumulative|qty|quantity|khối lượng|lũy kế/i.test(ind);
+    if(!isPct&&pVal&&pVal>1&&!cEntry.plan)cEntry.plan=pVal;
 
     if(isPct)cEntry.pctRow=r;
     else if(isQty){
       cEntry.qtyRow=r;
-      if(plan)cEntry.plan=parseNum(plan);
+      if(pVal&&pVal>1)cEntry.plan=pVal;
+    }
+  });
+
+  // Calculate and ensure correct total plan from sub-contractors if total plan is missing or was 1 (from 100%)
+  items.forEach(it=>{
+    let totEntry=it.contractors.find(c=>c.isTotal);
+    const sumContrPlan=it.contractors
+      .filter(c=>!c.isTotal&&c.plan&&c.plan>1)
+      .reduce((acc,c)=>acc+c.plan,0);
+
+    if(totEntry){
+      if(!totEntry.plan || totEntry.plan<=1 || (sumContrPlan>0 && Math.abs(totEntry.plan-sumContrPlan)>1)){
+        if(sumContrPlan>0) totEntry.plan=sumContrPlan;
+      }
+    } else if(sumContrPlan>0){
+      totEntry={name:'TỔNG DỰ ÁN',isTotal:true,plan:sumContrPlan,qtyRow:null,pctRow:null};
+      it.contractors.push(totEntry);
     }
   });
 
