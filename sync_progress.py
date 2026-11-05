@@ -278,6 +278,22 @@ def sync_cables_to_html(excel_path):
 def git_commit_and_push(target_week):
     try:
         from datetime import datetime
+        # Tự động tăng phiên bản cache sw.js khi có thay đổi
+        if os.path.exists('sw.js'):
+            try:
+                with open('sw.js', 'r', encoding='utf-8') as f_sw:
+                    sw_c = f_sw.read()
+                m_sw = re.search(r"CACHE_NAME = 'tsc80-pwa-v(\d+\.\d+)'", sw_c)
+                if m_sw:
+                    cur_v = float(m_sw.group(1))
+                    new_v = f"{cur_v + 0.1:.1f}"
+                    sw_c = sw_c.replace(m_sw.group(0), f"CACHE_NAME = 'tsc80-pwa-v{new_v}'")
+                    with open('sw.js', 'w', encoding='utf-8') as f_sw:
+                        f_sw.write(sw_c)
+                    subprocess.run(['git', 'add', 'sw.js'], check=False)
+            except Exception as e:
+                print('⚠️ Không thể tăng cache sw.js:', e)
+
         subprocess.run(['git', 'add', OVERVIEW_FILE, JSON_OUT, HTML_FILE, MASTER_FILE], check=True)
         st = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True)
         if not st.stdout.strip():

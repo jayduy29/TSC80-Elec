@@ -4021,7 +4021,7 @@ function renderProg(){
   const sh=PS.sheets[PS.cur];if(!sh){if(pwkBar)pwkBar.style.display='none';wk.innerHTML='';lg.innerHTML='';res.innerHTML=det||'';return}
   const M=pmodel(sh),k=PS.q.trim().toLowerCase();
   const wd=M.weeks.filter(w=>M.body.some(r=>isNum(M.cell(r,w.c))&&!zeroLike(M.cell(r,w.c))));
-  const key=PS.cur+':'+wd.map(w=>w.c).join(',');if(PS.wkKey!==key){PS.wkKey=key;const d=wd.find(w=>w.k===curK);PS.wk=(d||wd[wd.length-1]||{}).c}
+  const key=PS.cur+':'+wd.map(w=>w.c).join(',');if(PS.wkKey!==key){PS.wkKey=key;const d=wd.find(w=>w.k===curK||(w.w===cwk&&(!w.y||w.y===cy)));PS.wk=(d||wd[wd.length-1]||{}).c}
   const wcur=wd.find(w=>w.c===PS.wk)||wd[wd.length-1];
 
   // Quick contractor filter pills in legend: ALL, TOTAL, HDC, NAUTICS, ST
