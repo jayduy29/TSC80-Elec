@@ -695,7 +695,7 @@ const I18N = {
     progOverviewSub: 'Dữ liệu lũy kế đến tuần được chọn',
     itemCutting: 'Cắt cáp điện',
     itemPulling: 'Kéo dây cáp điện',
-    itemTermination: 'Đấu nối đầu cáp',
+    itemTermination: 'Đấu nối đầu dây',
     allContractors: 'Tất cả',
     detailsByItem: 'CHI TIẾT THEO HẠNG MỤC',
     btnExportProg: '📊 Xuất báo cáo',
@@ -2691,7 +2691,7 @@ function getWorkItemTitle(name){
 function getUnitLabel(unit){
   const isEn=(curLang==='en');
   const u=(unit||'').toLowerCase();
-  if(/pts|điểm|dau cot|đầu cốt/i.test(u))return isEn?'pts':'đầu cốt';
+  if(/pts|điểm|diem|dau cot|đầu cốt|dau cos|đầu cos|cos|cốt|dau day|đầu dây|ends?/i.test(u))return isEn?'ends':'đầu dây';
   if(u==='m'||u==='mét'||u==='meter')return 'm';
   return unit;
 }
@@ -3202,7 +3202,7 @@ async function snapProg(){
       }
     },
     term: {
-      title: isEn ? 'II. TERMINATION PROGRESS' : 'II. TIẾN ĐỘ ĐẤU NỐI',
+      title: isEn ? 'II. TERMINATION PROGRESS' : 'II. TIẾN ĐỘ ĐẤU NỐI ĐẦU DÂY',
       prev: {
         label: isEn ? ('• Previous Week (' + prevWkStr + ')') : ('• Tuần trước (' + prevWkStr + ')'),
         plan: fPct(termPlanPrev),
@@ -3236,12 +3236,12 @@ async function snapProg(){
         tot: evalItem(totTerm.deltaPct, termPlanDelta, totTerm.deltaQty, totTerm.curPct, true)
       },
       qty: {
-        label: isEn ? '• Weekly Executed Qty (cable ends)' : '• Khối lượng thực hiện tuần (đầu cáp)',
-        plan: fmtVal(termPlanWeeklyQty) + (isEn ? ' ends' : ' đầu'),
-        hdc: fQty(hdcTerm.deltaQty, isEn ? 'ends' : 'đầu'),
-        nau: fQty(nauTerm.deltaQty, isEn ? 'ends' : 'đầu'),
-        st: fQty(stTerm.deltaQty, isEn ? 'ends' : 'đầu'),
-        tot: fQty(totTerm.deltaQty, isEn ? 'ends' : 'đầu')
+        label: isEn ? '• Weekly Executed Qty (cable ends)' : '• Khối lượng thực hiện tuần (đầu dây)',
+        plan: fmtVal(termPlanWeeklyQty) + (isEn ? ' ends' : ' đầu dây'),
+        hdc: fQty(hdcTerm.deltaQty, isEn ? 'ends' : 'đầu dây'),
+        nau: fQty(nauTerm.deltaQty, isEn ? 'ends' : 'đầu dây'),
+        st: fQty(stTerm.deltaQty, isEn ? 'ends' : 'đầu dây'),
+        tot: fQty(totTerm.deltaQty, isEn ? 'ends' : 'đầu dây')
       }
     }
   };
@@ -3328,23 +3328,23 @@ async function snapProg(){
     if(termCur === 0 && termPlanTotal > 0){
       termSentence = isEn ?
         `However, [CRIT:TERMINATION HAS NOT STARTED (0/${termPlanTotal} ends)].` :
-        `Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/${termPlanTotal} đầu)].`;
+        `Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/${termPlanTotal} đầu dây)].`;
     } else if(termDiff >= 3.0){
       termSentence = isEn ?
         `Termination [GOOD:accelerated strongly (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
-        `Đấu nối [GOOD:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu)].`;
+        `Đấu nối [GOOD:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu dây)].`;
     } else if(termDiff >= -2.0 && termDiff < 0){
       termSentence = isEn ?
         `Termination [WARN:slight lag (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
-        `Đấu nối [WARN:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu), còn chậm nhẹ].`;
+        `Đấu nối [WARN:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu dây), còn chậm nhẹ].`;
     } else if(termDiff < -2.0){
       termSentence = isEn ?
         `Termination [WARN:remains behind (+${termQty} ends, reached ${termCur.toFixed(1)}% vs target)].` :
-        `Đấu nối [WARN:còn chậm (+${termQty} đầu, chỉ đạt ${termCur.toFixed(1)}% vs yêu cầu)].`;
+        `Đấu nối [WARN:còn chậm (+${termQty} đầu dây, chỉ đạt ${termCur.toFixed(1)}% vs yêu cầu)].`;
     } else {
       termSentence = isEn ?
         `Termination [GOOD:met plan (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
-        `Đấu nối [GOOD:đáp ứng kế hoạch (+${termQty} đầu, đạt ${termCur.toFixed(1)}%)].`;
+        `Đấu nối [GOOD:đáp ứng kế hoạch (+${termQty} đầu dây, đạt ${termCur.toFixed(1)}%)].`;
     }
 
     // Directives sentence for next week
@@ -3401,7 +3401,7 @@ async function snapProg(){
       scoreText: '4.0 / 5',
       descRaw: isEn ?
         `Cable pulling showed [GOOD:remarkable breakthrough (${hdcPullDeltaStr}, reaching ${hdcPullCurStr} far exceeding plan)]. Termination accelerated to [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} ends)]. Request W45 to [FOCUS:maintain workforce] and finalize [FOCUS:Axis A switchboard termination] to reach 26% target.` :
-        `Kéo dây bứt phá [GOOD:rất xuất sắc (${hdcPullDeltaStr}, đạt ${hdcPullCurStr} vượt xa kế hoạch)]. Đấu nối tăng tốc đạt [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} đầu)]. Yêu cầu tuần W45 [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm đấu nối phòng điện trục A] để hướng tới mốc 26%.`
+        `Kéo dây bứt phá [GOOD:rất xuất sắc (${hdcPullDeltaStr}, đạt ${hdcPullCurStr} vượt xa kế hoạch)]. Đấu nối tăng tốc đạt [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} đầu dây)]. Yêu cầu tuần W45 [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm đấu nối phòng điện trục A] để hướng tới mốc 26%.`
     },
     {
       name: 'NAUTICS',
@@ -3410,7 +3410,7 @@ async function snapProg(){
       scoreText: ((nauTerm.deltaQty || 0) >= 100 ? '4.0 / 5' : '3.0 / 5'),
       descRaw: isEn ?
         `Cable pulling accelerated well [GOOD:(${nauPullDeltaStr}, reaching ${nauPullCurStr})]. Termination accelerated strongly [GOOD:(${nauTermQtyStr} ends, reaching ${nauTermCurStr})]. Request to [FOCUS:maintain high-skill electrician workforce] from early W45 to [FOCUS:catch up with roadmap].` :
-        `Tiến độ kéo dây [GOOD:tăng tốc ấn tượng (${nauPullDeltaStr}, đạt ${nauPullCurStr})]. Đấu nối [GOOD:tăng tốc mạnh mẽ (${nauTermQtyStr} đầu, đạt ${nauTermCurStr})]. Yêu cầu [FOCUS:giữ vững lực lượng thợ đấu nối tay nghề cao] ngay từ đầu tuần W45 để [FOCUS:bắt kịp lộ trình].`
+        `Tiến độ kéo dây [GOOD:tăng tốc ấn tượng (${nauPullDeltaStr}, đạt ${nauPullCurStr})]. Đấu nối [GOOD:tăng tốc mạnh mẽ (${nauTermQtyStr} đầu dây, đạt ${nauTermCurStr})]. Yêu cầu [FOCUS:giữ vững lực lượng thợ đấu nối tay nghề cao] ngay từ đầu tuần W45 để [FOCUS:bắt kịp lộ trình].`
     },
     {
       name: 'ST',
@@ -3419,7 +3419,7 @@ async function snapProg(){
       scoreText: '2.0 / 5',
       descRaw: isEn ?
         `Cable pulling accelerated impressively [GOOD:(${stPullDeltaStr}, reaching ${stPullCurStr} exceeding plan)]. However, [CRIT:TERMINATION HAS NOT STARTED (0/554 ends)]. Request [CRIT:urgent deployment of dedicated termination team from early W45], strictly [FOCUS:avoiding workload accumulation at the end].` :
-        `Kéo dây tăng tốc ấn tượng [GOOD:(${stPullDeltaStr}, đạt ${stPullCurStr} vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`
+        `Kéo dây tăng tốc ấn tượng [GOOD:(${stPullDeltaStr}, đạt ${stPullCurStr} vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu dây)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`
     }
   ] : [
     buildContractorEvaluation('HDC', '#d84315', hdcPull, hdcTerm, pullPlanDelta, termPlanDelta),
