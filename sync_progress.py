@@ -125,7 +125,10 @@ def update_overview_excel(data, target_week):
         for contr, items in data.items():
             for item_k, val in items.items():
                 r = ROW_MAP[contr][item_k]
-                ws.cell(r, col_idx).value = int(val) if val else 0
+                int_v = int(val) if val else 0
+                ws.cell(r, col_idx).value = int_v
+                if r in ROW_PLANS and ROW_PLANS[r] > 0:
+                    ws.cell(r + 1, col_idx).value = round(int_v / ROW_PLANS[r], 6)
 
         # Totals
         total_cut = data['HDC']['cut'] + data['NAUTICS']['cut'] + data['ST']['cut']
@@ -133,8 +136,11 @@ def update_overview_excel(data, target_week):
         total_conn = data['HDC']['conn'] + data['NAUTICS']['conn'] + data['ST']['conn']
 
         ws.cell(25, col_idx).value = int(total_cut)
+        ws.cell(26, col_idx).value = round(total_cut / ROW_PLANS[25], 6)
         ws.cell(27, col_idx).value = int(total_pull)
+        ws.cell(28, col_idx).value = round(total_pull / ROW_PLANS[27], 6)
         ws.cell(29, col_idx).value = int(total_conn)
+        ws.cell(30, col_idx).value = round(total_conn / ROW_PLANS[29], 6)
 
     wb_ov.save(OVERVIEW_FILE)
     print(f"✅ Đã cập nhật {OVERVIEW_FILE} (cột {target_week})")
@@ -187,6 +193,18 @@ def generate_prog_json(target_week, col_idx, data):
                             val = float(pval) / ROW_PLANS[parent_r]
                         except:
                             val = ''
+                else:
+                    # For all other columns, if percentage row is empty, compute from parent row
+                    if r in (8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30) and (val is None or str(val).strip() == ''):
+                        parent_val = ws.cell(r - 1, c).value
+                        if parent_val not in (None, ''):
+                            try:
+                                pv = float(str(parent_val).replace(',', '').strip())
+                                plan_v = ROW_PLANS.get(r - 1)
+                                if plan_v and plan_v > 0:
+                                    val = round(pv / plan_v, 6)
+                            except:
+                                pass
 
                 if val is None:
                     row_vals.append('')
