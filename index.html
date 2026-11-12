@@ -3137,144 +3137,245 @@ async function snapProg(){
   const stTerm  = getMetrics(termItem, 'ST');
   const totTerm = getMetrics(termItem, 'TOTAL');
 
-  // Plan values (standard commitments W43 -> W44)
-  const pullPlanPrev = 67.0;
-  const pullPlanCur  = 71.0;
-  const pullPlanDelta = +(pullPlanCur - pullPlanPrev).toFixed(1); // +4.0%
-  const pullPlanWeeklyQty = 2610; // m
-
-  const termPlanPrev = 4.4;
-  const termPlanCur  = 15.0;
-  const termPlanDelta = +(termPlanCur - termPlanPrev).toFixed(1); // +10.6%
-  const termPlanWeeklyQty = 578; // đầu cáp
-
-  // Evaluation helper
-  function evalItem(deltaPct, planDelta, qty, curPct, isTermItem){
-    if(curPct === 0 || (qty === 0 && (!deltaPct || deltaPct === 0))){
-      return { text: isEn ? '🔴 Not started' : '🔴 Chưa triển khai', pass: false };
+  // Weekly Commitments Database from Master Project Plan (C459)
+  const WEEKLY_COMMITMENTS = {
+    43: {
+      pull: { hdc: { qty: 24906, pct: 82.3 }, nau: { qty: 19679, pct: 74.6 }, st: { qty: 5721, pct: 66.6 }, tot: { qty: 50306, pct: 77.1 } },
+      term: { hdc: { qty: 354,   pct: 13.1 }, nau: { qty: 236,   pct: 11.8 }, st: { qty: 0,    pct: 0.0  }, tot: { qty: 590,   pct: 11.2 } }
+    },
+    44: {
+      pull: { hdc: { qty: 25500, pct: 84.3 }, nau: { qty: 21000, pct: 79.6 }, st: { qty: 6000, pct: 69.8 }, tot: { qty: 52500, pct: 80.5 } },
+      term: { hdc: { qty: 500,   pct: 18.6 }, nau: { qty: 350,   pct: 17.4 }, st: { qty: 50,   pct: 9.0  }, tot: { qty: 900,   pct: 17.1 } }
+    },
+    45: {
+      pull: { hdc: { qty: 26892, pct: 88.9 }, nau: { qty: 24275, pct: 92.0 }, st: { qty: 6408, pct: 74.6 }, tot: { qty: 57575, pct: 88.3 } },
+      term: { hdc: { qty: 665,   pct: 24.7 }, nau: { qty: 452,   pct: 22.5 }, st: { qty: 0,    pct: 0.0  }, tot: { qty: 1117,  pct: 21.3 } }
+    },
+    46: {
+      pull: { hdc: { qty: 27263, pct: 90.1 }, nau: { qty: 24432, pct: 92.6 }, st: { qty: 6759, pct: 78.7 }, tot: { qty: 58454, pct: 89.6 } },
+      term: { hdc: { qty: 963,   pct: 35.7 }, nau: { qty: 683,   pct: 34.0 }, st: { qty: 89,   pct: 16.1 }, tot: { qty: 1734,  pct: 33.0 } }
+    },
+    47: {
+      pull: { hdc: { qty: 27634, pct: 91.3 }, nau: { qty: 24590, pct: 93.2 }, st: { qty: 7110, pct: 82.7 }, tot: { qty: 59333, pct: 91.0 } },
+      term: { hdc: { qty: 1261,  pct: 46.8 }, nau: { qty: 913,   pct: 45.5 }, st: { qty: 177,  pct: 31.9 }, tot: { qty: 2351,  pct: 44.7 } }
+    },
+    48: {
+      pull: { hdc: { qty: 28004, pct: 92.5 }, nau: { qty: 24747, pct: 93.8 }, st: { qty: 7461, pct: 86.8 }, tot: { qty: 60213, pct: 92.3 } },
+      term: { hdc: { qty: 1559,  pct: 57.9 }, nau: { qty: 1144,  pct: 57.0 }, st: { qty: 266,  pct: 48.0 }, tot: { qty: 2969,  pct: 56.5 } }
+    },
+    49: {
+      pull: { hdc: { qty: 28375, pct: 93.8 }, nau: { qty: 24905, pct: 94.4 }, st: { qty: 7812, pct: 90.9 }, tot: { qty: 61092, pct: 93.7 } },
+      term: { hdc: { qty: 1857,  pct: 68.9 }, nau: { qty: 1374,  pct: 68.5 }, st: { qty: 354,  pct: 63.9 }, tot: { qty: 3586,  pct: 68.3 } }
+    },
+    50: {
+      pull: { hdc: { qty: 28746, pct: 95.0 }, nau: { qty: 25062, pct: 95.0 }, st: { qty: 8163, pct: 95.0 }, tot: { qty: 61971, pct: 95.0 } },
+      term: { hdc: { qty: 2155,  pct: 80.0 }, nau: { qty: 1605,  pct: 80.0 }, st: { qty: 443,  pct: 80.0 }, tot: { qty: 4203,  pct: 80.0 } }
     }
-    if(deltaPct === null || planDelta === null) return { text: '—', pass: true };
-    const diff = +(deltaPct - planDelta).toFixed(1);
-    const sign = diff >= 0 ? '+' : '';
-    if(diff >= 0){
-      return { text: '🟢 ' + (isEn ? 'Ahead' : 'Vượt') + ' (' + sign + diff.toFixed(1) + '%)', pass: true };
-    } else if(diff >= -2.0 && isTermItem){
-      return { text: '🔴 ' + (isEn ? 'Slightly behind' : 'Chậm nhẹ') + ' (' + diff.toFixed(1) + '%)', pass: false };
+  };
+
+  const curWkNum = (wcur && wcur.w) ? wcur.w : (curWkStr.match(/\d+/) ? parseInt(curWkStr.match(/\d+/)[0], 10) : 46);
+  const curCommit = WEEKLY_COMMITMENTS[curWkNum] || WEEKLY_COMMITMENTS[46];
+  const pullCommit = curCommit.pull;
+  const termCommit = curCommit.term;
+
+  // Evaluation vs commitment helper
+  function evalCommitDiff(actMetric, commitObj, unit){
+    if(!commitObj || actMetric.curPct === null) return { text: '—', pass: true };
+    const diffPct = +(actMetric.curPct - commitObj.pct).toFixed(1);
+    const diffQty = (actMetric.curQty !== null) ? (actMetric.curQty - commitObj.qty) : null;
+    const signPct = diffPct > 0 ? '+' : '';
+    const signQty = (diffQty !== null && diffQty > 0) ? '+' : '';
+    const qtyPart = diffQty !== null ? (signQty + fmtVal(diffQty) + ' ' + unit) : '';
+
+    if(actMetric.curPct === 0 || (actMetric.curQty === 0 && commitObj.qty > 0)){
+      return {
+        text: isEn ? ('🔴 Not started (0/' + fmtVal(commitObj.qty) + ')') : ('🔴 Chưa đấu (0/' + fmtVal(commitObj.qty) + ')'),
+        pass: false,
+        warn: false,
+        diffPct,
+        diffQty
+      };
+    }
+    if(diffPct >= 0){
+      const prefix = diffPct === 0 ? (isEn ? 'On-track' : 'Đạt') : (isEn ? 'Ahead' : (unit === 'm' ? 'Nhanh' : 'Vượt'));
+      return {
+        text: '🟢 ' + prefix + ' ' + (qtyPart ? qtyPart + ' ' : '') + '(' + signPct + diffPct.toFixed(1) + '%)',
+        pass: true,
+        warn: false,
+        diffPct,
+        diffQty
+      };
+    } else if(diffPct >= -2.0){
+      return {
+        text: '🟡 ' + (isEn ? 'Lag ' : 'Chậm ') + (qtyPart ? qtyPart + ' ' : '') + '(' + diffPct.toFixed(1) + '%)',
+        pass: false,
+        warn: true,
+        diffPct,
+        diffQty
+      };
     } else {
-      return { text: '🔴 ' + (isEn ? 'Behind' : 'Chậm') + ' (' + diff.toFixed(1) + '%)', pass: false };
+      return {
+        text: '🔴 ' + (isEn ? 'Behind ' : 'Chậm ') + (qtyPart ? qtyPart + ' ' : '') + '(' + diffPct.toFixed(1) + '%)',
+        pass: false,
+        warn: false,
+        diffPct,
+        diffQty
+      };
     }
   }
 
   // Format helpers
-  const fPct = v => v !== null && v !== undefined ? v.toFixed(1) + '%' : '—';
-  const fDeltaPct = v => v !== null && v !== undefined ? (v > 0 ? '+' : '') + v.toFixed(1) + '%' : '—';
-  const fQty = (v, u) => v !== null && v !== undefined ? fmtVal(v) + ' ' + u : '—';
+  const fProg = (qty, pct, u) => {
+    if(qty !== null && pct !== null) return fmtVal(qty) + ' ' + u + ' (' + pct.toFixed(1) + '%)';
+    if(pct !== null) return pct.toFixed(1) + '%';
+    return '—';
+  };
+  const fDeltaProg = (dQty, dPct, u) => {
+    if(dQty !== null && dPct !== null) return (dQty > 0 ? '+' : '') + fmtVal(dQty) + ' ' + u + ' (' + (dPct > 0 ? '+' : '') + dPct.toFixed(1) + '%)';
+    if(dPct !== null) return (dPct > 0 ? '+' : '') + dPct.toFixed(1) + '%';
+    return '—';
+  };
+  const fCommit = (cObj, u) => {
+    if(!cObj) return '—';
+    return fmtVal(cObj.qty) + ' ' + u + ' (' + cObj.pct.toFixed(1) + '%)';
+  };
+
+  // Group III Synthesis Helper
+  function buildOverallContractorSummary(pullMetric, termMetric, pCommit, tCommit){
+    const pullDiff = (pullMetric && pullMetric.curPct !== null && pCommit) ? +(pullMetric.curPct - pCommit.pct).toFixed(1) : 0;
+    const termDiff = (termMetric && termMetric.curPct !== null && tCommit) ? +(termMetric.curPct - tCommit.pct).toFixed(1) : 0;
+
+    if(termMetric && termMetric.curQty === 0 && tCommit && tCommit.qty > 0){
+      return { text: isEn ? '🔴 CRITICAL: NO TERMINATION' : '🔴 CẢNH BÁO ĐẤU NỐI (0/' + fmtVal(tCommit.qty) + ')', pass: false, warn: false };
+    }
+    if(pullDiff >= 0 && termDiff >= 0){
+      return { text: isEn ? '🟢 COMPLETED ALL COMMITMENTS' : '🟢 HOÀN THÀNH VƯỢT CAM KẾT', pass: true, warn: false };
+    }
+    if(pullDiff >= 0 && termDiff >= -2.0){
+      const gap = tCommit && termMetric ? Math.abs(termMetric.curQty - tCommit.qty) : 0;
+      return { text: isEn ? ('🟡 PULL OK · LAGS ' + gap + ' ENDS') : ('🟡 KÉO ĐẠT · CẦN BÙ ' + gap + ' ĐẦU'), pass: false, warn: true };
+    }
+    if(pullDiff >= 0 && termDiff < -2.0){
+      const gap = tCommit && termMetric ? Math.abs(termMetric.curQty - tCommit.qty) : 0;
+      return { text: isEn ? ('🔴 TERMINATION BEHIND (-' + gap + ' ENDS)') : ('🔴 ĐẤU NỐI CHẬM (THIẾU ' + gap + ' ĐẦU)'), pass: false, warn: false };
+    }
+    return { text: isEn ? '🔴 BEHIND SCHEDULE' : '🔴 CHẬM TIẾN ĐỘ', pass: false, warn: false };
+  }
 
   // Table 1 Rows Data
   const t1Data = {
     pull: {
-      title: isEn ? 'I. CABLE PULLING PROGRESS' : 'I. TIẾN ĐỘ KÉO DÂY',
+      title: isEn ? 'I. CABLE PULLING PROGRESS' : 'I. TIẾN ĐỘ KÉO DÂY (CÁP ĐIỆN)',
       prev: {
         label: isEn ? ('• Previous Week (' + prevWkStr + ')') : ('• Tuần trước (' + prevWkStr + ')'),
-        plan: fPct(pullPlanPrev),
-        hdc: fPct(hdcPull.prevPct),
-        nau: fPct(nauPull.prevPct),
-        st: fPct(stPull.prevPct),
-        tot: fPct(totPull.prevPct)
+        hdc: fProg(hdcPull.prevQty, hdcPull.prevPct, 'm'),
+        nau: fProg(nauPull.prevQty, nauPull.prevPct, 'm'),
+        st:  fProg(stPull.prevQty,  stPull.prevPct,  'm'),
+        tot: fProg(totPull.prevQty, totPull.prevPct, 'm')
+      },
+      commit: {
+        label: isEn ? ('• Committed Target (' + curWkStr + ')') : ('• Cam kết tuần này (' + curWkStr + ')'),
+        hdc: fCommit(pullCommit.hdc, 'm'),
+        nau: fCommit(pullCommit.nau, 'm'),
+        st:  fCommit(pullCommit.st,  'm'),
+        tot: fCommit(pullCommit.tot, 'm')
       },
       cur: {
-        label: isEn ? ('• Current Week (' + curWkStr + ')') : ('• Tuần này (' + curWkStr + ')'),
-        plan: fPct(pullPlanCur),
-        hdc: fPct(hdcPull.curPct),
-        nau: fPct(nauPull.curPct),
-        st: fPct(stPull.curPct),
-        tot: fPct(totPull.curPct)
+        label: isEn ? ('• Actual Executed (' + curWkStr + ')') : ('• Thực tế tuần này (' + curWkStr + ')'),
+        hdc: fProg(hdcPull.curQty, hdcPull.curPct, 'm'),
+        nau: fProg(nauPull.curQty, nauPull.curPct, 'm'),
+        st:  fProg(stPull.curQty,  stPull.curPct,  'm'),
+        tot: fProg(totPull.curQty, totPull.curPct, 'm')
+      },
+      eval: {
+        label: isEn ? ('• vs Commitment (' + curWkStr + ')') : ('• So với cam kết tuần (' + curWkStr + ')'),
+        hdc: evalCommitDiff(hdcPull, pullCommit.hdc, 'm'),
+        nau: evalCommitDiff(nauPull, pullCommit.nau, 'm'),
+        st:  evalCommitDiff(stPull,  pullCommit.st,  'm'),
+        tot: evalCommitDiff(totPull, pullCommit.tot, 'm')
       },
       delta: {
         label: isEn ? ('• Weekly Gain (Δ = ' + curWkStr + ' - ' + prevWkStr + ')') : ('• Tăng trong tuần (Δ = ' + curWkStr + ' - ' + prevWkStr + ')'),
-        plan: fDeltaPct(pullPlanDelta),
-        hdc: fDeltaPct(hdcPull.deltaPct),
-        nau: fDeltaPct(nauPull.deltaPct),
-        st: fDeltaPct(stPull.deltaPct),
-        tot: fDeltaPct(totPull.deltaPct)
-      },
-      eval: {
-        label: isEn ? ('• Evaluation (vs Plan ' + fDeltaPct(pullPlanDelta) + ')') : ('• Đánh giá (vs Kế hoạch ' + fDeltaPct(pullPlanDelta) + ')'),
-        plan: isEn ? 'Standard' : 'Chuẩn',
-        hdc: evalItem(hdcPull.deltaPct, pullPlanDelta, hdcPull.deltaQty, hdcPull.curPct, false),
-        nau: evalItem(nauPull.deltaPct, pullPlanDelta, nauPull.deltaQty, nauPull.curPct, false),
-        st: evalItem(stPull.deltaPct, pullPlanDelta, stPull.deltaQty, stPull.curPct, false),
-        tot: evalItem(totPull.deltaPct, pullPlanDelta, totPull.deltaQty, totPull.curPct, false)
-      },
-      qty: {
-        label: isEn ? '• Weekly Executed Qty (meters)' : '• Khối lượng thực hiện tuần (mét)',
-        plan: fmtVal(pullPlanWeeklyQty) + ' m',
-        hdc: fQty(hdcPull.deltaQty, 'm'),
-        nau: fQty(nauPull.deltaQty, 'm'),
-        st: fQty(stPull.deltaQty, 'm'),
-        tot: fQty(totPull.deltaQty, 'm')
+        hdc: fDeltaProg(hdcPull.deltaQty, hdcPull.deltaPct, 'm'),
+        nau: fDeltaProg(nauPull.deltaQty, nauPull.deltaPct, 'm'),
+        st:  fDeltaProg(stPull.deltaQty,  stPull.deltaPct,  'm'),
+        tot: fDeltaProg(totPull.deltaQty, totPull.deltaPct, 'm')
       }
     },
     term: {
-      title: isEn ? 'II. TERMINATION PROGRESS' : 'II. TIẾN ĐỘ ĐẤU NỐI ĐẦU DÂY',
+      title: isEn ? 'II. TERMINATION PROGRESS (CABLE ENDS)' : 'II. TIẾN ĐỘ ĐẤU NỐI (ĐẦU DÂY)',
       prev: {
         label: isEn ? ('• Previous Week (' + prevWkStr + ')') : ('• Tuần trước (' + prevWkStr + ')'),
-        plan: fPct(termPlanPrev),
-        hdc: fPct(hdcTerm.prevPct),
-        nau: fPct(nauTerm.prevPct),
-        st: fPct(stTerm.prevPct),
-        tot: fPct(totTerm.prevPct)
+        hdc: fProg(hdcTerm.prevQty, hdcTerm.prevPct, isEn ? 'ends' : 'đầu'),
+        nau: fProg(nauTerm.prevQty, nauTerm.prevPct, isEn ? 'ends' : 'đầu'),
+        st:  fProg(stTerm.prevQty,  stTerm.prevPct,  isEn ? 'ends' : 'đầu'),
+        tot: fProg(totTerm.prevQty, totTerm.prevPct, isEn ? 'ends' : 'đầu')
+      },
+      commit: {
+        label: isEn ? ('• Committed Target (' + curWkStr + ')') : ('• Cam kết tuần này (' + curWkStr + ')'),
+        hdc: fCommit(termCommit.hdc, isEn ? 'ends' : 'đầu'),
+        nau: fCommit(termCommit.nau, isEn ? 'ends' : 'đầu'),
+        st:  fCommit(termCommit.st,  isEn ? 'ends' : 'đầu'),
+        tot: fCommit(termCommit.tot, isEn ? 'ends' : 'đầu')
       },
       cur: {
-        label: isEn ? ('• Current Week (' + curWkStr + ')') : ('• Tuần này (' + curWkStr + ')'),
-        plan: fPct(termPlanCur),
-        hdc: fPct(hdcTerm.curPct),
-        nau: fPct(nauTerm.curPct),
-        st: fPct(stTerm.curPct),
-        tot: fPct(totTerm.curPct)
+        label: isEn ? ('• Actual Executed (' + curWkStr + ')') : ('• Thực tế tuần này (' + curWkStr + ')'),
+        hdc: fProg(hdcTerm.curQty, hdcTerm.curPct, isEn ? 'ends' : 'đầu'),
+        nau: fProg(nauTerm.curQty, nauTerm.curPct, isEn ? 'ends' : 'đầu'),
+        st:  fProg(stTerm.curQty,  stTerm.curPct,  isEn ? 'ends' : 'đầu'),
+        tot: fProg(totTerm.curQty, totTerm.curPct, isEn ? 'ends' : 'đầu')
+      },
+      eval: {
+        label: isEn ? ('• vs Commitment (' + curWkStr + ')') : ('• So với cam kết tuần (' + curWkStr + ')'),
+        hdc: evalCommitDiff(hdcTerm, termCommit.hdc, isEn ? 'ends' : 'đầu'),
+        nau: evalCommitDiff(nauTerm, termCommit.nau, isEn ? 'ends' : 'đầu'),
+        st:  evalCommitDiff(stTerm,  termCommit.st,  isEn ? 'ends' : 'đầu'),
+        tot: evalCommitDiff(totTerm, termCommit.tot, isEn ? 'ends' : 'đầu')
       },
       delta: {
         label: isEn ? ('• Weekly Gain (Δ = ' + curWkStr + ' - ' + prevWkStr + ')') : ('• Tăng trong tuần (Δ = ' + curWkStr + ' - ' + prevWkStr + ')'),
-        plan: fDeltaPct(termPlanDelta),
-        hdc: fDeltaPct(hdcTerm.deltaPct),
-        nau: fDeltaPct(nauTerm.deltaPct),
-        st: fDeltaPct(stTerm.deltaPct),
-        tot: fDeltaPct(totTerm.deltaPct)
+        hdc: fDeltaProg(hdcTerm.deltaQty, hdcTerm.deltaPct, isEn ? 'ends' : 'đầu'),
+        nau: fDeltaProg(nauTerm.deltaQty, nauTerm.deltaPct, isEn ? 'ends' : 'đầu'),
+        st:  fDeltaProg(stTerm.deltaQty,  stTerm.deltaPct,  isEn ? 'ends' : 'đầu'),
+        tot: fDeltaProg(totTerm.deltaQty, totTerm.deltaPct, isEn ? 'ends' : 'đầu')
+      }
+    },
+    summary: {
+      title: isEn ? ('III. OVERALL EVALUATION VS COMMITMENT (' + curWkStr + ')') : ('III. TỔNG HỢP ĐÁNH GIÁ THEO TIẾN ĐỘ CAM KẾT (' + curWkStr + ')'),
+      pullRow: {
+        label: isEn ? '• Cable Pulling Status' : '• Đánh giá Kéo dây',
+        hdc: evalCommitDiff(hdcPull, pullCommit.hdc, 'm'),
+        nau: evalCommitDiff(nauPull, pullCommit.nau, 'm'),
+        st:  evalCommitDiff(stPull,  pullCommit.st,  'm'),
+        tot: evalCommitDiff(totPull, pullCommit.tot, 'm')
       },
-      eval: {
-        label: isEn ? ('• Evaluation (vs Plan ' + fDeltaPct(termPlanDelta) + ')') : ('• Đánh giá (vs Kế hoạch ' + fDeltaPct(termPlanDelta) + ')'),
-        plan: isEn ? 'Standard' : 'Chuẩn',
-        hdc: evalItem(hdcTerm.deltaPct, termPlanDelta, hdcTerm.deltaQty, hdcTerm.curPct, true),
-        nau: evalItem(nauTerm.deltaPct, termPlanDelta, nauTerm.deltaQty, nauTerm.curPct, true),
-        st: evalItem(stTerm.deltaPct, termPlanDelta, stTerm.deltaQty, stTerm.curPct, true),
-        tot: evalItem(totTerm.deltaPct, termPlanDelta, totTerm.deltaQty, totTerm.curPct, true)
+      termRow: {
+        label: isEn ? '• Termination Status' : '• Đánh giá Đấu nối',
+        hdc: evalCommitDiff(hdcTerm, termCommit.hdc, isEn ? 'ends' : 'đầu'),
+        nau: evalCommitDiff(nauTerm, termCommit.nau, isEn ? 'ends' : 'đầu'),
+        st:  evalCommitDiff(stTerm,  termCommit.st,  isEn ? 'ends' : 'đầu'),
+        tot: evalCommitDiff(totTerm, termCommit.tot, isEn ? 'ends' : 'đầu')
       },
-      qty: {
-        label: isEn ? '• Weekly Executed Qty (cable ends)' : '• Khối lượng thực hiện tuần (đầu dây)',
-        plan: fmtVal(termPlanWeeklyQty) + (isEn ? ' ends' : ' đầu dây'),
-        hdc: fQty(hdcTerm.deltaQty, isEn ? 'ends' : 'đầu dây'),
-        nau: fQty(nauTerm.deltaQty, isEn ? 'ends' : 'đầu dây'),
-        st: fQty(stTerm.deltaQty, isEn ? 'ends' : 'đầu dây'),
-        tot: fQty(totTerm.deltaQty, isEn ? 'ends' : 'đầu dây')
+      conclusionRow: {
+        label: isEn ? '• OVERALL CONCLUSION' : '• KẾT LUẬN TIẾN ĐỘ',
+        hdc: buildOverallContractorSummary(hdcPull, hdcTerm, pullCommit.hdc, termCommit.hdc),
+        nau: buildOverallContractorSummary(nauPull, nauTerm, pullCommit.nau, termCommit.nau),
+        st:  buildOverallContractorSummary(stPull,  stTerm,  pullCommit.st,  termCommit.st),
+        tot: buildOverallContractorSummary(totPull, totTerm, pullCommit.tot, termCommit.tot)
       }
     }
   };
 
-  // Dynamic roadmap commitment targets (W43 to W50)
-  const curPullPct = (totPull && totPull.curPct !== null) ? +totPull.curPct.toFixed(1) : 77.1;
-  const curPullDelta = (totPull && totPull.deltaPct !== null) ? +totPull.deltaPct.toFixed(1) : 10.1;
-  const curTermPct = (totTerm && totTerm.curPct !== null) ? +totTerm.curPct.toFixed(1) : 11.2;
-  const curTermDelta = (totTerm && totTerm.deltaPct !== null) ? +totTerm.deltaPct.toFixed(1) : 6.8;
-
+  // Master roadmap commitments (W43 to W50) from Project Schedule C459
   const roadmap = [
-    { wk: 'W43', pullTot: 67.0, pullDelta: null, termTot: 4.4, termDelta: null, note: 'Đã qua (Mốc xuất phát đấu nối)', noteEn: 'Passed (Termination baseline)', isCurrent: (wcur && wcur.w === 43) || curWkStr === 'W43' },
-    { wk: 'W44', pullTot: curPullPct, pullDelta: curPullDelta, termTot: curTermPct, termDelta: curTermDelta, note: 'Tuần báo cáo (Kéo dây bứt phá, đấu nối tăng tốc)', noteEn: 'Report week (Pulling ahead, termination accelerated)', isCurrent: (wcur && wcur.w === 44) || curWkStr === 'W44' },
-    { wk: 'W45', pullTot: 80.0, pullDelta: +(80.0 - curPullPct).toFixed(1), termTot: 26.0, termDelta: +(26.0 - curTermPct).toFixed(1), note: 'Mốc tuần tới (Tập trung toàn lực đấu nối)', noteEn: 'Next milestone (Full focus on termination)', isCurrent: (wcur && wcur.w === 45) || curWkStr === 'W45' },
-    { wk: 'W46', pullTot: 84.0, pullDelta: 4.0, termTot: 38.0, termDelta: 12.0, note: 'Duy trì ổn định nhân lực đấu nối', noteEn: 'Maintain stable termination workforce', isCurrent: (wcur && wcur.w === 46) || curWkStr === 'W46' },
-    { wk: 'W47', pullTot: 88.0, pullDelta: 4.0, termTot: 50.0, termDelta: 12.0, note: 'Đấu nối tiệm cận 50%', noteEn: 'Termination approaching 50%', isCurrent: (wcur && wcur.w === 47) || curWkStr === 'W47' },
-    { wk: 'W48', pullTot: 91.0, pullDelta: 3.0, termTot: 62.0, termDelta: 12.0, note: 'Nghiệm thu phân đoạn 1', noteEn: 'Stage 1 acceptance', isCurrent: (wcur && wcur.w === 48) || curWkStr === 'W48' },
-    { wk: 'W49', pullTot: 93.0, pullDelta: 2.0, termTot: 72.0, termDelta: 10.0, note: 'Giai đoạn nước rút rải cáp & đấu nối', noteEn: 'Sprint phase for cable laying & termination', isCurrent: (wcur && wcur.w === 49) || curWkStr === 'W49' },
-    { wk: 'W50', pullTot: 95.0, pullDelta: 2.0, termTot: 80.0, termDelta: 8.0, note: 'Mốc đợt 1 (Sẵn sàng Test & Comm)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true, isCurrent: (wcur && wcur.w === 50) || curWkStr === 'W50' }
+    { wk: 'W43', pullTot: 77.1, pullDelta: null, termTot: 11.2, termDelta: null, note: 'Mốc khởi đầu giai đoạn đấu nối', noteEn: 'Termination baseline', isCurrent: (wcur && wcur.w === 43) || curWkStr === 'W43' },
+    { wk: 'W44', pullTot: 80.5, pullDelta: 3.4, termTot: 17.1, termDelta: 5.9, note: 'Đẩy mạnh kéo cáp & triển khai đấu nối', noteEn: 'Accelerated pulling & started termination', isCurrent: (wcur && wcur.w === 44) || curWkStr === 'W44' },
+    { wk: 'W45', pullTot: 88.3, pullDelta: 7.8, termTot: 21.3, termDelta: 4.2, note: 'Tập trung bứt phá sản lượng kéo cáp', noteEn: 'Pulling breakthrough', isCurrent: (wcur && wcur.w === 45) || curWkStr === 'W45' },
+    { wk: 'W46', pullTot: 89.6, pullDelta: 1.3, termTot: 33.0, termDelta: 11.7, note: 'Tăng tốc mạnh đấu nối (mục tiêu 1.734 đầu)', noteEn: 'Accelerate termination (target 1,734 ends)', isCurrent: (wcur && wcur.w === 46) || curWkStr === 'W46' },
+    { wk: 'W47', pullTot: 91.0, pullDelta: 1.4, termTot: 44.7, termDelta: 11.7, note: 'Đấu nối tiệm cận 45% (2.351 đầu)', noteEn: 'Termination approaching 45% (2,351 ends)', isCurrent: (wcur && wcur.w === 47) || curWkStr === 'W47' },
+    { wk: 'W48', pullTot: 92.3, pullDelta: 1.3, termTot: 56.5, termDelta: 11.8, note: 'Nghiệm thu phân đoạn 1 & tủ điện chính', noteEn: 'Stage 1 acceptance & main switchboards', isCurrent: (wcur && wcur.w === 48) || curWkStr === 'W48' },
+    { wk: 'W49', pullTot: 93.7, pullDelta: 1.4, termTot: 68.3, termDelta: 11.8, note: 'Giai đoạn nước rút rải cáp & đấu nối', noteEn: 'Sprint phase for cable laying & termination', isCurrent: (wcur && wcur.w === 49) || curWkStr === 'W49' },
+    { wk: 'W50', pullTot: 95.0, pullDelta: 1.3, termTot: 80.0, termDelta: 11.7, note: 'Mốc đợt 1 (Sẵn sàng Test & Commissioning)', noteEn: 'Phase 1 target (Ready for Test & Comm)', isTarget: true, isCurrent: (wcur && wcur.w === 50) || curWkStr === 'W50' }
   ];
 
   // Dynamic next week label
@@ -3284,32 +3385,35 @@ async function snapProg(){
     nextWkLabel = wcur.y ? (nextW + '/' + String(wcur.y).slice(2)) : (nextW >= 10 ? 'W' + nextW : 'W0' + nextW);
   }
 
-  // Dynamic Contractor Evaluation Generator for Any Week
-  function buildContractorEvaluation(cName, color, pull, term, pullPlanD, termPlanD){
-    const pullDelta = pull.deltaPct || 0;
+  // Dynamic Contractor Evaluation Generator based on Weekly Commitments
+  function buildContractorEvaluation(cName, color, pull, term, pCommit, tCommit){
     const pullCur = pull.curPct || 0;
-    const pullDiff = pullDelta - (pullPlanD || 0);
+    const pCommitPct = pCommit ? pCommit.pct : 0;
+    const pCommitQty = pCommit ? pCommit.qty : 0;
+    const pullDiffPct = +(pullCur - pCommitPct).toFixed(1);
+    const pullDiffQty = (pull.curQty !== null) ? (pull.curQty - pCommitQty) : 0;
+    const pullDeltaQty = pull.deltaQty !== null ? pull.deltaQty : 0;
 
-    const termDelta = term.deltaPct || 0;
     const termCur = term.curPct || 0;
-    const termDiff = termDelta - (termPlanD || 0);
-    const termQty = term.deltaQty !== null ? term.deltaQty : 0;
-    const termPlanTotal = term.plan || 0;
+    const tCommitPct = tCommit ? tCommit.pct : 0;
+    const tCommitQty = tCommit ? tCommit.qty : 0;
+    const termDiffPct = +(termCur - tCommitPct).toFixed(1);
+    const termDiffQty = (term.curQty !== null) ? (term.curQty - tCommitQty) : 0;
+    const termDeltaQty = term.deltaQty !== null ? term.deltaQty : 0;
 
-    // Star calculation (1 - 5 stars)
-    let score = 3.0;
-    if(pullDiff >= 5.0) score += 1.0;
-    else if(pullDiff >= 1.0) score += 0.5;
-    else if(pullDiff < -2.0) score -= 0.5;
+    // Star calculation (1 - 5 stars) based on commitment fulfillment
+    let score = 3.5;
+    if(pullDiffPct >= 2.0) score += 0.5;
+    else if(pullDiffPct < -2.0) score -= 0.5;
 
-    if(termCur === 0 && termPlanTotal > 0){
-      score -= 1.5;
-    } else if(termDiff >= 3.0){
+    if(termCur === 0 && tCommitQty > 0){
+      score = 2.0; // Critical penalty if 0 termination while commitment > 0
+    } else if(termDiffPct >= 0){
       score += 1.0;
-    } else if(termDiff >= 0){
-      score += 0.5;
-    } else if(termDiff < -4.0){
-      score -= 0.5;
+    } else if(termDiffPct >= -2.0){
+      // slight lag
+    } else {
+      score -= 1.0;
     }
     const finalScore = Math.max(1, Math.min(5, Math.round(score)));
     let starsStr = '';
@@ -3319,66 +3423,59 @@ async function snapProg(){
 
     // Pulling analysis sentence
     let pullSentence = '';
-    if(pullDiff >= 5.0){
+    const pullSignQty = pullDiffQty >= 0 ? '+' : '';
+    if(pullDiffPct >= 2.0){
       pullSentence = isEn ?
-        `Cable pulling [GOOD:breakthrough progress (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}% far exceeding plan)].` :
-        `Kéo dây bứt phá [GOOD:rất xuất sắc (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}% vượt xa kế hoạch)].`;
-    } else if(pullDiff >= 0){
+        `Cable pulling [GOOD:exceeded commitment (+${fmtVal(pullDeltaQty)} m, reached ${pullCur.toFixed(1)}% vs committed ${pCommitPct.toFixed(1)}%, ahead ${pullSignQty}${fmtVal(pullDiffQty)} m)].` :
+        `Kéo dây bứt phá [GOOD:vượt cam kết tuần (+${fmtVal(pullDeltaQty)} m, đạt ${pullCur.toFixed(1)}% vs cam kết ${pCommitPct.toFixed(1)}%, nhanh ${pullSignQty}${fmtVal(pullDiffQty)} m)].`;
+    } else if(pullDiffPct >= 0){
       pullSentence = isEn ?
-        `Cable pulling [GOOD:accelerated well (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}% exceeding plan)].` :
-        `Kéo dây [GOOD:tăng tốc ấn tượng (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}% vượt kế hoạch)].`;
-    } else if(pullDiff >= -2.0){
-      pullSentence = isEn ?
-        `Cable pulling [WARN:showed signs of slowing (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}%)].` :
-        `Tiến độ kéo dây [WARN:có dấu hiệu chậm lại (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}%)].`;
+        `Cable pulling [GOOD:met commitment (+${fmtVal(pullDeltaQty)} m, reached ${pullCur.toFixed(1)}% vs committed ${pCommitPct.toFixed(1)}%)].` :
+        `Kéo dây [GOOD:đáp ứng cam kết tuần (+${fmtVal(pullDeltaQty)} m, đạt ${pullCur.toFixed(1)}% vs cam kết ${pCommitPct.toFixed(1)}%)].`;
     } else {
       pullSentence = isEn ?
-        `Cable pulling [CRIT:significantly behind plan (+${pullDelta.toFixed(1)}%, reached ${pullCur.toFixed(1)}%)].` :
-        `Tiến độ kéo dây [CRIT:chậm so với kế hoạch (+${pullDelta.toFixed(1)}%, đạt ${pullCur.toFixed(1)}%)].`;
+        `Cable pulling [WARN:lagging behind commitment (+${fmtVal(pullDeltaQty)} m, reached ${pullCur.toFixed(1)}% vs committed ${pCommitPct.toFixed(1)}%, short ${fmtVal(Math.abs(pullDiffQty))} m)].` :
+        `Tiến độ kéo dây [WARN:chưa đạt cam kết tuần (+${fmtVal(pullDeltaQty)} m, đạt ${pullCur.toFixed(1)}% vs cam kết ${pCommitPct.toFixed(1)}%, còn thiếu ${fmtVal(Math.abs(pullDiffQty))} m)].`;
     }
 
     // Termination analysis sentence
     let termSentence = '';
-    if(termCur === 0 && termPlanTotal > 0){
+    if(termCur === 0 && tCommitQty > 0){
       termSentence = isEn ?
-        `However, [CRIT:TERMINATION HAS NOT STARTED (0/${termPlanTotal} ends)].` :
-        `Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/${termPlanTotal} đầu dây)].`;
-    } else if(termDiff >= 3.0){
+        `However, [CRIT:TERMINATION HAS NOT STARTED (0/${tCommitQty} ends committed)].` :
+        `Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/${tCommitQty} đầu dây cam kết tuần)].`;
+    } else if(termDiffPct >= 0){
       termSentence = isEn ?
-        `Termination [GOOD:accelerated strongly (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
-        `Đấu nối [GOOD:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu dây)].`;
-    } else if(termDiff >= -2.0 && termDiff < 0){
+        `Termination [GOOD:met and exceeded commitment (+${termDeltaQty} ends, reached ${termCur.toFixed(1)}% vs committed ${tCommitPct.toFixed(1)}%)].` :
+        `Đấu nối [GOOD:đáp ứng tốt cam kết tuần (+${termDeltaQty} đầu dây, đạt ${termCur.toFixed(1)}% vs cam kết ${tCommitPct.toFixed(1)}%)].`;
+    } else if(termDiffPct >= -2.0){
       termSentence = isEn ?
-        `Termination [WARN:slight lag (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
-        `Đấu nối [WARN:tăng tốc đạt ${termCur.toFixed(1)}% (+${termQty} đầu dây), còn chậm nhẹ].`;
-    } else if(termDiff < -2.0){
-      termSentence = isEn ?
-        `Termination [WARN:remains behind (+${termQty} ends, reached ${termCur.toFixed(1)}% vs target)].` :
-        `Đấu nối [WARN:còn chậm (+${termQty} đầu dây, chỉ đạt ${termCur.toFixed(1)}% vs yêu cầu)].`;
+        `Termination [WARN:accelerated (+${termDeltaQty} ends, reached ${termCur.toFixed(1)}%) but slightly lagged committed target ${tCommitPct.toFixed(1)}% (short ${Math.abs(termDiffQty)} ends)].` :
+        `Đấu nối [WARN:tăng tốc (+${termDeltaQty} đầu dây, đạt ${termCur.toFixed(1)}%) nhưng còn chậm nhẹ ${Math.abs(termDiffQty)} đầu dây so với cam kết tuần (${tCommitPct.toFixed(1)}%)].`;
     } else {
       termSentence = isEn ?
-        `Termination [GOOD:met plan (+${termQty} ends, reached ${termCur.toFixed(1)}%)].` :
-        `Đấu nối [GOOD:đáp ứng kế hoạch (+${termQty} đầu dây, đạt ${termCur.toFixed(1)}%)].`;
+        `Termination [CRIT:behind commitment (+${termDeltaQty} ends, reached ${termCur.toFixed(1)}% vs committed ${tCommitPct.toFixed(1)}%, lacking ${Math.abs(termDiffQty)} ends)].` :
+        `Đấu nối [CRIT:chậm so với cam kết tuần (+${termDeltaQty} đầu dây, mới đạt ${termCur.toFixed(1)}% vs cam kết ${tCommitPct.toFixed(1)}%, thiếu ${Math.abs(termDiffQty)} đầu dây)].`;
     }
 
     // Directives sentence for next week
     let directiveSentence = '';
-    if(termCur === 0 && termPlanTotal > 0){
+    if(termCur === 0 && tCommitQty > 0){
       directiveSentence = isEn ?
-        `Request [CRIT:urgent deployment of dedicated termination team in ${nextWkLabel}], strictly [FOCUS:avoiding workload accumulation].` :
-        `Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần ${nextWkLabel}], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`;
-    } else if(termDiff < -2.0){
+        `Request [CRIT:urgent deployment of dedicated termination team in ${nextWkLabel}] to make up for schedule gap, strictly [FOCUS:avoiding workload accumulation].` :
+        `Yêu cầu [CRIT:khẩn trương triển khai tổ đấu nối chuyên trách ngay từ đầu tuần ${nextWkLabel}], dứt điểm bù tiến độ thiếu hụt, tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`;
+    } else if(termDiffPct < -2.0){
       directiveSentence = isEn ?
-        `Request [CRIT:immediate addition of skilled electricians in ${nextWkLabel}] to [FOCUS:catch up with schedule].` :
-        `Yêu cầu [CRIT:bổ sung ngay 3-4 thợ đấu nối tay nghề cao ngay từ đầu tuần ${nextWkLabel}] để [FOCUS:bắt kịp lộ trình].`;
-    } else if(pullDiff >= 2.0 && termDiff >= -2.0){
+        `Request [CRIT:immediate addition of skilled electricians in ${nextWkLabel}] to [FOCUS:catch up with committed roadmap].` :
+        `Yêu cầu [CRIT:bổ sung thợ đấu nối tay nghề cao ngay từ đầu tuần ${nextWkLabel}] để [FOCUS:bù đắp ${Math.abs(termDiffQty)} đầu dây chậm và bắt kịp lộ trình].`;
+    } else if(termDiffPct >= -2.0 && termDiffPct < 0){
       directiveSentence = isEn ?
-        `Request ${nextWkLabel} to [FOCUS:maintain workforce] and [FOCUS:finalize switchboard termination] to reach target milestones.` :
-        `Yêu cầu tuần ${nextWkLabel} [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm các phân đoạn trọng điểm] để hướng tới mốc mục tiêu.`;
+        `Request ${nextWkLabel} to [FOCUS:accelerate termination workforce] to fully bridge the ${Math.abs(termDiffQty)} ends gap.` :
+        `Yêu cầu tuần ${nextWkLabel} [FOCUS:tập trung nhân lực đấu nối] để bù đắp dứt điểm ${Math.abs(termDiffQty)} đầu dây còn thiếu.`;
     } else {
       directiveSentence = isEn ?
-        `Maintain execution momentum and ensure safety and quality in ${nextWkLabel}.` :
-        `Duy trì nhịp độ thi công và kiểm soát an toàn chất lượng trong tuần ${nextWkLabel}.`;
+        `Request ${nextWkLabel} to [FOCUS:maintain workforce] and [FOCUS:finalize key compartments] to reach target milestones.` :
+        `Yêu cầu tuần ${nextWkLabel} [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm các phân đoạn trọng điểm] để hướng tới mốc mục tiêu.`;
     }
 
     return {
@@ -3390,60 +3487,15 @@ async function snapProg(){
     };
   }
 
-  // Pre-configured expert directives for W44, or dynamic auto-generated for other weeks
-  const isW44 = (curWkStr === 'W44' || curWkStr === '44/26');
-  const hdcPullDeltaStr = (hdcPull.deltaPct !== null ? (hdcPull.deltaPct > 0 ? '+' : '') + hdcPull.deltaPct.toFixed(1) + '%' : '+14.3%');
-  const hdcPullCurStr = (hdcPull.curPct !== null ? hdcPull.curPct.toFixed(1) + '%' : '82.3%');
-  const hdcTermCurStr = (hdcTerm.curPct !== null ? hdcTerm.curPct.toFixed(1) + '%' : '13.1%');
-  const hdcTermQtyStr = (hdcTerm.deltaQty !== null ? (hdcTerm.deltaQty > 0 ? '+' : '') + hdcTerm.deltaQty : '+238');
-
-  const nauPullDeltaStr = (nauPull.deltaPct !== null ? (nauPull.deltaPct > 0 ? '+' : '') + nauPull.deltaPct.toFixed(1) + '%' : '+5.1%');
-  const nauPullCurStr = (nauPull.curPct !== null ? nauPull.curPct.toFixed(1) + '%' : '74.6%');
-  const nauTermCurStr = (nauTerm.curPct !== null ? nauTerm.curPct.toFixed(1) + '%' : '11.8%');
-  const nauTermQtyStr = (nauTerm.deltaQty !== null ? (nauTerm.deltaQty > 0 ? '+' : '') + nauTerm.deltaQty : '+120');
-
-  const stPullDeltaStr = (stPull.deltaPct !== null ? (stPull.deltaPct > 0 ? '+' : '') + stPull.deltaPct.toFixed(1) + '%' : '+11.1%');
-  const stPullCurStr = (stPull.curPct !== null ? stPull.curPct.toFixed(1) + '%' : '66.6%');
-  const stTermCurStr = (stTerm.curPct !== null ? stTerm.curPct.toFixed(1) + '%' : '0.0%');
-  const stTermQtyStr = (stTerm.deltaQty !== null ? (stTerm.deltaQty > 0 ? '+' : '') + stTerm.deltaQty : '+0');
-
-  const comments = isW44 ? [
-    {
-      name: 'HDC',
-      color: '#d84315',
-      starsStr: '★★★★☆',
-      scoreText: '4.0 / 5',
-      descRaw: isEn ?
-        `Cable pulling showed [GOOD:remarkable breakthrough (${hdcPullDeltaStr}, reaching ${hdcPullCurStr} far exceeding plan)]. Termination accelerated to [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} ends)]. Request W45 to [FOCUS:maintain workforce] and finalize [FOCUS:Axis A switchboard termination] to reach 26% target.` :
-        `Kéo dây bứt phá [GOOD:rất xuất sắc (${hdcPullDeltaStr}, đạt ${hdcPullCurStr} vượt xa kế hoạch)]. Đấu nối tăng tốc đạt [GOOD:${hdcTermCurStr} (${hdcTermQtyStr} đầu dây)]. Yêu cầu tuần W45 [FOCUS:giữ vững quân số], tập trung [FOCUS:dứt điểm đấu nối phòng điện trục A] để hướng tới mốc 26%.`
-    },
-    {
-      name: 'NAUTICS',
-      color: '#1565c0',
-      starsStr: ((nauTerm.deltaQty || 0) >= 100 ? '★★★★☆' : '★★★☆☆'),
-      scoreText: ((nauTerm.deltaQty || 0) >= 100 ? '4.0 / 5' : '3.0 / 5'),
-      descRaw: isEn ?
-        `Cable pulling accelerated well [GOOD:(${nauPullDeltaStr}, reaching ${nauPullCurStr})]. Termination accelerated strongly [GOOD:(${nauTermQtyStr} ends, reaching ${nauTermCurStr})]. Request to [FOCUS:maintain high-skill electrician workforce] from early W45 to [FOCUS:catch up with roadmap].` :
-        `Tiến độ kéo dây [GOOD:tăng tốc ấn tượng (${nauPullDeltaStr}, đạt ${nauPullCurStr})]. Đấu nối [GOOD:tăng tốc mạnh mẽ (${nauTermQtyStr} đầu dây, đạt ${nauTermCurStr})]. Yêu cầu [FOCUS:giữ vững lực lượng thợ đấu nối tay nghề cao] ngay từ đầu tuần W45 để [FOCUS:bắt kịp lộ trình].`
-    },
-    {
-      name: 'ST',
-      color: '#2e7d32',
-      starsStr: '★★☆☆☆',
-      scoreText: '2.0 / 5',
-      descRaw: isEn ?
-        `Cable pulling accelerated impressively [GOOD:(${stPullDeltaStr}, reaching ${stPullCurStr} exceeding plan)]. However, [CRIT:TERMINATION HAS NOT STARTED (0/554 ends)]. Request [CRIT:urgent deployment of dedicated termination team from early W45], strictly [FOCUS:avoiding workload accumulation at the end].` :
-        `Kéo dây tăng tốc ấn tượng [GOOD:(${stPullDeltaStr}, đạt ${stPullCurStr} vượt kế hoạch)]. Tuy nhiên [CRIT:ĐẤU NỐI CHƯA TRIỂN KHAI (0/554 đầu dây)]. Yêu cầu [CRIT:khẩn trương bố trí tổ đấu nối chuyên trách ngay từ đầu tuần W45], tuyệt đối [FOCUS:không để dồn ứ việc về cuối].`
-    }
-  ] : [
-    buildContractorEvaluation('HDC', '#d84315', hdcPull, hdcTerm, pullPlanDelta, termPlanDelta),
-    buildContractorEvaluation('NAUTICS', '#1565c0', nauPull, nauTerm, pullPlanDelta, termPlanDelta),
-    buildContractorEvaluation('ST', '#2e7d32', stPull, stTerm, pullPlanDelta, termPlanDelta)
+  const comments = [
+    buildContractorEvaluation('HDC', '#d84315', hdcPull, hdcTerm, pullCommit.hdc, termCommit.hdc),
+    buildContractorEvaluation('NAUTICS', '#1565c0', nauPull, nauTerm, pullCommit.nau, termCommit.nau),
+    buildContractorEvaluation('ST', '#2e7d32', stPull, stTerm, pullCommit.st, termCommit.st)
   ];
 
-  // Render on A4 Canvas (1200 x 1697) with larger fonts & PM contractor colors
+  // Render on A4 Canvas (1200 x 1750) with larger fonts & PM contractor colors
   const cv = document.createElement('canvas');
-  const W = 1200, H = 1697;
+  const W = 1200, H = 1750;
   cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
   const X_PAD = 40;
@@ -3506,13 +3558,13 @@ async function snapProg(){
     g.textAlign = 'left';
   }
 
-  function drawTable1Row(rowY, rowH, label, planVal, hdcVal, nauVal, stVal, totVal, isBold){
-    const colW = [370, 150, 150, 150, 150, 150];
-    const vals = [label, planVal, hdcVal, nauVal, stVal, totVal];
-    const colBgs = ['#ffffff', '#fffbe6', '#fff8f6', '#f4f8ff', '#f4faf5', '#f0f7f8'];
+  function drawTable1Row(rowY, rowH, label, hdcVal, nauVal, stVal, totVal, isBold){
+    const colW = [320, 200, 200, 200, 200];
+    const vals = [label, hdcVal, nauVal, stVal, totVal];
+    const colBgs = ['#ffffff', '#fff8f6', '#f4f8ff', '#f4faf5', '#f0f7f8'];
     let curX = X_PAD;
 
-    for(let c = 0; c < 6; c++){
+    for(let c = 0; c < 5; c++){
       const cw = colW[c];
       g.fillStyle = colBgs[c];
       g.fillRect(curX, rowY, cw, rowH);
@@ -3522,15 +3574,15 @@ async function snapProg(){
 
       const val = vals[c];
       if(val !== undefined && val !== null){
-        let textCol = (c === 1) ? '#78350f' : (c === 5 ? '#0D5966' : '#1d2733');
-        let weight = (isBold || c === 1 || c === 5) ? 'bold' : 'normal';
+        let textCol = (c === 4 ? '#0D5966' : '#1d2733');
+        let weight = (isBold || c === 4) ? 'bold' : 'normal';
 
         if(typeof val === 'object' && val.text){
-          textCol = val.pass ? '#15803d' : '#b91c1c';
+          textCol = val.pass ? '#15803d' : (val.warn ? '#b45309' : '#b91c1c');
           weight = 'bold';
-          drawCellText(curX, rowY, cw, rowH, val.text, weight, textCol, 'center', 'bold 15px ' + F);
+          drawCellText(curX, rowY, cw, rowH, val.text, weight, textCol, 'center', 'bold 13px ' + F);
         } else {
-          drawCellText(curX, rowY, cw, rowH, String(val), weight, textCol, c === 0 ? 'left' : 'center');
+          drawCellText(curX, rowY, cw, rowH, String(val), weight, textCol, c === 0 ? 'left' : 'center', (weight === 'bold' ? 'bold 13.5px ' : '13.5px ') + F);
         }
       }
       curX += cw;
@@ -3545,7 +3597,7 @@ async function snapProg(){
     g.strokeRect(X_PAD, rowY, innerW, rowH);
 
     g.fillStyle = '#0a424c';
-    g.font = 'bold 16px ' + F;
+    g.font = 'bold 15.5px ' + F;
     g.textAlign = 'left';
     g.textBaseline = 'middle';
     g.fillText(title, X_PAD + 14, rowY + rowH / 2);
@@ -3554,63 +3606,72 @@ async function snapProg(){
 
   // --- BẢNG 1 ---
   drawSectionTitle(y, isEn ?
-    'TABLE 1: 3-CONTRACTOR CABLE PULLING & TERMINATION PROGRESS COMPARISON' :
-    'BẢNG 1: SO SÁNH TIẾN ĐỘ KÉO DÂY & ĐẤU NỐI GIỮA 2 TUẦN CỦA 3 NHÀ THẦU');
+    'TABLE 1: 3-CONTRACTOR PROGRESS VS WEEKLY COMMITMENTS' :
+    'BẢNG 1: TIẾN ĐỘ THỰC HIỆN SO VỚI CAM KẾT CỦA 3 NHÀ THẦU VÀ TOÀN DỰ ÁN');
   y += 36;
 
-  // Table 1 Header with distinct PM colors
-  const t1ColW = [370, 150, 150, 150, 150, 150];
+  // Table 1 Header with distinct PM colors (5 columns)
+  const t1ColW = [320, 200, 200, 200, 200];
   const t1Headers = [
     isEn ? 'Work Item / Monitored Parameter' : 'Hạng mục / Thông số theo dõi',
-    (isEn ? 'Plan ' : 'Kế hoạch ') + curWkStr,
     'HDC',
     'NAUTICS',
     'ST',
     isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'
   ];
-  const t1HdrBgs = ['#e6f2f4', '#fffbe6', '#d84315', '#1565c0', '#2e7d32', '#0D5966'];
-  const t1HdrFgs = ['#0D5966', '#78350f', '#ffffff', '#ffffff', '#ffffff', '#ffffff'];
+  const t1HdrBgs = ['#e6f2f4', '#d84315', '#1565c0', '#2e7d32', '#0D5966'];
+  const t1HdrFgs = ['#0D5966', '#ffffff', '#ffffff', '#ffffff', '#ffffff'];
 
   let curHX = X_PAD;
-  for(let c = 0; c < 6; c++){
+  for(let c = 0; c < 5; c++){
     const cw = t1ColW[c];
     g.fillStyle = t1HdrBgs[c];
-    g.fillRect(curHX, y, cw, 44);
+    g.fillRect(curHX, y, cw, 42);
     g.strokeStyle = '#d3dae3';
     g.lineWidth = 1;
-    g.strokeRect(curHX, y, cw, 44);
-    drawCellText(curHX, y, cw, 44, t1Headers[c], 'bold', t1HdrFgs[c], 'center', 'bold 16px ' + F);
+    g.strokeRect(curHX, y, cw, 42);
+    drawCellText(curHX, y, cw, 42, t1Headers[c], 'bold', t1HdrFgs[c], 'center', 'bold 15px ' + F);
     curHX += cw;
   }
-  y += 44;
+  y += 42;
 
-  const rowH1 = 35;
+  const rowH1 = 33;
   // Group 1: Cable Pulling
-  drawGroupHeader(y, 34, t1Data.pull.title);
-  y += 34;
-  drawTable1Row(y, rowH1, t1Data.pull.prev.label, t1Data.pull.prev.plan, t1Data.pull.prev.hdc, t1Data.pull.prev.nau, t1Data.pull.prev.st, t1Data.pull.prev.tot, false);
+  drawGroupHeader(y, 31, t1Data.pull.title);
+  y += 31;
+  drawTable1Row(y, rowH1, t1Data.pull.prev.label, t1Data.pull.prev.hdc, t1Data.pull.prev.nau, t1Data.pull.prev.st, t1Data.pull.prev.tot, false);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.pull.cur.label, t1Data.pull.cur.plan, t1Data.pull.cur.hdc, t1Data.pull.cur.nau, t1Data.pull.cur.st, t1Data.pull.cur.tot, false);
+  drawTable1Row(y, rowH1, t1Data.pull.commit.label, t1Data.pull.commit.hdc, t1Data.pull.commit.nau, t1Data.pull.commit.st, t1Data.pull.commit.tot, true);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.pull.delta.label, t1Data.pull.delta.plan, t1Data.pull.delta.hdc, t1Data.pull.delta.nau, t1Data.pull.delta.st, t1Data.pull.delta.tot, true);
+  drawTable1Row(y, rowH1, t1Data.pull.cur.label, t1Data.pull.cur.hdc, t1Data.pull.cur.nau, t1Data.pull.cur.st, t1Data.pull.cur.tot, true);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.pull.eval.label, t1Data.pull.eval.plan, t1Data.pull.eval.hdc, t1Data.pull.eval.nau, t1Data.pull.eval.st, t1Data.pull.eval.tot, false);
+  drawTable1Row(y, rowH1, t1Data.pull.eval.label, t1Data.pull.eval.hdc, t1Data.pull.eval.nau, t1Data.pull.eval.st, t1Data.pull.eval.tot, true);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.pull.qty.label, t1Data.pull.qty.plan, t1Data.pull.qty.hdc, t1Data.pull.qty.nau, t1Data.pull.qty.st, t1Data.pull.qty.tot, false);
+  drawTable1Row(y, rowH1, t1Data.pull.delta.label, t1Data.pull.delta.hdc, t1Data.pull.delta.nau, t1Data.pull.delta.st, t1Data.pull.delta.tot, false);
   y += rowH1;
 
   // Group 2: Termination
-  drawGroupHeader(y, 34, t1Data.term.title);
-  y += 34;
-  drawTable1Row(y, rowH1, t1Data.term.prev.label, t1Data.term.prev.plan, t1Data.term.prev.hdc, t1Data.term.prev.nau, t1Data.term.prev.st, t1Data.term.prev.tot, false);
+  drawGroupHeader(y, 31, t1Data.term.title);
+  y += 31;
+  drawTable1Row(y, rowH1, t1Data.term.prev.label, t1Data.term.prev.hdc, t1Data.term.prev.nau, t1Data.term.prev.st, t1Data.term.prev.tot, false);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.term.cur.label, t1Data.term.cur.plan, t1Data.term.cur.hdc, t1Data.term.cur.nau, t1Data.term.cur.st, t1Data.term.cur.tot, false);
+  drawTable1Row(y, rowH1, t1Data.term.commit.label, t1Data.term.commit.hdc, t1Data.term.commit.nau, t1Data.term.commit.st, t1Data.term.commit.tot, true);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.term.delta.label, t1Data.term.delta.plan, t1Data.term.delta.hdc, t1Data.term.delta.nau, t1Data.term.delta.st, t1Data.term.delta.tot, true);
+  drawTable1Row(y, rowH1, t1Data.term.cur.label, t1Data.term.cur.hdc, t1Data.term.cur.nau, t1Data.term.cur.st, t1Data.term.cur.tot, true);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.term.eval.label, t1Data.term.eval.plan, t1Data.term.eval.hdc, t1Data.term.eval.nau, t1Data.term.eval.st, t1Data.term.eval.tot, false);
+  drawTable1Row(y, rowH1, t1Data.term.eval.label, t1Data.term.eval.hdc, t1Data.term.eval.nau, t1Data.term.eval.st, t1Data.term.eval.tot, true);
   y += rowH1;
-  drawTable1Row(y, rowH1, t1Data.term.qty.label, t1Data.term.qty.plan, t1Data.term.qty.hdc, t1Data.term.qty.nau, t1Data.term.qty.st, t1Data.term.qty.tot, false);
+  drawTable1Row(y, rowH1, t1Data.term.delta.label, t1Data.term.delta.hdc, t1Data.term.delta.nau, t1Data.term.delta.st, t1Data.term.delta.tot, false);
+  y += rowH1;
+
+  // Group 3: Overall Synthesis vs Commitment
+  drawGroupHeader(y, 31, t1Data.summary.title);
+  y += 31;
+  drawTable1Row(y, rowH1, t1Data.summary.pullRow.label, t1Data.summary.pullRow.hdc, t1Data.summary.pullRow.nau, t1Data.summary.pullRow.st, t1Data.summary.pullRow.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.summary.termRow.label, t1Data.summary.termRow.hdc, t1Data.summary.termRow.nau, t1Data.summary.termRow.st, t1Data.summary.termRow.tot, false);
+  y += rowH1;
+  drawTable1Row(y, rowH1, t1Data.summary.conclusionRow.label, t1Data.summary.conclusionRow.hdc, t1Data.summary.conclusionRow.nau, t1Data.summary.conclusionRow.st, t1Data.summary.conclusionRow.tot, true);
   y += rowH1;
 
   y += 24;
@@ -3775,7 +3836,12 @@ async function snapProg(){
       '</tr>';
   });
 
-  const evalTagHtml = ev => '<span class="' + (ev.pass ? 'tag-pass' : 'tag-fail') + '">' + esc(ev.text) + '</span>';
+  const evalTagHtml = ev => {
+    if(!ev) return '—';
+    if(typeof ev === 'string') return esc(ev);
+    const cls = ev.pass ? 'tag-pass' : (ev.warn ? 'tag-warn' : 'tag-fail');
+    return '<span class="' + cls + '">' + esc(ev.text) + '</span>';
+  };
 
   const reportHtml = `<!DOCTYPE html>
 <html lang="${isEn ? 'en' : 'vi'}">
@@ -3794,12 +3860,12 @@ async function snapProg(){
   table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
   th, td { border: 1px solid #d3dae3; padding: 7px 8px; text-align: center; font-size: 13px; }
   th { background-color: #e6f2f4; color: #0D5966; font-weight: 700; font-size: 13px; }
-  .col-label { text-align: left; width: 34%; font-weight: 600; }
+  .col-label { text-align: left; width: 32%; font-weight: 600; }
   .group-header { background-color: #d4e8eb; color: #0a424c; font-weight: 700; font-size: 13.5px; text-align: left; padding-left: 12px; }
-  .plan-col { background-color: #fffbe6; color: #78350f; font-weight: bold; }
   .total-col { background-color: #f0f7f8; color: #0D5966; font-weight: bold; }
   .curr-week { background-color: #fff3e0; font-weight: bold; }
   .tag-pass { color: #15803d; font-weight: bold; }
+  .tag-warn { color: #b45309; font-weight: bold; }
   .tag-fail { color: #b91c1c; font-weight: bold; }
   .comments-table td { padding: 12px 16px; vertical-align: middle; }
   .nt-name { width: 18%; text-align: center; vertical-align: middle; padding: 12px 8px; }
@@ -3817,7 +3883,6 @@ async function snapProg(){
   .th-nautics { background-color: #1565c0; color: #ffffff; font-weight: bold; }
   .th-st { background-color: #2e7d32; color: #ffffff; font-weight: bold; }
   .th-tot { background-color: #0D5966; color: #ffffff; font-weight: bold; }
-  .th-plan { background-color: #fffbe6; color: #78350f; font-weight: bold; }
   .col-hdc { background-color: #fff8f6; }
   .col-nautics { background-color: #f4f8ff; }
   .col-st { background-color: #f4faf5; }
@@ -3835,101 +3900,113 @@ async function snapProg(){
     <p>${esc(subTitle)}</p>
   </div>
 
-  <div class="section-title">${isEn ? 'TABLE 1: 3-CONTRACTOR CABLE PULLING & TERMINATION PROGRESS COMPARISON' : 'BẢNG 1: SO SÁNH TIẾN ĐỘ KÉO DÂY & ĐẤU NỐI GIỮA 2 TUẦN CỦA 3 NHÀ THẦU'}</div>
+  <div class="section-title">${isEn ? 'TABLE 1: 3-CONTRACTOR PROGRESS VS WEEKLY COMMITMENTS' : 'BẢNG 1: TIẾN ĐỘ THỰC HIỆN SO VỚI CAM KẾT CỦA 3 NHÀ THẦU VÀ TOÀN DỰ ÁN'}</div>
   <table>
     <thead>
       <tr>
-        <th style="width:34%; text-align: left; padding-left: 10px;">${isEn ? 'Work Item / Parameter' : 'Hạng mục / Thông số theo dõi'}</th>
-        <th style="width:13%;" class="th-plan">${(isEn ? 'Plan ' : 'Kế hoạch ') + esc(curWkStr)}</th>
-        <th style="width:13%;" class="th-hdc">HDC</th>
-        <th style="width:13%;" class="th-nautics">NAUTICS</th>
-        <th style="width:13%;" class="th-st">ST</th>
-        <th style="width:14%;" class="th-tot">${isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'}</th>
+        <th style="width:32%; text-align: left; padding-left: 10px;">${isEn ? 'Work Item / Parameter' : 'Hạng mục / Thông số theo dõi'}</th>
+        <th style="width:17%;" class="th-hdc">HDC</th>
+        <th style="width:17%;" class="th-nautics">NAUTICS</th>
+        <th style="width:17%;" class="th-st">ST</th>
+        <th style="width:17%;" class="th-tot">${isEn ? 'TOTAL PROJECT' : 'TOÀN DỰ ÁN'}</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td colspan="6" class="group-header">${esc(t1Data.pull.title)}</td></tr>
+      <tr><td colspan="5" class="group-header">${esc(t1Data.pull.title)}</td></tr>
       <tr>
         <td class="col-label">${esc(t1Data.pull.prev.label)}</td>
-        <td class="plan-col">${esc(t1Data.pull.prev.plan)}</td>
         <td class="col-hdc">${esc(t1Data.pull.prev.hdc)}</td>
         <td class="col-nautics">${esc(t1Data.pull.prev.nau)}</td>
         <td class="col-st">${esc(t1Data.pull.prev.st)}</td>
         <td class="total-col">${esc(t1Data.pull.prev.tot)}</td>
       </tr>
-      <tr>
+      <tr style="background-color: #fffde7; font-weight: 600;">
+        <td class="col-label">${esc(t1Data.pull.commit.label)}</td>
+        <td class="col-hdc">${esc(t1Data.pull.commit.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.pull.commit.nau)}</td>
+        <td class="col-st">${esc(t1Data.pull.commit.st)}</td>
+        <td class="total-col">${esc(t1Data.pull.commit.tot)}</td>
+      </tr>
+      <tr style="font-weight: bold;">
         <td class="col-label">${esc(t1Data.pull.cur.label)}</td>
-        <td class="plan-col">${esc(t1Data.pull.cur.plan)}</td>
         <td class="col-hdc">${esc(t1Data.pull.cur.hdc)}</td>
         <td class="col-nautics">${esc(t1Data.pull.cur.nau)}</td>
         <td class="col-st">${esc(t1Data.pull.cur.st)}</td>
         <td class="total-col">${esc(t1Data.pull.cur.tot)}</td>
       </tr>
-      <tr style="font-weight: bold;">
-        <td class="col-label">${esc(t1Data.pull.delta.label)}</td>
-        <td class="plan-col">${esc(t1Data.pull.delta.plan)}</td>
-        <td class="col-hdc">${esc(t1Data.pull.delta.hdc)}</td>
-        <td class="col-nautics">${esc(t1Data.pull.delta.nau)}</td>
-        <td class="col-st">${esc(t1Data.pull.delta.st)}</td>
-        <td class="total-col">${esc(t1Data.pull.delta.tot)}</td>
-      </tr>
-      <tr>
+      <tr style="font-weight: bold; background-color: #f8fafc;">
         <td class="col-label">${esc(t1Data.pull.eval.label)}</td>
-        <td class="plan-col">${esc(t1Data.pull.eval.plan)}</td>
         <td class="col-hdc">${evalTagHtml(t1Data.pull.eval.hdc)}</td>
         <td class="col-nautics">${evalTagHtml(t1Data.pull.eval.nau)}</td>
         <td class="col-st">${evalTagHtml(t1Data.pull.eval.st)}</td>
         <td class="total-col">${evalTagHtml(t1Data.pull.eval.tot)}</td>
       </tr>
       <tr>
-        <td class="col-label">${esc(t1Data.pull.qty.label)}</td>
-        <td class="plan-col">${esc(t1Data.pull.qty.plan)}</td>
-        <td class="col-hdc">${esc(t1Data.pull.qty.hdc)}</td>
-        <td class="col-nautics">${esc(t1Data.pull.qty.nau)}</td>
-        <td class="col-st">${esc(t1Data.pull.qty.st)}</td>
-        <td class="total-col">${esc(t1Data.pull.qty.tot)}</td>
+        <td class="col-label">${esc(t1Data.pull.delta.label)}</td>
+        <td class="col-hdc">${esc(t1Data.pull.delta.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.pull.delta.nau)}</td>
+        <td class="col-st">${esc(t1Data.pull.delta.st)}</td>
+        <td class="total-col">${esc(t1Data.pull.delta.tot)}</td>
       </tr>
 
-      <tr><td colspan="6" class="group-header">${esc(t1Data.term.title)}</td></tr>
+      <tr><td colspan="5" class="group-header">${esc(t1Data.term.title)}</td></tr>
       <tr>
         <td class="col-label">${esc(t1Data.term.prev.label)}</td>
-        <td class="plan-col">${esc(t1Data.term.prev.plan)}</td>
         <td class="col-hdc">${esc(t1Data.term.prev.hdc)}</td>
         <td class="col-nautics">${esc(t1Data.term.prev.nau)}</td>
         <td class="col-st">${esc(t1Data.term.prev.st)}</td>
         <td class="total-col">${esc(t1Data.term.prev.tot)}</td>
       </tr>
-      <tr>
+      <tr style="background-color: #fffde7; font-weight: 600;">
+        <td class="col-label">${esc(t1Data.term.commit.label)}</td>
+        <td class="col-hdc">${esc(t1Data.term.commit.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.term.commit.nau)}</td>
+        <td class="col-st">${esc(t1Data.term.commit.st)}</td>
+        <td class="total-col">${esc(t1Data.term.commit.tot)}</td>
+      </tr>
+      <tr style="font-weight: bold;">
         <td class="col-label">${esc(t1Data.term.cur.label)}</td>
-        <td class="plan-col">${esc(t1Data.term.cur.plan)}</td>
         <td class="col-hdc">${esc(t1Data.term.cur.hdc)}</td>
         <td class="col-nautics">${esc(t1Data.term.cur.nau)}</td>
         <td class="col-st">${esc(t1Data.term.cur.st)}</td>
         <td class="total-col">${esc(t1Data.term.cur.tot)}</td>
       </tr>
-      <tr style="font-weight: bold;">
-        <td class="col-label">${esc(t1Data.term.delta.label)}</td>
-        <td class="plan-col">${esc(t1Data.term.delta.plan)}</td>
-        <td class="col-hdc">${esc(t1Data.term.delta.hdc)}</td>
-        <td class="col-nautics">${esc(t1Data.term.delta.nau)}</td>
-        <td class="col-st">${esc(t1Data.term.delta.st)}</td>
-        <td class="total-col">${esc(t1Data.term.delta.tot)}</td>
-      </tr>
-      <tr>
+      <tr style="font-weight: bold; background-color: #f8fafc;">
         <td class="col-label">${esc(t1Data.term.eval.label)}</td>
-        <td class="plan-col">${esc(t1Data.term.eval.plan)}</td>
         <td class="col-hdc">${evalTagHtml(t1Data.term.eval.hdc)}</td>
         <td class="col-nautics">${evalTagHtml(t1Data.term.eval.nau)}</td>
         <td class="col-st">${evalTagHtml(t1Data.term.eval.st)}</td>
         <td class="total-col">${evalTagHtml(t1Data.term.eval.tot)}</td>
       </tr>
       <tr>
-        <td class="col-label">${esc(t1Data.term.qty.label)}</td>
-        <td class="plan-col">${esc(t1Data.term.qty.plan)}</td>
-        <td class="col-hdc">${esc(t1Data.term.qty.hdc)}</td>
-        <td class="col-nautics">${esc(t1Data.term.qty.nau)}</td>
-        <td class="col-st">${esc(t1Data.term.qty.st)}</td>
-        <td class="total-col">${esc(t1Data.term.qty.tot)}</td>
+        <td class="col-label">${esc(t1Data.term.delta.label)}</td>
+        <td class="col-hdc">${esc(t1Data.term.delta.hdc)}</td>
+        <td class="col-nautics">${esc(t1Data.term.delta.nau)}</td>
+        <td class="col-st">${esc(t1Data.term.delta.st)}</td>
+        <td class="total-col">${esc(t1Data.term.delta.tot)}</td>
+      </tr>
+
+      <tr><td colspan="5" class="group-header">${esc(t1Data.summary.title)}</td></tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.summary.pullRow.label)}</td>
+        <td class="col-hdc">${evalTagHtml(t1Data.summary.pullRow.hdc)}</td>
+        <td class="col-nautics">${evalTagHtml(t1Data.summary.pullRow.nau)}</td>
+        <td class="col-st">${evalTagHtml(t1Data.summary.pullRow.st)}</td>
+        <td class="total-col">${evalTagHtml(t1Data.summary.pullRow.tot)}</td>
+      </tr>
+      <tr>
+        <td class="col-label">${esc(t1Data.summary.termRow.label)}</td>
+        <td class="col-hdc">${evalTagHtml(t1Data.summary.termRow.hdc)}</td>
+        <td class="col-nautics">${evalTagHtml(t1Data.summary.termRow.nau)}</td>
+        <td class="col-st">${evalTagHtml(t1Data.summary.termRow.st)}</td>
+        <td class="total-col">${evalTagHtml(t1Data.summary.termRow.tot)}</td>
+      </tr>
+      <tr style="font-weight: bold; background-color: #f1f5f9;">
+        <td class="col-label">${esc(t1Data.summary.conclusionRow.label)}</td>
+        <td class="col-hdc">${evalTagHtml(t1Data.summary.conclusionRow.hdc)}</td>
+        <td class="col-nautics">${evalTagHtml(t1Data.summary.conclusionRow.nau)}</td>
+        <td class="col-st">${evalTagHtml(t1Data.summary.conclusionRow.st)}</td>
+        <td class="total-col">${evalTagHtml(t1Data.summary.conclusionRow.tot)}</td>
       </tr>
     </tbody>
   </table>
