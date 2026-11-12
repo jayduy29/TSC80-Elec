@@ -2,3 +2,5 @@ auto_sync.log
 ~$*.xlsx
 ~$*.xlsm
 __pycache__/
+watcher.lock
+setup_task.ps1

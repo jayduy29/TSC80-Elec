@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsc80-pwa-v6.6';
+const CACHE_NAME = 'tsc80-pwa-v6.7';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -70,7 +70,7 @@ self.addEventListener('fetch', event => {
   // Specific handler for prog_data.json (Network First, Cache Fallback)
   if (url.pathname.endsWith('/prog_data.json')) {
     event.respondWith(
-      fetch(req)
+      fetch(new Request(req.url, { cache: 'reload' }))
         .then(res => {
           if (res && res.ok) {
             const copy = res.clone();

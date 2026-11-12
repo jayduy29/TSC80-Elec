@@ -13,7 +13,7 @@ import sys
 import json
 import re
 import subprocess
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import openpyxl
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -142,12 +142,18 @@ def update_overview_excel(data, target_week):
         ws.cell(29, col_idx).value = int(total_conn)
         ws.cell(30, col_idx).value = round(total_conn / ROW_PLANS[29], 6)
 
-    wb_ov.save(OVERVIEW_FILE)
-    print(f"✅ Đã cập nhật {OVERVIEW_FILE} (cột {target_week})")
-    return col_found
+    try:
+        wb_ov.save(OVERVIEW_FILE)
+        print(f"✅ Đã cập nhật {OVERVIEW_FILE} (cột {target_week})")
+    except PermissionError:
+        print(f"⚠️ Lưu ý: File {OVERVIEW_FILE} đang mở trong Excel, bỏ qua lưu đè Excel nhưng vẫn đồng bộ JSON & Web bình thường!")
+    except Exception as e:
+        print(f"⚠️ Lỗi lưu {OVERVIEW_FILE}: {e}")
+    return col_found, wb_ov
 
-def generate_prog_json(target_week, col_idx, data):
-    wb_data = openpyxl.load_workbook(OVERVIEW_FILE, data_only=True)
+def generate_prog_json(target_week, col_idx, data, wb_data=None):
+    if wb_data is None:
+        wb_data = openpyxl.load_workbook(OVERVIEW_FILE, data_only=True)
     sheets_json = []
 
     total_cut = data['HDC']['cut'] + data['NAUTICS']['cut'] + data['ST']['cut']
@@ -217,7 +223,11 @@ def generate_prog_json(target_week, col_idx, data):
                     row_vals.append(str(val))
             if any(x != '' for x in row_vals):
                 rows.append(row_vals)
-        sheets_json.append({"name": sname, "rows": rows})
+        sheets_json.append({
+            "name": sname,
+            "rows": rows,
+            "synced_at": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        })
 
     with open(JSON_OUT, 'w', encoding='utf-8') as f:
         json.dump(sheets_json, f, ensure_ascii=False, indent=2)
@@ -364,9 +374,9 @@ def main():
 
     print(f"\n🎯 Đồng bộ cho tuần: {target_week}")
 
-    col_idx = update_overview_excel(data, target_week)
+    col_idx, wb_ov = update_overview_excel(data, target_week)
     if col_idx != -1:
-        generate_prog_json(target_week, col_idx, data)
+        generate_prog_json(target_week, col_idx, data, wb_ov)
 
     sync_cables_to_html(file_path)
 

@@ -2581,14 +2581,17 @@ function gvizJsonp(){return new Promise((res,rej)=>{const cb='gv'+Date.now(),s=d
     const tb=d.table,head=tb.cols.map(c=>c.label||'');const rows=tb.rows.map(r=>tb.cols.map((c,i)=>{const x=r.c[i];return x?String(x.f!=null?x.f:(x.v!=null?x.v:'')).trim():''}));
     res((head.some(x=>x)?[head]:[]).concat(rows).filter(r=>r.some(x=>x!=='')))};
   s.onerror=()=>{done();rej(new Error('bị chặn hoặc không truy cập được'))};s.src=SB()+'/gviz/tq?tqx=out:json;responseHandler:'+cb;document.head.appendChild(s)})}
-async function loadProg(){
+async function loadProg(force){
   if(PS.loading)return;PS.loading=true;PS.errs=[];pstat(t('progLoading'));let ok=false;
+  if(force){try{localStorage.removeItem('tsc80_prog2')}catch(_){}}
+  const prefBtn=$('#pref');
+  if(prefBtn){prefBtn.disabled=true;prefBtn.textContent='⏳ Đang tải...'}
   const pUrlT=k=>PURL(k)+(PURL(k).includes('?')?'&_t=':'?_t=')+Date.now();
   const tryit=async(name,fn)=>{if(ok)return;try{const r=await fn();if(r&&r.length){PS.sheets=r;PS.ts=Date.now();PS.fromCache=false;ok=true}else PS.errs.push(name+': rỗng')}catch(e){PS.errs.push(name+': '+String((e&&e.message)||e))}};
   const csv=k=>async()=>{const r=await fetch(pUrlT(k),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const tx=await r.text();if(/^\s*</.test(tx))throw new Error('Google trả về trang web (chưa chia sẻ công khai?)');return [{name:'Trang 1',rows:parseCsv(tx)}]};
   const gdriveXlsx=k=>async()=>{const r=await fetch(pUrlT(k),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.arrayBuffer();if(new Uint8Array(b)[0]!==0x50)throw new Error('không phải tệp xlsx (có thể cần chia sẻ công khai)');return await readXlsx(b)};
   const localJson=async()=>{
-    const r=await fetch('prog_data.json?_t='+Date.now(),{cache:'no-store'});
+    const r=await fetch('prog_data.json?_t='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const j=await r.json();
     if(!Array.isArray(j)||!j.length)throw new Error('rỗng');
@@ -2611,13 +2614,22 @@ async function loadProg(){
     await tryit('gviz-script',async()=>[{name:'Trang 1',rows:await gvizJsonp()}]);
   }
   PS.loading=false;
+  if(prefBtn){
+    prefBtn.disabled=false;
+    if(ok){
+      prefBtn.textContent='✓ Đã xong';
+      setTimeout(()=>{if(prefBtn)prefBtn.textContent=t('btnRefresh')},1800);
+    } else {
+      prefBtn.textContent=t('btnRefresh');
+    }
+  }
   if(ok){let bi=0,bn=-1;PS.sheets.forEach((s,i)=>{const n=(s.rows.slice(0,12).map(r=>r.filter(x=>wkInfo(x)!==null).length).sort((a,b)=>b-a)[0])||0;if(n>bn){bn=n;bi=i}});PS.cur=bi;try{localStorage.setItem('tsc80_prog2',JSON.stringify({sheets:PS.sheets,ts:PS.ts}))}catch(_){}PS.err=''}else{PS.err=PS.errs[0]||'lỗi'}
   if(!ok&&!PS.sheets.length)PS.frame=1;
   renderProg();
   return ok}
 function pstat(m,e){const s=$('#pstat');s.textContent=m;s.className=e?'err':''}
 function enterProg(){renderProg();if(!PS.sheets.length||Date.now()-PS.ts>60000)loadProg()}
-$('#pref').onclick=()=>loadProg();
+$('#pref').onclick=()=>loadProg(true);
 $('#pfr').onclick=()=>{PS.frame=(PS.frame+1)%3;if(PS.frame)PS.chart=false;renderProg()};
 const pqIn=$('#pq'); if(pqIn) pqIn.oninput=e=>{PS.q=e.target.value;renderProg()};
 $('#psheet').onchange=e=>{PS.cur=+e.target.value;renderProg()};
@@ -4010,9 +4022,12 @@ function renderProg(){
   const sel=$('#psheet');if(sel)sel.style.display='none';
   const [cy,cwk]=projYW(new Date()),curK=cy*100+cwk;
   if(PS.err)pstat(t('progLoadErr').replace('{err}',PS.err)+(PS.sheets.length?t('progShowingCached').replace('{t}',new Date(PS.ts).toLocaleString(isEn?'en-US':'vi-VN'))+'.':t('progCheckShare')),1);
-  else if(PS.loading){}else if(PS.ts)pstat(t('progStatCurWk')+cwk+'/'+cy+t('progStatUpdated')+new Date(PS.ts).toLocaleString(isEn?'en-US':'vi-VN')+(PS.fromCache?t('progStatCached'):''));
+  else if(PS.loading){}else if(PS.ts){
+    const syncInfo=(PS.sheets&&PS.sheets[0]&&PS.sheets[0].synced_at)?(' · File Excel: '+PS.sheets[0].synced_at):'';
+    pstat(t('progStatCurWk')+cwk+'/'+cy+syncInfo+t('progStatUpdated')+new Date(PS.ts).toLocaleTimeString(isEn?'en-US':'vi-VN')+(PS.fromCache?t('progStatCached'):''));
+  }
   const res=$('#pres'),wk=$('#pwk'),lg=$('#pleg'),pwkBar=$('#pwk-bar'),pwkLbl=$('#pwk-lbl');
-  $('#pref').textContent=t('btnRefresh');
+  if(!PS.loading){const prefBtn=$('#pref');if(prefBtn&&!prefBtn.disabled)prefBtn.textContent=t('btnRefresh');}
   $('#pch').textContent=t('btnChart');
   $('#pch').classList.toggle('on',!!PS.chart);
   $('#pfr').textContent=PS.frame===0?t('btnRaw'):(PS.frame===1?t('btnRawDrive'):t('btnRawSheets'));
