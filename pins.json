@@ -148,5 +148,6 @@
 {"id":"n1793356760413","c":"461U18","v":2,"x":1790,"y":458,"n":"JB F ( MIZZEN FORESTAY )","s":"","a":0,"dc":["(=461++4040+-461U18)"]},
 {"id":"n1793505957620","c":"461U12","v":1,"x":1129,"y":321,"n":"HYDRAULICS REMOTE CONTROL POSITION 1","s":"","a":0,"dc":["(=461++5010+-461U12)"]},
 {"id":"n1793506043540","c":"461U11","v":2,"x":2639,"y":513,"n":"HYDRAULICS REMOTE CONTROL POSITION 2","s":"","a":0,"dc":["(=461++4020+-461U11)"]},
-{"id":"n1794623075969","c":"601JB18","v":4,"x":2329,"y":213,"n":"\"601JB18\" TEMPERATURE AND HUMIDITY J-BOX (MIDDLE FORE HOLD)","s":"","a":0,"dc":["(+601JB18)"]}
+{"id":"n1794623075969","c":"601JB18","v":4,"x":2329,"y":213,"n":"\"601JB18\" TEMPERATURE AND HUMIDITY J-BOX (MIDDLE FORE HOLD)","s":"","a":0,"dc":["(+601JB18)"]},
+{"id":"n1794625238099","c":"531U03","v":4,"x":1884,"y":562,"n":"JB FOR ENG. ESCAPE SENSOR","s":"","a":0,"dc":["(=531++2161+-531U03)"]}
 ]
