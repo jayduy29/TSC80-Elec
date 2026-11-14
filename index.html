@@ -2532,7 +2532,21 @@ const DEF_PID='1Be1vyM5hzqD8n-QPe9_Mmi2FGxXsuAtB';let PID=DEF_PID;try{PID=localS
 const SB=()=>'https://docs.google.com/spreadsheets/d/'+PID;
 const PURL=k=>({x:SB()+'/export?format=xlsx',g:SB()+'/gviz/tq?tqx=out:csv',c:SB()+'/export?format=csv',d:'https://drive.google.com/uc?export=download&id='+PID})[k];
 const PS={sheets:[],cur:0,ts:0,view:'card',q:'',loading:false,errs:[],frame:0};
-try{const c=JSON.parse(localStorage.getItem('tsc80_prog2')||'null');if(c&&c.sheets){PS.sheets=c.sheets;PS.ts=c.ts;PS.fromCache=true}}catch(_){}
+try{
+  const c=JSON.parse(localStorage.getItem('tsc80_prog2')||'null');
+  if(c&&c.sheets&&c.sheets.length){
+    PS.sheets=c.sheets;
+    PS.ts=c.ts;
+    PS.fromCache=true;
+    let bi=0,bn=-1;
+    const isWk=h=>h&&typeof h==='string'&&/(?:tu.{1,2}n|week|wk|\bw)\s*[-.:#]?\s*\d{1,2}\b/i.test(h)&&!/report|progress|báo\s*cáo|tiến\s*độ/i.test(h);
+    PS.sheets.forEach((s,i)=>{
+      const n=(s.rows&&s.rows.slice(0,15).map(r=>r.filter(isWk).length).sort((a,b)=>b-a)[0])||0;
+      if(n>bn){bn=n;bi=i;}
+    });
+    PS.cur=bi;
+  }
+}catch(_){}
 async function unzipX(buf){const u=new Uint8Array(buf),dv=new DataView(buf);let e=u.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('zip');
   const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const F={};
   for(let i=0;i<n;i++){if(dv.getUint32(p,true)!==0x02014b50)break;const meth=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);F[new TextDecoder().decode(u.subarray(p+46,p+46+nl))]={meth,csz,off};p+=46+nl+el+cl}
@@ -2623,7 +2637,16 @@ async function loadProg(force){
       prefBtn.textContent=t('btnRefresh');
     }
   }
-  if(ok){let bi=0,bn=-1;PS.sheets.forEach((s,i)=>{const n=(s.rows.slice(0,12).map(r=>r.filter(x=>wkInfo(x)!==null).length).sort((a,b)=>b-a)[0])||0;if(n>bn){bn=n;bi=i}});PS.cur=bi;try{localStorage.setItem('tsc80_prog2',JSON.stringify({sheets:PS.sheets,ts:PS.ts}))}catch(_){}PS.err=''}else{PS.err=PS.errs[0]||'lỗi'}
+  if(ok){
+    let bi=0,bn=-1;
+    PS.sheets.forEach((s,i)=>{
+      const n=(s.rows&&s.rows.slice(0,20).map(r=>r.filter(x=>wkInfo(x)!==null).length).sort((a,b)=>b-a)[0])||0;
+      if(n>bn){bn=n;bi=i;}
+    });
+    PS.cur=bi;
+    try{localStorage.setItem('tsc80_prog2',JSON.stringify({sheets:PS.sheets,ts:PS.ts}))}catch(_){}
+    PS.err='';
+  }else{PS.err=PS.errs[0]||'lỗi'}
   if(!ok&&!PS.sheets.length)PS.frame=1;
   renderProg();
   return ok}
@@ -2637,8 +2660,21 @@ const isoYW=d=>{const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate
 const projYW=d=>{const dt=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=(dt.getDay()+6)%7;const offset=(day-3+7)%7;dt.setDate(dt.getDate()-offset);return isoYW(dt)};
 const ERRV=/^#(N\/A|REF!|DIV\/0!|VALUE!|NAME\?|NUM!|NULL!|ERROR!)/i;
 const zeroLike=v=>v===''||/^[-–—.\s]*$/.test(v)||/^0+([.,]0+)?\s*%?$/.test(v);
-const wkInfo=h=>{h=h||'';let m=/(?:^|[^\d\/])(\d{1,2})\s*[\/\-–]\s*(20\d{2})(?!\d)/.exec(h);if(m&&+m[1]>=1&&+m[1]<=53)return{w:+m[1],y:+m[2]};m=/(?:tu.{1,2}n|week|wk|\bw)\s*[-.:#]?\s*(\d{1,2})\b/i.exec(h);return m?{w:+m[1],y:0}:null};
-const isNum=v=>/^[-+]?[\d.,]+\s*%?$/.test(v);
+const wkInfo=h=>{
+  if(!h||typeof h!=='string')return null;
+  const s=h.trim();
+  if(/report|progress|báo\s*cáo|tiến\s*độ|overview|contractor|nhà\s*thầu/i.test(s)&&s.length>20)return null;
+  let m=/(?:^|[^\d\/])(\d{1,2})\s*[\/\-–]\s*(20\d{2})(?!\d)/.exec(s);
+  if(m&&+m[1]>=1&&+m[1]<=53)return{w:+m[1],y:+m[2]};
+  m=/(?:tu.{1,2}n|week|wk|\bw)\s*[-.:#]?\s*(\d{1,2})\b/i.exec(s);
+  return m?{w:+m[1],y:0}:null;
+};
+const isNum=v=>{
+  if(typeof v==='number')return !isNaN(v);
+  if(!v||typeof v!=='string')return false;
+  const s=v.replace(/[\s\u00a0]/g,'');
+  return /^[-+]?[\d.,]+%?$/.test(s);
+};
 
 function parseNum(v){
   if(v===null||v===undefined||v==='')return null;
@@ -4095,47 +4131,87 @@ async function snapProg(){
 
 
 function renderProg(){
-  const isEn=(curLang==='en');
-  const sel=$('#psheet');if(sel)sel.style.display='none';
-  const [cy,cwk]=projYW(new Date()),curK=cy*100+cwk;
-  if(PS.err)pstat(t('progLoadErr').replace('{err}',PS.err)+(PS.sheets.length?t('progShowingCached').replace('{t}',new Date(PS.ts).toLocaleString(isEn?'en-US':'vi-VN'))+'.':t('progCheckShare')),1);
-  else if(PS.loading){}else if(PS.ts){
-    const syncInfo=(PS.sheets&&PS.sheets[0]&&PS.sheets[0].synced_at)?(' · File Excel: '+PS.sheets[0].synced_at):'';
-    pstat(t('progStatCurWk')+cwk+'/'+cy+syncInfo+t('progStatUpdated')+new Date(PS.ts).toLocaleTimeString(isEn?'en-US':'vi-VN')+(PS.fromCache?t('progStatCached'):''));
-  }
-  const res=$('#pres'),wk=$('#pwk'),lg=$('#pleg'),pwkBar=$('#pwk-bar'),pwkLbl=$('#pwk-lbl');
-  if(!PS.loading){const prefBtn=$('#pref');if(prefBtn&&!prefBtn.disabled)prefBtn.textContent=t('btnRefresh');}
-  $('#pch').textContent=t('btnChart');
-  $('#pch').classList.toggle('on',!!PS.chart);
-  $('#pfr').textContent=PS.frame===0?t('btnRaw'):(PS.frame===1?t('btnRawDrive'):t('btnRawSheets'));
-  const pqPl=$('#pq'); if(pqPl) pqPl.placeholder=t('progFilterPh');
+  try {
+    const isEn=(curLang==='en');
+    const sel=$('#psheet');if(sel)sel.style.display='none';
+    const [cy,cwk]=projYW(new Date()),curK=cy*100+cwk;
+    if(PS.err)pstat(t('progLoadErr').replace('{err}',PS.err)+(PS.sheets.length?t('progShowingCached').replace('{t}',new Date(PS.ts).toLocaleString(isEn?'en-US':'vi-VN'))+'.':t('progCheckShare')),1);
+    else if(PS.loading){}else if(PS.ts){
+      const syncInfo=(PS.sheets&&PS.sheets[0]&&PS.sheets[0].synced_at)?(' · File Excel: '+PS.sheets[0].synced_at):'';
+      pstat(t('progStatCurWk')+cwk+'/'+cy+syncInfo+t('progStatUpdated')+new Date(PS.ts).toLocaleTimeString(isEn?'en-US':'vi-VN')+(PS.fromCache?t('progStatCached'):''));
+    }
+    const res=$('#pres'),wk=$('#pwk'),lg=$('#pleg'),pwkBar=$('#pwk-bar'),pwkLbl=$('#pwk-lbl');
+    if(!PS.loading){const prefBtn=$('#pref');if(prefBtn&&!prefBtn.disabled)prefBtn.textContent=t('btnRefresh');}
+    $('#pch').textContent=t('btnChart');
+    $('#pch').classList.toggle('on',!!PS.chart);
+    $('#pfr').textContent=PS.frame===0?t('btnRaw'):(PS.frame===1?t('btnRawDrive'):t('btnRawSheets'));
+    const pqPl=$('#pq'); if(pqPl) pqPl.placeholder=t('progFilterPh');
 
-  const det=PS.err&&PS.errs.length?'<div class="m" style="font-size:11px;color:var(--mut);padding:2px 2px 8px">Chi tiết: '+PS.errs.map(esc).join(' · ')+'</div>':'';
-  if(PS.frame){if(pwkBar)pwkBar.style.display='none';wk.innerHTML='';lg.innerHTML='';res.innerHTML=det+'<iframe src="'+(PS.frame===1?'https://drive.google.com/file/d/'+PID+'/preview':'https://docs.google.com/spreadsheets/d/'+PID+'/htmlview')+'" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff" allow="fullscreen"></iframe>';return}
-  const sh=PS.sheets[PS.cur];if(!sh){if(pwkBar)pwkBar.style.display='none';wk.innerHTML='';lg.innerHTML='';res.innerHTML=det||'';return}
-  const M=pmodel(sh),k=PS.q.trim().toLowerCase();
-  const wd=M.weeks.filter(w=>M.body.some(r=>isNum(M.cell(r,w.c))&&!zeroLike(M.cell(r,w.c))));
-  const key=PS.cur+':'+wd.map(w=>w.c).join(',');if(PS.wkKey!==key){PS.wkKey=key;const d=wd.find(w=>w.k===curK||(w.w===cwk&&(!w.y||w.y===cy)));PS.wk=(d||wd[wd.length-1]||{}).c}
-  const wcur=wd.find(w=>w.c===PS.wk)||wd[wd.length-1];
+    const det=PS.err&&PS.errs.length?'<div class="m" style="font-size:11px;color:var(--mut);padding:2px 2px 8px">Chi tiết: '+PS.errs.map(esc).join(' · ')+'</div>':'';
+    if(PS.frame){if(pwkBar)pwkBar.style.display='none';if(wk)wk.innerHTML='';if(lg)lg.innerHTML='';if(res)res.innerHTML=det+'<iframe src="'+(PS.frame===1?'https://drive.google.com/file/d/'+PID+'/preview':'https://docs.google.com/spreadsheets/d/'+PID+'/htmlview')+'" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff" allow="fullscreen"></iframe>';return}
+    const sh=PS.sheets[PS.cur];
+    if(!sh){
+      if(pwkBar)pwkBar.style.display='none';
+      if(wk)wk.innerHTML='';
+      if(lg)lg.innerHTML='';
+      if(res)res.innerHTML=det+`<div class="m" style="padding:24px 16px;text-align:center;color:var(--mut)"><div style="font-size:28px;margin-bottom:8px">📊</div><div style="font-weight:600;font-size:15px;color:var(--fg);margin-bottom:6px">Chưa có dữ liệu tiến độ</div><div style="font-size:12px;margin-bottom:16px">Đang tải hoặc chưa có trang tính tiến độ.</div><button class="tag-btn on" onclick="localStorage.removeItem('tsc80_prog2');loadProg(true);" style="padding:6px 16px;cursor:pointer">⟳ Tải lại tiến độ</button></div>`;
+      return;
+    }
+    const M=pmodel(sh),k=PS.q.trim().toLowerCase();
+    const wd=M.weeks.filter(w=>M.body.some(r=>isNum(M.cell(r,w.c))&&!zeroLike(M.cell(r,w.c))));
 
-  // Quick contractor filter pills in legend: ALL, TOTAL, HDC, NAUTICS, ST
-  const filterOptions=[
-    {key:'ALL',label:t('allContractors'),col:''},
-    {key:'TOTAL',label:isEn?'TOTAL PROJECT':'TỔNG DỰ ÁN',col:'#1e3a8a'},
-    {key:'HDC',label:'HDC',col:getContrColor('HDC')},
-    {key:'NAUTICS',label:'NAUTICS',col:getContrColor('NAUTICS')},
-    {key:'ST',label:'ST',col:getContrColor('ST')}
-  ];
-  let plegHtml='';
-  filterOptions.forEach(opt=>{
-    const on=(!PS.contrFilter&&opt.key==='ALL')||(PS.contrFilter===opt.key);
-    const style=opt.col?`color:${opt.col};${on?'border-color:'+opt.col+';box-shadow:0 0 0 1px '+opt.col+';':''}`:'';
-    const dot=opt.col?`<i style="background:${opt.col}"></i>`:'';
-    plegHtml+=`<span class="tag-btn${on?' on':''}" data-cf="${opt.key}" style="${style}">${dot}${esc(opt.label)}</span>`;
-  });
-  lg.innerHTML=plegHtml;
+    // If current sheet has no valid week columns, try another sheet in PS.sheets
+    if(!wd.length && PS.sheets.length > 1){
+      let altBi = -1, altBn = 0;
+      PS.sheets.forEach((s, i)=>{
+        if(i === PS.cur) return;
+        const altM = pmodel(s);
+        const altWd = altM.weeks.filter(w=>altM.body.some(r=>isNum(altM.cell(r,w.c))&&!zeroLike(altM.cell(r,w.c))));
+        if(altWd.length > altBn){ altBn = altWd.length; altBi = i; }
+      });
+      if(altBi >= 0){
+        PS.cur = altBi;
+        renderProg();
+        return;
+      }
+    }
 
-  const wkLabel=w=>w.y?(w.w+'/'+String(w.y).slice(2)):(w.w>=10?'W'+w.w:'W0'+w.w);
+    const key=PS.cur+':'+wd.map(w=>w.c).join(',');if(PS.wkKey!==key){PS.wkKey=key;const d=wd.find(w=>w.k===curK||(w.w===cwk&&(!w.y||w.y===cy)));PS.wk=(d||wd[wd.length-1]||{}).c}
+    const wcur=wd.find(w=>w.c===PS.wk)||wd[wd.length-1];
+
+    // Quick contractor filter pills in legend: ALL, TOTAL, HDC, NAUTICS, ST
+    const filterOptions=[
+      {key:'ALL',label:t('allContractors'),col:''},
+      {key:'TOTAL',label:isEn?'TOTAL PROJECT':'TỔNG DỰ ÁN',col:'#1e3a8a'},
+      {key:'HDC',label:'HDC',col:getContrColor('HDC')},
+      {key:'NAUTICS',label:'NAUTICS',col:getContrColor('NAUTICS')},
+      {key:'ST',label:'ST',col:getContrColor('ST')}
+    ];
+    let plegHtml='';
+    filterOptions.forEach(opt=>{
+      const on=(!PS.contrFilter&&opt.key==='ALL')||(PS.contrFilter===opt.key);
+      const style=opt.col?`color:${opt.col};${on?'border-color:'+opt.col+';box-shadow:0 0 0 1px '+opt.col+';':''}`:'';
+      const dot=opt.col?`<i style="background:${opt.col}"></i>`:'';
+      plegHtml+=`<span class="tag-btn${on?' on':''}" data-cf="${opt.key}" style="${style}">${dot}${esc(opt.label)}</span>`;
+    });
+    if(lg)lg.innerHTML=plegHtml;
+
+    if(!wd.length){
+      if(pwkBar) pwkBar.style.display='none';
+      if(wk) wk.innerHTML='';
+      if(res) res.innerHTML=det+`<div class="m" style="padding:24px 16px;text-align:center;color:var(--mut)">
+        <div style="font-size:28px;margin-bottom:8px">📊</div>
+        <div style="font-weight:600;font-size:15px;color:var(--fg);margin-bottom:6px">Chưa có dữ liệu tiến độ tuần</div>
+        <div style="font-size:12px;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto">Không tìm thấy cột tuần hợp lệ trong dữ liệu đang mở. Bấm nút dưới để tải lại dữ liệu mới nhất:</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="tag-btn on" onclick="localStorage.removeItem('tsc80_prog2');loadProg(true);" style="padding:6px 16px;cursor:pointer">⟳ Tải lại tiến độ</button>
+          <button class="tag-btn" onclick="PID=DEF_PID;try{localStorage.removeItem('tsc80_prog_id')}catch(_){};localStorage.removeItem('tsc80_prog2');loadProg(true);" style="padding:6px 16px;cursor:pointer">⚙ Về mặc định Google Drive</button>
+        </div>
+      </div>`;
+      return;
+    }
+
+    const wkLabel=w=>!w?'':(w.y?(w.w+'/'+String(w.y).slice(2)):(w.w>=10?'W'+w.w:'W0'+w.w));
   if(pwkBar) pwkBar.style.display=wd.length?'flex':'none';
   if(pwkLbl) pwkLbl.textContent=t('weekLabel');
   wk.innerHTML=wd.length?wd.map(w=>`<span class="wk${wcur&&w.c===wcur.c?' on':''}" data-c="${w.c}">${wkLabel(w)}</span>`).join(''):'';
@@ -4380,6 +4456,17 @@ function renderProg(){
     h+=`<tr><td class="lb">${esc(lb)}</td>`+cols.map(c=>`<td>${pcell(M.cell(r,c.c))}</td>`).join('')+'</tr>';
   });
   res.innerHTML=det+h+'</table>';
+  } catch(err) {
+    console.error('renderProg error:', err);
+    const res=$('#pres');
+    if(res){
+      res.innerHTML=`<div class="m err" style="padding:16px;margin:8px;border:1px solid #ef4444;border-radius:8px;background:rgba(239,68,68,0.08);color:#b91c1c;text-align:center">
+        <div style="font-weight:bold;margin-bottom:4px">⚠️ Lỗi hiển thị tiến độ: ${esc(err&&err.message||err)}</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:10px">Vui lòng bấm nút dưới đây để làm mới hoặc đặt lại dữ liệu:</div>
+        <button class="tag-btn on" onclick="localStorage.removeItem('tsc80_prog2');localStorage.removeItem('tsc80_prog_id');loadProg(true);" style="padding:6px 14px;cursor:pointer">⟳ Đặt lại và tải lại dữ liệu</button>
+      </div>`;
+    }
+  }
 }
 
 $('#pwk').onclick=e=>{
@@ -4406,14 +4493,23 @@ const pexpBtn=$('#pexp');if(pexpBtn)pexpBtn.onclick=()=>snapProg();
 const pgdBtn=$('#pgd');
 if(pgdBtn){
   pgdBtn.onclick=()=>{
-    ask('Nhập Link hoặc ID file Google Drive của file tiến độ', PID, s=>{
-      if(!s)return;
-      const m=s.match(/[-\w]{25,}/);
+    ask('Nhập Link hoặc ID file Google Drive của file tiến độ (hoặc gõ "reset" để về mặc định):', PID, s=>{
+      if(s===null)return;
+      const trimS=(s||'').trim();
+      if(!trimS || trimS.toLowerCase()==='reset' || trimS.toLowerCase()==='default'){
+        PID=DEF_PID;
+        try{localStorage.removeItem('tsc80_prog_id')}catch(_){}
+        PS.sheets=[];
+        loadProg(true);
+        flag('Đã đặt lại về link Google Drive mặc định');
+        return;
+      }
+      const m=trimS.match(/[-\w]{25,}/);
       if(m){
         PID=m[0];
         try{localStorage.setItem('tsc80_prog_id', PID)}catch(_){}
         PS.sheets=[];
-        loadProg();
+        loadProg(true);
         flag('Đã đổi link Google Drive: '+PID);
       }else{
         alert('Không tìm thấy File ID hợp lệ trong link vừa nhập');
